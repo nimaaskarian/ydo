@@ -3,6 +3,7 @@ package core
 import (
   "testing"
   "reflect"
+  "strconv"
 )
 
 func assertEq(t *testing.T, actual any, expected any, format string) {
@@ -14,16 +15,14 @@ func assertEq(t *testing.T, actual any, expected any, format string) {
 func TestParse(t *testing.T) {
   data := `
 task: buy groceries
-priority: 1
 deps: [2]
 done: true
 `
   todo := Todo{};
-  todo.YamlParse(data);
+  ParseYaml(&todo, []byte(data));
   expected := Todo {
     Task: "buy groceries",
-    Priority: 1,
-    Deps: []int{2},
+    Deps: []string{"2"},
     Done: true,
   };
   assertEq(t, todo, expected, "%v")
@@ -31,39 +30,32 @@ done: true
 
 const GROCERIES = `0:
   task: buy groceries
-  priority: 1
   deps: [2, 3]
   done: true
 1:
   task: buy milk
 2:
   task: buy bread
-  priority: 12
 `
 
 func TestParseMap(t *testing.T) {
   todomap := make(TodoMap)
-  todomap.YamlParseMap(GROCERIES)
+  ParseYaml(todomap, []byte(GROCERIES));
   expected_tasks := []string{"buy groceries", "buy milk", "buy bread"};
-  for i:=0; i < 3; i++  {
-    assertEq(t, todomap[i].Task, expected_tasks[i], "%q")
-  }
-
-  expected_priorities := []int{1,0,12};
-  for i:=0; i < 3; i++  {
-    assertEq(t, todomap[i].Priority, expected_priorities[i], "%d")
+  for i:=range 3 {
+    assertEq(t, todomap[strconv.Itoa(i)].Task, expected_tasks[i], "%q")
   }
 }
 
 func TestNextId(t *testing.T) {
   todomap := make(TodoMap)
-  todomap.YamlParseMap(GROCERIES)
-  for i:=0; i < 20; i++ {
-    assertEq(t, todomap.NextId(), 3+i, "%d")
-    todomap[3+i] = Todo{};
+  ParseYaml(todomap, []byte(GROCERIES));
+  for i:=range 20 {
+    assertEq(t, todomap.NextId(), strconv.Itoa(3+i), "%d")
+    todomap[strconv.Itoa(3+i)] = Todo{};
   }
-  todomap[24] = Todo{};
-  assertEq(t, todomap.NextId(), 23, "%d")
-  todomap[23] = Todo{};
-  assertEq(t, todomap.NextId(), 25, "%d")
+  todomap["24"] = Todo{};
+  assertEq(t, todomap.NextId(), "23", "%d")
+  todomap["23"] = Todo{};
+  assertEq(t, todomap.NextId(), "25", "%d")
 }
