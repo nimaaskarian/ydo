@@ -6,30 +6,22 @@ import (
 )
 
 type Todo struct {
-  Message string
+  Task string
   Priority int
   Deps []int
   Done bool
 }
-
 type TodoMap map[int]Todo;
 
-func (todo *Todo) YamlParse(input string) {
-  err := yaml.Unmarshal([]byte(input), &todo)
-  if err != nil {
-    log.Fatalf("%v\n", err)
-  }
-}
-
-func (todomap TodoMap) YamlParseMap(input string) {
-  err := yaml.Unmarshal([]byte(input), &todomap)
+func ParseYaml(obj any, input []byte) {
+  err := yaml.Unmarshal([]byte(input), obj)
   if err != nil {
     log.Fatalf("%v\n", err)
   }
 }
 
 func (todomap TodoMap) NextId() int {
-  i := 1
+  i := 0
   for {
     if _, ok := todomap[i]; ok {
       i++
