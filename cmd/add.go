@@ -12,8 +12,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var deps []string
 func init() {
   rootCmd.AddCommand(addCmd)
+  addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the todo to add")
 }
 
 var addCmd = &cobra.Command{
@@ -31,7 +33,12 @@ var addCmd = &cobra.Command{
     if task == "" {
       log.Fatalln("Task can't be empty")
     }
-    todomap[key] = core.Todo {Task: task}
+    for _,key := range deps {
+      if _, ok := todomap[key]; !ok {
+        log.Fatalf("No such todo %q\n",key)
+      }
+    }
+    todomap[key] = core.Todo {Task: task, Deps: deps}
     str, err := yaml.Marshal(todomap)
     utils.Check(err)
     err = os.WriteFile(path, str, 0644)

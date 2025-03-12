@@ -11,7 +11,7 @@ func init() {
 }
 
 var outCmd = &cobra.Command{
-  Use: "output",
+  Use: "out",
   Short: "output todos as yaml",
   Run: func(cmd *cobra.Command, args []string) {
     todomap = utils.LoadTodos(path)
