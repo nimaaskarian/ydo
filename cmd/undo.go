@@ -7,6 +7,7 @@ import (
 
 func init() {
   rootCmd.AddCommand(undoCmd)
+  undoCmd.ValidArgsFunction = TaskKeyCompletion
 }
 
 var undoCmd = &cobra.Command{

@@ -14,6 +14,8 @@ var deps []string
 func init() {
   rootCmd.AddCommand(addCmd)
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
+  addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
+
 }
 
 var addCmd = &cobra.Command{

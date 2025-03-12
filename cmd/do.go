@@ -7,6 +7,7 @@ import (
 
 func init() {
   rootCmd.AddCommand(doCmd)
+  doCmd.ValidArgsFunction = TaskKeyCompletion
 }
 
 var doCmd = &cobra.Command{

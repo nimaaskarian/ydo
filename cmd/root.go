@@ -4,11 +4,28 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
+
+func TaskKeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  taskmap = utils.LoadTasks(path)
+
+  keys := make([]string, len(taskmap))
+
+  i := 0
+  for key := range taskmap {
+		if strings.HasPrefix(key, toComplete) {
+      keys[i] = key
+      i++
+    }
+  }
+  return keys, cobra.ShellCompDirectiveDefault
+}
+
 
 var (
   // flags
@@ -41,6 +58,8 @@ func init() {
   dir := utils.ConfigDir()
   rootCmd.PersistentFlags().StringVarP(&path, "file","f",filepath.Join(dir, "tasks.yaml"), "path to task file")
   rootCmd.PersistentFlags().StringVarP(&key, "key","k", "", "task key")
+  rootCmd.RegisterFlagCompletionFunc("key", TaskKeyCompletion)
+
 }
 
 func Execute() {

@@ -13,6 +13,7 @@ import (
 func init() {
   rootCmd.AddCommand(editCmd)
   editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
+  editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
 }
 
 var editCmd = &cobra.Command{
