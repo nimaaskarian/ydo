@@ -25,11 +25,15 @@ func ConfigDir() string {
   return filepath.Join(base, APP_NAME)
 }
 
-func LoadTodos(dir string) core.TodoMap {
-  path := filepath.Join(dir, "todos.yaml")
+func LoadTodos(path string) core.TodoMap {
   todomap := make(core.TodoMap)
   content, _ := os.ReadFile(path)
   core.ParseYaml(todomap, content)
   return todomap
 }
 
+func Check(e error) {
+  if e != nil {
+    panic(e)
+  }
+}

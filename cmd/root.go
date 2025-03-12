@@ -1,29 +1,41 @@
 package cmd
 
 import (
-  "github.com/spf13/cobra"
-  "github.com/nimaaskarian/ydo/utils"
-  "github.com/nimaaskarian/ydo/core"
-  "os"
-  "fmt"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/utils"
+	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
+var (
+  // flags
+  key string
+  path string
+  // global state
+  todomap core.TodoMap
+
+  rootCmd = &cobra.Command{
   Use:   "ydo",
   Short: "ydo is a frictionless and fast todo app",
   Long: `Fast and featureful todo app 
 made with love by nimaaskarian`,
   Run: func(cmd *cobra.Command, args []string) {
-    // Do Stuff Here
+    todomap = utils.LoadTodos(path)
+    core.PrintYaml(todomap)
   },
 }
+)
 
-var key string
-var todomap core.TodoMap
-func Execute() {
+func init() {
   dir := utils.ConfigDir()
-  todomap = utils.LoadTodos(dir)
+  rootCmd.PersistentFlags().StringVarP(&path, "file","f",filepath.Join(dir, "todos.yaml"), "path to todo file")
   rootCmd.PersistentFlags().StringVarP(&key, "key","k", todomap.NextKey(), "todo key")
+}
+
+func Execute() {
   if err := rootCmd.Execute(); err != nil {
     fmt.Fprintln(os.Stderr, err)
     os.Exit(1)

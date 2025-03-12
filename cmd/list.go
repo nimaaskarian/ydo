@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/utils"
 )
 
 func init() {
@@ -11,12 +11,13 @@ func init() {
 
 var listCmd = &cobra.Command{
   Use: "list",
-  Short: "list all todos of selected files",
+  Short: "list todos as markdown",
   Run: func(cmd *cobra.Command, args []string) {
+    todomap = utils.LoadTodos(path)
     if todo, ok := todomap[key]; ok {
-      core.PrintYaml(todo)
+      todo.PrintMarkdown(todomap, 1)
     } else {
-      core.PrintYaml(todomap)
+      todomap.PrintMarkdown()
     }
   },
 }

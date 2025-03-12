@@ -1,0 +1,5 @@
+webgui:
+  task: add webgui
+  deps: [cli]
+cli:
+  task: complete frictionless cli
