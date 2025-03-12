@@ -46,7 +46,7 @@ var (
   },
   Run: func(cmd *cobra.Command, args []string) {
     if task, ok := taskmap[key]; ok {
-      task.PrintMarkdown(taskmap, 1, nil, nil)
+      task.PrintMarkdown(taskmap, 1, []string{key}, nil)
     } else {
       taskmap.PrintMarkdown()
     }

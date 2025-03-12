@@ -1,8 +1,15 @@
 cli:
     task: complete frictionless cli
+    deps: [markdown]
+markdown:
+    task: fix markdown output for circular dependencies
+    deps: [tree]
+tree:
+    task: read tree depth to see which one to start with
 webgui:
     task: add webgui
     deps: [cli]
 ydo:
     task: complete ydo development
     deps: [webgui]
+    donedeps: true
