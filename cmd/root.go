@@ -26,9 +26,6 @@ var (
     if taskmap == nil {
       taskmap = make(core.TaskMap)
     }
-    if key == "" {
-      key = taskmap.NextKey()
-    }
   },
   Run: func(cmd *cobra.Command, args []string) {
     if todo, ok := taskmap[key]; ok {

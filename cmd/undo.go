@@ -6,26 +6,26 @@ import (
 )
 
 func init() {
-  rootCmd.AddCommand(doCmd)
+  rootCmd.AddCommand(undoCmd)
 }
 
-var doCmd = &cobra.Command{
-  Use: "do",
-  Short: "set a task as done",
+var undoCmd = &cobra.Command{
+  Use: "undo",
+  Short: "set a task as not completed",
   Run: func(cmd *cobra.Command, args []string) {
     if len(args) > 0 {
       key = args[0];
     }
     if key == ""  {
-      if !utils.ReadYesNo("This will set all tasks as completed. ARE YOU REALLY SURE? (yes/no) ")  {
+      if !utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ")  {
         return
       }
       for key := range taskmap {
-        taskmap.Do(key)
+        taskmap.Undo(key)
       }
     } else {
+      taskmap.Undo(key)
       utils.MustHaveTask(taskmap, key)
-      taskmap.Do(key)
     }
     utils.WriteTaskmap(taskmap, path)
   },

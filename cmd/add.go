@@ -20,6 +20,9 @@ var addCmd = &cobra.Command{
   Use: "add",
   Short: "add a task",
   Run: func(cmd *cobra.Command, args []string) {
+    if key == "" {
+      key = taskmap.NextKey()
+    }
     utils.MustNotHaveTask(taskmap, key)
     task := strings.Join(args, " ")
     if task == "" {

@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"runtime"
 
@@ -42,21 +45,39 @@ func Check(e error) {
 }
 
 func MustHaveTask(taskmap core.TaskMap, key string) {
-  if _, ok := taskmap[key]; !ok {
+  if !taskmap.HasTask(key) {
     log.Fatalf("No such todo %q\n",key)
   }
 }
 
 func MustNotHaveTask(taskmap core.TaskMap, key string) {
-  if _, ok := taskmap[key]; ok {
+  if taskmap.HasTask(key) {
     log.Fatalf("Task %q already exists\n",key)
   }
 }
 
 func WriteTaskmap(taskmap core.TaskMap, path string) {
-    content, err := yaml.Marshal(taskmap)
-    Check(err)
-    err = os.WriteFile(path, content, 0644)
-    Check(err)
+  content, err := yaml.Marshal(taskmap)
+  Check(err)
+  err = os.WriteFile(path, content, 0644)
+  Check(err)
+  log.Println("Wrote to file")
+}
 
+func ReadYesNo(format string, a ...any) bool {
+  for {
+    reader := bufio.NewReader(os.Stdin)
+    fmt.Printf(format, a...)
+    line, err := reader.ReadString('\n')
+    if err != nil {
+      log.Fatalln("Error reading input:", err)
+    }
+    lower_line := strings.ToLower(strings.TrimSpace(line))
+    if strings.HasPrefix("yes", lower_line) {
+      return true
+    }
+    if strings.HasPrefix("no", lower_line) {
+      return false
+    }
+  }
 }

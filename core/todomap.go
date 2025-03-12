@@ -17,10 +17,24 @@ func ParseYaml(obj any, input []byte) {
 
 type TaskMap map[string]Task;
 
-func (todomap TaskMap) Do(key string) {
-  if entry, ok := todomap[key]; ok {
+func (taskmap TaskMap) HasTask(key string) bool {
+  _, ok := taskmap[key]
+  return ok
+}
+
+func (taskmap TaskMap) Do(key string) {
+  if entry, ok := taskmap[key]; ok {
     entry.Done = true
-    todomap[key] = entry
+    taskmap[key] = entry
+    log.Printf("Completed task %q (%q)\n", key, entry.Task)
+  }
+}
+
+func (taskmap TaskMap) Undo(key string) {
+  if entry, ok := taskmap[key]; ok {
+    entry.Done = false
+    taskmap[key] = entry
+    log.Printf("Un-completed task %q (%q)\n", key, taskmap[key].Task)
   }
 }
 
@@ -44,11 +58,11 @@ func (taskmap TaskMap) PrintMarkdown() {
   }
 }
 
-func (todomap TaskMap) NextKey() string {
+func (taskmap TaskMap) NextKey() string {
   i := 1
   for {
     s_i := "t"+strconv.Itoa(i);
-    if _, ok := todomap[s_i]; ok {
+    if _, ok := taskmap[s_i]; ok {
       i++
     } else {
       return s_i
@@ -56,8 +70,8 @@ func (todomap TaskMap) NextKey() string {
   }
 }
 
-func (todomap TaskMap) PrintKeys() {
-  for key := range todomap {
+func (taskmap TaskMap) PrintKeys() {
+  for key := range taskmap {
     fmt.Printf("%s\n", key)
   }
 }
