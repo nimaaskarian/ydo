@@ -21,9 +21,18 @@ var (
   Use:   "ydo",
   Short: "ydo is a frictionless and fast todo app",
   Long: `Fast, featurefull and frictionless todo app with a graph structure`,
-  Run: func(cmd *cobra.Command, args []string) {
+  PersistentPreRun: func(cmd *cobra.Command, args []string) {
     todomap = utils.LoadTodos(path)
-    core.PrintYaml(todomap)
+    if key == "" {
+      key = todomap.NextKey()
+    }
+  },
+  Run: func(cmd *cobra.Command, args []string) {
+    if todo, ok := todomap[key]; ok {
+      todo.PrintMarkdown(todomap, 1)
+    } else {
+      todomap.PrintMarkdown()
+    }
   },
 }
 )
@@ -31,7 +40,7 @@ var (
 func init() {
   dir := utils.ConfigDir()
   rootCmd.PersistentFlags().StringVarP(&path, "file","f",filepath.Join(dir, "todos.yaml"), "path to todo file")
-  rootCmd.PersistentFlags().StringVarP(&key, "key","k", todomap.NextKey(), "todo key")
+  rootCmd.PersistentFlags().StringVarP(&key, "key","k", "", "todo key")
 }
 
 func Execute() {

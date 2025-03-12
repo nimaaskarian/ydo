@@ -1,23 +1,24 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-  rootCmd.AddCommand(listCmd)
+  rootCmd.AddCommand(outCmd)
 }
 
-var listCmd = &cobra.Command{
-  Use: "list",
-  Short: "list todos as markdown",
+var outCmd = &cobra.Command{
+  Use: "output",
+  Short: "output todos as yaml",
   Run: func(cmd *cobra.Command, args []string) {
     todomap = utils.LoadTodos(path)
     if todo, ok := todomap[key]; ok {
-      todo.PrintMarkdown(todomap, 1)
+      core.PrintYaml(todo)
     } else {
-      todomap.PrintMarkdown()
+      core.PrintYaml(todomap)
     }
   },
 }
