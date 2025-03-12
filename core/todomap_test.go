@@ -30,11 +30,11 @@ func TestNextKey(t *testing.T) {
   ParseYaml(todomap, []byte(GROCERIES));
   for i:=range 20 {
     assert.Equal(t, todomap.NextKey(), "t"+strconv.Itoa(4+i))
-    todomap["t"+strconv.Itoa(4+i)] = Todo{};
+    todomap["t"+strconv.Itoa(4+i)] = Task{};
   }
-  todomap["t25"] = Todo{};
+  todomap["t25"] = Task{};
   assert.Equal(t, "t24", todomap.NextKey())
-  todomap["t24"] = Todo{};
+  todomap["t24"] = Task{};
   assert.Equal(t, "t26", todomap.NextKey())
 }
 

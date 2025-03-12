@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/nimaaskarian/ydo/core"
-	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -12,9 +11,8 @@ func init() {
 
 var outCmd = &cobra.Command{
   Use: "out",
-  Short: "output todos as yaml",
+  Short: "output tasks as yaml",
   Run: func(cmd *cobra.Command, args []string) {
-    taskmap = utils.LoadTasks(path)
     if todo, ok := taskmap[key]; ok {
       core.PrintYaml(todo)
     } else {

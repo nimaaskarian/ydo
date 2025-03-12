@@ -3,13 +3,11 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var deps []string
@@ -20,9 +18,8 @@ func init() {
 
 var addCmd = &cobra.Command{
   Use: "add",
-  Short: "add a todo",
+  Short: "add a task",
   Run: func(cmd *cobra.Command, args []string) {
-    taskmap = utils.LoadTasks(path)
     utils.MustNotHaveTask(taskmap, key)
     task := strings.Join(args, " ")
     if task == "" {
@@ -31,11 +28,8 @@ var addCmd = &cobra.Command{
     for _,key := range deps {
       utils.MustHaveTask(taskmap, key)
     }
-    taskmap[key] = core.Todo {Task: task, Deps: deps}
-    str, err := yaml.Marshal(taskmap)
-    utils.Check(err)
-    err = os.WriteFile(path, str, 0644)
-    utils.Check(err)
+    taskmap[key] = core.Task {Task: task, Deps: deps}
+    utils.WriteTaskmap(taskmap, path)
     fmt.Printf("Task %q created\n", key)
   },
 }

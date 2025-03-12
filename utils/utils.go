@@ -1,12 +1,14 @@
 package utils
 
 import (
+	"log"
 	"os"
-  "log"
 	"path/filepath"
 
-	"github.com/nimaaskarian/ydo/core"
 	"runtime"
+
+	"github.com/nimaaskarian/ydo/core"
+	"gopkg.in/yaml.v3"
 )
 
 const APP_NAME = "ydo";
@@ -49,4 +51,12 @@ func MustNotHaveTask(taskmap core.TaskMap, key string) {
   if _, ok := taskmap[key]; ok {
     log.Fatalf("Task %q already exists\n",key)
   }
+}
+
+func WriteTaskmap(taskmap core.TaskMap, path string) {
+    content, err := yaml.Marshal(taskmap)
+    Check(err)
+    err = os.WriteFile(path, content, 0644)
+    Check(err)
+
 }

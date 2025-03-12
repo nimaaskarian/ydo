@@ -12,9 +12,9 @@ done: true
 `
 
 func TestParseYaml(t *testing.T) {
-  todo := Todo{};
+  todo := Task{};
   ParseYaml(&todo, []byte(DATA));
-  expected := Todo {
+  expected := Task {
     Task: "buy groceries",
     Deps: []string{"2"},
     Done: true,
@@ -23,15 +23,15 @@ func TestParseYaml(t *testing.T) {
 }
 
 func TestIsDone(t *testing.T) {
-  todo := Todo{};
+  todo := Task{};
   ParseYaml(&todo, []byte(DATA));
   assert.True(t, todo.IsDone(nil))
   todo.Done = false
   assert.False(t, todo.IsDone(nil))
 }
 
-func ExampleTodo_PrintMarkdown() {
-  todo := Todo{};
+func ExampleTask_PrintMarkdown() {
+  todo := Task{};
   ParseYaml(&todo, []byte(DATA));
   todo.Deps = []string{};
   todo.PrintMarkdown(nil, 1)

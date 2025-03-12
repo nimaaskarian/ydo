@@ -5,6 +5,7 @@ import (
   "log"
   "fmt"
   "strconv"
+	"slices"
 )
 
 func ParseYaml(obj any, input []byte) {
@@ -14,7 +15,7 @@ func ParseYaml(obj any, input []byte) {
   }
 }
 
-type TaskMap map[string]Todo;
+type TaskMap map[string]Task;
 
 func (todomap TaskMap) Do(key string) {
   if entry, ok := todomap[key]; ok {
@@ -31,9 +32,15 @@ func PrintYaml(obj any) {
   fmt.Printf("%s", s)
 }
 
-func (todomap TaskMap) PrintMarkdown() {
-  for _,todo := range todomap {
-    todo.PrintMarkdown(todomap,1)
+func (taskmap TaskMap) PrintMarkdown() {
+  var seen_keys []string
+  for _,todo := range taskmap {
+    seen_keys = append(seen_keys, todo.Deps...)
+  }
+  for i,todo := range taskmap {
+    if !slices.Contains(seen_keys, i) {
+      todo.PrintMarkdown(taskmap, 1)
+    }
   }
 }
 
