@@ -12,24 +12,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var deps []string
 func init() {
-  rootCmd.AddCommand(addCmd)
-  addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the todo to add")
+  rootCmd.AddCommand(editCmd)
+  editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the todo to add")
 }
 
-var addCmd = &cobra.Command{
-  Use: "add",
-  Short: "add a todo",
+var editCmd = &cobra.Command{
+  Use: "edit",
+  Short: "edit a todo",
   Run: func(cmd *cobra.Command, args []string) {
     taskmap = utils.LoadTasks(path)
-    utils.MustNotHaveTask(taskmap, key)
+    utils.MustHaveTask(taskmap, key)
     task := strings.Join(args, " ")
     if task == "" {
-      log.Fatalln("Task can't be empty")
+      task = taskmap[key].Task
     }
     for _,key := range deps {
-      utils.MustHaveTask(taskmap, key)
+      if _, ok := taskmap[key]; !ok {
+        log.Fatalf("No such task %q\n",key)
+      }
     }
     taskmap[key] = core.Todo {Task: task, Deps: deps}
     str, err := yaml.Marshal(taskmap)

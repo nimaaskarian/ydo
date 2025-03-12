@@ -15,23 +15,26 @@ var (
   key string
   path string
   // global state
-  todomap core.TodoMap
+  taskmap core.TaskMap
 
   rootCmd = &cobra.Command{
   Use:   "ydo",
   Short: "ydo is a frictionless and fast todo app",
   Long: `Fast, featurefull and frictionless todo app with a graph structure`,
   PersistentPreRun: func(cmd *cobra.Command, args []string) {
-    todomap = utils.LoadTodos(path)
+    taskmap = utils.LoadTasks(path)
+    if taskmap == nil {
+      taskmap = make(core.TaskMap)
+    }
     if key == "" {
-      key = todomap.NextKey()
+      key = taskmap.NextKey()
     }
   },
   Run: func(cmd *cobra.Command, args []string) {
-    if todo, ok := todomap[key]; ok {
-      todo.PrintMarkdown(todomap, 1)
+    if todo, ok := taskmap[key]; ok {
+      todo.PrintMarkdown(taskmap, 1)
     } else {
-      todomap.PrintMarkdown()
+      taskmap.PrintMarkdown()
     }
   },
 }

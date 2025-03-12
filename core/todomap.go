@@ -14,9 +14,9 @@ func ParseYaml(obj any, input []byte) {
   }
 }
 
-type TodoMap map[string]Todo;
+type TaskMap map[string]Todo;
 
-func (todomap TodoMap) Do(key string) {
+func (todomap TaskMap) Do(key string) {
   if entry, ok := todomap[key]; ok {
     entry.Done = true
     todomap[key] = entry
@@ -31,13 +31,13 @@ func PrintYaml(obj any) {
   fmt.Printf("%s", s)
 }
 
-func (todomap TodoMap) PrintMarkdown() {
+func (todomap TaskMap) PrintMarkdown() {
   for _,todo := range todomap {
     todo.PrintMarkdown(todomap,1)
   }
 }
 
-func (todomap TodoMap) NextKey() string {
+func (todomap TaskMap) NextKey() string {
   i := 1
   for {
     s_i := "t"+strconv.Itoa(i);
@@ -49,7 +49,7 @@ func (todomap TodoMap) NextKey() string {
   }
 }
 
-func (todomap TodoMap) PrintKeys() {
+func (todomap TaskMap) PrintKeys() {
   for key := range todomap {
     fmt.Printf("%s\n", key)
   }

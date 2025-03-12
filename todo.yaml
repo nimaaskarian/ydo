@@ -5,4 +5,4 @@ webgui:
     deps: [cli]
 ydo:
     task: complete ydo development
-    deps: [cli, webgui]
+    deps: [webgui]

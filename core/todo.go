@@ -10,7 +10,7 @@ type Todo struct {
   DoneDeps bool   `yaml:",omitempty"`
 }
 
-func (todo Todo) IsDone(todomap TodoMap) bool {
+func (todo Todo) IsDone(todomap TaskMap) bool {
   if todo.DoneDeps {
     for _,key := range todo.Deps {
       if !todomap[key].Done {
@@ -22,7 +22,7 @@ func (todo Todo) IsDone(todomap TodoMap) bool {
   return todo.Done
 }
 
-func (todo Todo) PrintMarkdown(todomap TodoMap, depth int) {
+func (todo Todo) PrintMarkdown(todomap TaskMap, depth int) {
   var inner string;
   if todo.IsDone(todomap) {
     inner = "x"

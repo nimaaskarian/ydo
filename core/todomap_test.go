@@ -17,7 +17,7 @@ t3:
 `
 
 func TestTodoMapParseYaml(t *testing.T) {
-  todomap := make(TodoMap)
+  todomap := make(TaskMap)
   ParseYaml(todomap, []byte(GROCERIES));
   expected_tasks := []string{"buy groceries", "buy milk", "buy bread"};
   for i:=range 3 {
@@ -26,7 +26,7 @@ func TestTodoMapParseYaml(t *testing.T) {
 }
 
 func TestNextKey(t *testing.T) {
-  todomap := make(TodoMap)
+  todomap := make(TaskMap)
   ParseYaml(todomap, []byte(GROCERIES));
   for i:=range 20 {
     assert.Equal(t, todomap.NextKey(), "t"+strconv.Itoa(4+i))
@@ -39,7 +39,7 @@ func TestNextKey(t *testing.T) {
 }
 
 func TestDo(t *testing.T) {
-  todomap := make(TodoMap)
+  todomap := make(TaskMap)
   ParseYaml(todomap, []byte(GROCERIES))
   assert.False(t, todomap["t2"].IsDone(todomap))
   todomap.Do("t2")
@@ -50,7 +50,7 @@ func TestDo(t *testing.T) {
 }
 
 func TestDepIsDone(t *testing.T) {
-  todomap := make(TodoMap)
+  todomap := make(TaskMap)
   ParseYaml(todomap, []byte(GROCERIES))
   assert.False(t, todomap["t1"].IsDone(todomap))
   todomap.Do("t2")
@@ -60,10 +60,10 @@ func TestDepIsDone(t *testing.T) {
 }
 
 func ExamplePrintYaml() {
-  todomap := make(TodoMap)
+  todomap := make(TaskMap)
   ParseYaml(todomap, []byte(GROCERIES))
   PrintYaml(todomap)
-  todomap = make(TodoMap)
+  todomap = make(TaskMap)
   ParseYaml(todomap, []byte(HOMEWORKS))
   PrintYaml(todomap)
   // Output:
@@ -93,11 +93,11 @@ project:
     task: blah blah project
 `
 
-func ExampleTodoMap_PrintKeys() {
-  todomap := make(TodoMap)
+func ExampleTaskMap_PrintKeys() {
+  todomap := make(TaskMap)
   ParseYaml(todomap, []byte(GROCERIES))
   todomap.PrintKeys()
-  todomap = make(TodoMap)
+  todomap = make(TaskMap)
   ParseYaml(todomap, []byte(HOMEWORKS))
   todomap.PrintKeys()
   // Unordered output:

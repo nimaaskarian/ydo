@@ -14,11 +14,11 @@ var outCmd = &cobra.Command{
   Use: "out",
   Short: "output todos as yaml",
   Run: func(cmd *cobra.Command, args []string) {
-    todomap = utils.LoadTodos(path)
-    if todo, ok := todomap[key]; ok {
+    taskmap = utils.LoadTasks(path)
+    if todo, ok := taskmap[key]; ok {
       core.PrintYaml(todo)
     } else {
-      core.PrintYaml(todomap)
+      core.PrintYaml(taskmap)
     }
   },
 }

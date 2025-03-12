@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+  "log"
 	"path/filepath"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -25,8 +26,8 @@ func ConfigDir() string {
   return filepath.Join(base, APP_NAME)
 }
 
-func LoadTodos(path string) core.TodoMap {
-  todomap := make(core.TodoMap)
+func LoadTasks(path string) core.TaskMap {
+  todomap := make(core.TaskMap)
   content, _ := os.ReadFile(path)
   core.ParseYaml(todomap, content)
   return todomap
@@ -35,5 +36,17 @@ func LoadTodos(path string) core.TodoMap {
 func Check(e error) {
   if e != nil {
     panic(e)
+  }
+}
+
+func MustHaveTask(taskmap core.TaskMap, key string) {
+  if _, ok := taskmap[key]; !ok {
+    log.Fatalf("No such todo %q\n",key)
+  }
+}
+
+func MustNotHaveTask(taskmap core.TaskMap, key string) {
+  if _, ok := taskmap[key]; ok {
+    log.Fatalf("Task %q already exists\n",key)
   }
 }
