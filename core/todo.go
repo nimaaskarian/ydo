@@ -13,7 +13,7 @@ type Task struct {
 func (todo Task) IsDone(todomap TaskMap) bool {
   if todo.DoneDeps {
     for _,key := range todo.Deps {
-      if !todomap[key].Done {
+      if !todomap[key].IsDone(todomap) {
         return false
       }
     }
