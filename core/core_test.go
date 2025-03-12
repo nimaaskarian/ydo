@@ -2,15 +2,9 @@ package core
 
 import (
   "testing"
-  "reflect"
   "strconv"
+  "github.com/stretchr/testify/assert"
 )
-
-func assertEq(t *testing.T, actual any, expected any, format string) {
-  if !reflect.DeepEqual(actual, expected) {
-    t.Errorf(format+" (actual) != "+format+" (expected)", actual, expected)
-  }
-}
 
 func TestParse(t *testing.T) {
   data := `
@@ -25,13 +19,13 @@ done: true
     Deps: []string{"2"},
     Done: true,
   };
-  assertEq(t, todo, expected, "%v")
+  assert.Equal(t, todo, expected)
 }
 
 const GROCERIES = `0:
   task: buy groceries
-  deps: [2, 3]
-  done: true
+  deps: [2, 1]
+  donedeps: true
 1:
   task: buy milk
 2:
@@ -43,7 +37,7 @@ func TestParseMap(t *testing.T) {
   ParseYaml(todomap, []byte(GROCERIES));
   expected_tasks := []string{"buy groceries", "buy milk", "buy bread"};
   for i:=range 3 {
-    assertEq(t, todomap[strconv.Itoa(i)].Task, expected_tasks[i], "%q")
+    assert.Equal(t, expected_tasks[i], todomap[strconv.Itoa(i)].Task)
   }
 }
 
@@ -51,11 +45,32 @@ func TestNextId(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES));
   for i:=range 20 {
-    assertEq(t, todomap.NextId(), strconv.Itoa(3+i), "%d")
+    assert.Equal(t, todomap.NextId(), strconv.Itoa(3+i))
     todomap[strconv.Itoa(3+i)] = Todo{};
   }
   todomap["24"] = Todo{};
-  assertEq(t, todomap.NextId(), "23", "%d")
+  assert.Equal(t, todomap.NextId(), "23")
   todomap["23"] = Todo{};
-  assertEq(t, todomap.NextId(), "25", "%d")
+  assert.Equal(t, todomap.NextId(), "25")
+}
+
+func TestMapDo(t *testing.T) {
+  todomap := make(TodoMap)
+  ParseYaml(todomap, []byte(GROCERIES))
+  assert.Equal(t, false, todomap["1"].IsDone(todomap))
+  todomap.Do("1")
+  assert.Equal(t, true, todomap["1"].IsDone(todomap))
+  assert.Equal(t, false, todomap["2"].IsDone(todomap))
+  todomap.Do("2")
+  assert.Equal(t, true, todomap["2"].IsDone(todomap))
+}
+
+func TestIsDone(t *testing.T) {
+  todomap := make(TodoMap)
+  ParseYaml(todomap, []byte(GROCERIES))
+  assert.Equal(t, false, todomap["0"].IsDone(todomap))
+  todomap.Do("1")
+  assert.Equal(t, false, todomap["0"].IsDone(todomap))
+  todomap.Do("2")
+  assert.Equal(t, true, todomap["0"].IsDone(todomap))
 }

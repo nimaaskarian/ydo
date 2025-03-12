@@ -11,11 +11,24 @@ type Todo struct {
   Task string
   Deps []string
   Done bool
+  DoneDeps bool
+}
+
+func (todo Todo) IsDone(todomap TodoMap) bool {
+  if todo.DoneDeps {
+    for _,key := range todo.Deps {
+      if !todomap[key].Done {
+        return false
+      }
+    }
+    return true
+  }
+  return todo.Done
 }
 
 func (todo Todo) PrintMarkdown(todomap TodoMap, depth int) {
   var inner string;
-  if todo.Done {
+  if todo.IsDone(todomap) {
     inner = "x"
   } else {
     inner = " "
@@ -29,6 +42,13 @@ func (todo Todo) PrintMarkdown(todomap TodoMap, depth int) {
   }
 }
 type TodoMap map[string]Todo;
+
+func (todomap TodoMap) Do(key string) {
+  if entry, ok := todomap[key]; ok {
+    entry.Done = true
+    todomap[key] = entry
+  }
+}
 
 func (todomap TodoMap) PrintYaml() {
   s,err:=yaml.Marshal(todomap)
