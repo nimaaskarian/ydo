@@ -14,7 +14,6 @@ func ParseYaml(obj any, input []byte) {
   }
 }
 
-
 type TodoMap map[string]Todo;
 
 func (todomap TodoMap) Do(key string) {

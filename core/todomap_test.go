@@ -16,7 +16,7 @@ const GROCERIES = `0:
   task: buy bread
 `
 
-func TestParseMap(t *testing.T) {
+func TestTodoMapParseYaml(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES));
   expected_tasks := []string{"buy groceries", "buy milk", "buy bread"};
@@ -38,23 +38,47 @@ func TestNextId(t *testing.T) {
   assert.Equal(t, todomap.NextId(), "25")
 }
 
-func TestMapDo(t *testing.T) {
+func TestDo(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES))
-  assert.Equal(t, false, todomap["1"].IsDone(todomap))
+  assert.False(t, todomap["1"].IsDone(todomap))
   todomap.Do("1")
-  assert.Equal(t, true, todomap["1"].IsDone(todomap))
-  assert.Equal(t, false, todomap["2"].IsDone(todomap))
+  assert.True(t, todomap["1"].IsDone(todomap))
+  assert.False(t, todomap["2"].IsDone(todomap))
   todomap.Do("2")
-  assert.Equal(t, true, todomap["2"].IsDone(todomap))
+  assert.True(t, todomap["2"].IsDone(todomap))
 }
 
-func TestIsDone(t *testing.T) {
+func TestDepIsDone(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES))
-  assert.Equal(t, false, todomap["0"].IsDone(todomap))
+  assert.False(t, todomap["0"].IsDone(todomap))
   todomap.Do("1")
-  assert.Equal(t, false, todomap["0"].IsDone(todomap))
+  assert.False(t, todomap["0"].IsDone(todomap))
   todomap.Do("2")
-  assert.Equal(t, true, todomap["0"].IsDone(todomap))
+  assert.True(t, todomap["0"].IsDone(todomap))
+}
+
+func ExampleTodoMap_PrintYaml() {
+  todomap := make(TodoMap);
+  ParseYaml(todomap, []byte(GROCERIES));
+  todomap.PrintYaml()
+  // Output:
+  // "0":
+  //     task: buy groceries
+  //     deps:
+  //         - "2"
+  //         - "1"
+  //     done: false
+  //     donedeps: true
+  // "1":
+  //     task: buy milk
+  //     deps: []
+  //     done: false
+  //     donedeps: false
+  // "2":
+  //     task: buy bread
+  //     deps: []
+  //     done: false
+  //     donedeps: false
 }
