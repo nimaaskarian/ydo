@@ -1,6 +1,8 @@
-package core;
+package core
+
 import (
-  "fmt"
+	"fmt"
+	"slices"
 )
 
 type Task struct {
@@ -22,7 +24,7 @@ func (task Task) IsDone(taskmap TaskMap) bool {
   return task.Done
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth int) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys []string, seen_in_deps *[]string) {
   var inner string;
   if task.IsDone(taskmap) {
     inner = "x"
@@ -30,10 +32,16 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int) {
     inner = " "
   }
   fmt.Printf("- [%s] %s\n", inner,task.Task)
-  for _, id := range task.Deps {
+  for _, key := range task.Deps {
+    if seen_keys != nil && slices.Contains(seen_keys, key) {
+      continue
+    }
     for range depth {
       fmt.Print("   ")
     }
-    taskmap[id].PrintMarkdown(taskmap, depth+1)
+    if seen_in_deps != nil {
+      *seen_in_deps = append(*seen_in_deps, key)
+    }
+    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, seen_in_deps)
   }
 }

@@ -32,7 +32,6 @@ func ConfigDir() string {
 }
 
 func LoadTasks(path string) core.TaskMap {
-  log.Printf("File %q loaded\n", path)
   taskmap := make(core.TaskMap)
   content, _ := os.ReadFile(path)
   core.ParseYaml(taskmap, content)

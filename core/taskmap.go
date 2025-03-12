@@ -48,12 +48,11 @@ func PrintYaml(obj any) {
 
 func (taskmap TaskMap) PrintMarkdown() {
   var seen_keys []string
-  for _,task := range taskmap {
-    seen_keys = append(seen_keys, task.Deps...)
-  }
-  for i,task := range taskmap {
-    if !slices.Contains(seen_keys, i) {
-      task.PrintMarkdown(taskmap, 1)
+  var seen_in_deps []string
+  for key,task := range taskmap {
+    if !slices.Contains(seen_keys, key) && !slices.Contains(seen_in_deps, key) {
+      seen_keys = append(seen_keys, key)
+      task.PrintMarkdown(taskmap, 1, seen_keys, &seen_in_deps)
     }
   }
 }
