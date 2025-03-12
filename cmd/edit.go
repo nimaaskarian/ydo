@@ -12,7 +12,7 @@ import (
 
 func init() {
   rootCmd.AddCommand(editCmd)
-  editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the todo to add")
+  editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
 }
 
 var editCmd = &cobra.Command{

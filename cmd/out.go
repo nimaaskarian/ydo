@@ -13,8 +13,8 @@ var outCmd = &cobra.Command{
   Use: "out",
   Short: "output tasks as yaml",
   Run: func(cmd *cobra.Command, args []string) {
-    if todo, ok := taskmap[key]; ok {
-      core.PrintYaml(todo)
+    if task, ok := taskmap[key]; ok {
+      core.PrintYaml(task)
     } else {
       core.PrintYaml(taskmap)
     }

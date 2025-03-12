@@ -13,7 +13,7 @@ import (
 var deps []string
 func init() {
   rootCmd.AddCommand(addCmd)
-  addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the todo to add")
+  addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
 }
 
 var addCmd = &cobra.Command{

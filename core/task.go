@@ -10,30 +10,30 @@ type Task struct {
   DoneDeps bool   `yaml:",omitempty"`
 }
 
-func (todo Task) IsDone(todomap TaskMap) bool {
-  if todo.DoneDeps {
-    for _,key := range todo.Deps {
-      if !todomap[key].IsDone(todomap) {
+func (task Task) IsDone(taskmap TaskMap) bool {
+  if task.DoneDeps {
+    for _,key := range task.Deps {
+      if !taskmap[key].IsDone(taskmap) {
         return false
       }
     }
     return true
   }
-  return todo.Done
+  return task.Done
 }
 
-func (todo Task) PrintMarkdown(todomap TaskMap, depth int) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth int) {
   var inner string;
-  if todo.IsDone(todomap) {
+  if task.IsDone(taskmap) {
     inner = "x"
   } else {
     inner = " "
   }
-  fmt.Printf("- [%s] %s\n", inner,todo.Task)
-  for _, id := range todo.Deps {
+  fmt.Printf("- [%s] %s\n", inner,task.Task)
+  for _, id := range task.Deps {
     for range depth {
       fmt.Print("   ")
     }
-    todomap[id].PrintMarkdown(todomap, depth+1)
+    taskmap[id].PrintMarkdown(taskmap, depth+1)
   }
 }

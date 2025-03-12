@@ -32,10 +32,10 @@ func ConfigDir() string {
 }
 
 func LoadTasks(path string) core.TaskMap {
-  todomap := make(core.TaskMap)
+  taskmap := make(core.TaskMap)
   content, _ := os.ReadFile(path)
-  core.ParseYaml(todomap, content)
-  return todomap
+  core.ParseYaml(taskmap, content)
+  return taskmap
 }
 
 func Check(e error) {
@@ -46,7 +46,7 @@ func Check(e error) {
 
 func MustHaveTask(taskmap core.TaskMap, key string) {
   if !taskmap.HasTask(key) {
-    log.Fatalf("No such todo %q\n",key)
+    log.Fatalf("No such task %q\n",key)
   }
 }
 
