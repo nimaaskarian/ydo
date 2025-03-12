@@ -4,10 +4,10 @@ import (
 )
 
 type Todo struct {
-  Task string
-  Deps []string
-  Done bool
-  DoneDeps bool
+  Task string     `yaml:",omitempty"`
+  Deps []string   `yaml:",omitempty"`
+  Done bool       `yaml:",omitempty"`
+  DoneDeps bool   `yaml:",omitempty"`
 }
 
 func (todo Todo) IsDone(todomap TodoMap) bool {

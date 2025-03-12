@@ -29,13 +29,13 @@ func TestNextId(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES));
   for i:=range 20 {
-    assert.Equal(t, todomap.NextId(), strconv.Itoa(3+i))
+    assert.Equal(t, todomap.NextKey(), strconv.Itoa(3+i))
     todomap[strconv.Itoa(3+i)] = Todo{};
   }
   todomap["24"] = Todo{};
-  assert.Equal(t, todomap.NextId(), "23")
+  assert.Equal(t, todomap.NextKey(), "23")
   todomap["23"] = Todo{};
-  assert.Equal(t, todomap.NextId(), "25")
+  assert.Equal(t, todomap.NextKey(), "25")
 }
 
 func TestDo(t *testing.T) {
@@ -60,8 +60,8 @@ func TestDepIsDone(t *testing.T) {
 }
 
 func ExampleTodoMap_PrintYaml() {
-  todomap := make(TodoMap);
-  ParseYaml(todomap, []byte(GROCERIES));
+  todomap := make(TodoMap)
+  ParseYaml(todomap, []byte(GROCERIES))
   todomap.PrintYaml()
   // Output:
   // "0":
@@ -69,16 +69,34 @@ func ExampleTodoMap_PrintYaml() {
   //     deps:
   //         - "2"
   //         - "1"
-  //     done: false
   //     donedeps: true
   // "1":
   //     task: buy milk
-  //     deps: []
-  //     done: false
-  //     donedeps: false
   // "2":
   //     task: buy bread
-  //     deps: []
-  //     done: false
-  //     donedeps: false
+}
+
+const HOMEWORKS = `homework:
+    task: blah blah homework
+    deps: [study, project]
+study:
+    task: study blah balh
+project:
+    task: blah balh project
+`
+
+func ExampleTodoMap_PrintKeys() {
+  todomap := make(TodoMap)
+  ParseYaml(todomap, []byte(GROCERIES))
+  todomap.PrintKeys()
+  todomap = make(TodoMap)
+  ParseYaml(todomap, []byte(HOMEWORKS))
+  todomap.PrintKeys()
+  // Unordered output:
+  // 0
+  // 1
+  // 2
+  // homework
+  // study
+  // project
 }

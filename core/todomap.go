@@ -37,7 +37,7 @@ func (todomap TodoMap) PrintMarkdown() {
   }
 }
 
-func (todomap TodoMap) NextId() string {
+func (todomap TodoMap) NextKey() string {
   i := 0
   for {
     s_i := strconv.Itoa(i);
@@ -46,5 +46,11 @@ func (todomap TodoMap) NextId() string {
     } else {
       return s_i
     }
+  }
+}
+
+func (todomap TodoMap) PrintKeys() {
+  for key := range todomap {
+    fmt.Printf("%s\n", key)
   }
 }
