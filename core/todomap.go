@@ -23,8 +23,8 @@ func (todomap TodoMap) Do(key string) {
   }
 }
 
-func (todomap TodoMap) PrintYaml() {
-  s,err:=yaml.Marshal(todomap)
+func PrintYaml(obj any) {
+  s,err:=yaml.Marshal(obj)
   if err != nil {
     log.Fatalf("%v\n", err)
   }

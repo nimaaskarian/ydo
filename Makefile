@@ -6,5 +6,5 @@ DEP_FILES=$(foreach dir, ${DEP_DIRS}, $(wildcard $(dir)/*.go))
 test:
 	go test ./... -coverprofile=coverage.out
 
-main:
+main: *
 	go build main.go

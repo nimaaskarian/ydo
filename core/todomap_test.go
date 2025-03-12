@@ -59,13 +59,13 @@ func TestDepIsDone(t *testing.T) {
   assert.True(t, todomap["t1"].IsDone(todomap))
 }
 
-func ExampleTodoMap_PrintYaml() {
+func ExamplePrintYaml() {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES))
-  todomap.PrintYaml()
+  PrintYaml(todomap)
   todomap = make(TodoMap)
   ParseYaml(todomap, []byte(HOMEWORKS))
-  todomap.PrintYaml()
+  PrintYaml(todomap)
   // Output:
   // t1:
   //     task: buy groceries

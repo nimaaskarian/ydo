@@ -3,6 +3,8 @@ package utils
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/nimaaskarian/ydo/core"
 	"runtime"
 )
 
@@ -22,3 +24,12 @@ func ConfigDir() string {
   }
   return filepath.Join(base, APP_NAME)
 }
+
+func LoadTodos(dir string) core.TodoMap {
+  path := filepath.Join(dir, "todos.yaml")
+  todomap := make(core.TodoMap)
+  content, _ := os.ReadFile(path)
+  core.ParseYaml(todomap, content)
+  return todomap
+}
+
