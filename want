@@ -1,0 +1,15 @@
+t0:
+    task: buy groceries
+    deps: [t1, t2]
+    donedeps: true
+t1:
+    task: buy milk
+t2:
+    task: buy bread
+homework:
+    task: blah blah homework
+    deps: [study, project]
+project:
+    task: blah blah project
+study:
+    task: study blah blah

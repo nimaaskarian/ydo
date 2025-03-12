@@ -40,7 +40,7 @@ func (todomap TodoMap) PrintMarkdown() {
 func (todomap TodoMap) NextKey() string {
   i := 0
   for {
-    s_i := strconv.Itoa(i);
+    s_i := "t"+strconv.Itoa(i);
     if _, ok := todomap[s_i]; ok {
       i++
     } else {

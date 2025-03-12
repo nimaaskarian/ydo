@@ -6,13 +6,13 @@ import (
   "github.com/stretchr/testify/assert"
 )
 
-const GROCERIES = `0:
+const GROCERIES = `t0:
   task: buy groceries
-  deps: [2, 1]
+  deps: [t2, t1]
   donedeps: true
-1:
+t1:
   task: buy milk
-2:
+t2:
   task: buy bread
 `
 
@@ -21,68 +21,76 @@ func TestTodoMapParseYaml(t *testing.T) {
   ParseYaml(todomap, []byte(GROCERIES));
   expected_tasks := []string{"buy groceries", "buy milk", "buy bread"};
   for i:=range 3 {
-    assert.Equal(t, expected_tasks[i], todomap[strconv.Itoa(i)].Task)
+    assert.Equal(t, expected_tasks[i], todomap["t"+strconv.Itoa(i)].Task)
   }
 }
 
-func TestNextId(t *testing.T) {
+func TestNextKey(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES));
   for i:=range 20 {
-    assert.Equal(t, todomap.NextKey(), strconv.Itoa(3+i))
-    todomap[strconv.Itoa(3+i)] = Todo{};
+    assert.Equal(t, todomap.NextKey(), "t"+strconv.Itoa(3+i))
+    todomap["t"+strconv.Itoa(3+i)] = Todo{};
   }
-  todomap["24"] = Todo{};
-  assert.Equal(t, todomap.NextKey(), "23")
-  todomap["23"] = Todo{};
-  assert.Equal(t, todomap.NextKey(), "25")
+  todomap["t24"] = Todo{};
+  assert.Equal(t, "t23", todomap.NextKey())
+  todomap["t23"] = Todo{};
+  assert.Equal(t, "t25", todomap.NextKey())
 }
 
 func TestDo(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES))
-  assert.False(t, todomap["1"].IsDone(todomap))
-  todomap.Do("1")
-  assert.True(t, todomap["1"].IsDone(todomap))
-  assert.False(t, todomap["2"].IsDone(todomap))
-  todomap.Do("2")
-  assert.True(t, todomap["2"].IsDone(todomap))
+  assert.False(t, todomap["t1"].IsDone(todomap))
+  todomap.Do("t1")
+  assert.True(t, todomap["t1"].IsDone(todomap))
+  assert.False(t, todomap["t2"].IsDone(todomap))
+  todomap.Do("t2")
+  assert.True(t, todomap["t2"].IsDone(todomap))
 }
 
 func TestDepIsDone(t *testing.T) {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES))
-  assert.False(t, todomap["0"].IsDone(todomap))
-  todomap.Do("1")
-  assert.False(t, todomap["0"].IsDone(todomap))
-  todomap.Do("2")
-  assert.True(t, todomap["0"].IsDone(todomap))
+  assert.False(t, todomap["t0"].IsDone(todomap))
+  todomap.Do("t1")
+  assert.False(t, todomap["t0"].IsDone(todomap))
+  todomap.Do("t2")
+  assert.True(t, todomap["t0"].IsDone(todomap))
 }
 
 func ExampleTodoMap_PrintYaml() {
   todomap := make(TodoMap)
   ParseYaml(todomap, []byte(GROCERIES))
   todomap.PrintYaml()
+  todomap = make(TodoMap)
+  ParseYaml(todomap, []byte(HOMEWORKS))
+  todomap.PrintYaml()
   // Output:
-  // "0":
+  // t0:
   //     task: buy groceries
-  //     deps:
-  //         - "2"
-  //         - "1"
+  //     deps: [t2, t1]
   //     donedeps: true
-  // "1":
+  // t1:
   //     task: buy milk
-  // "2":
+  // t2:
   //     task: buy bread
+  // homework:
+  //     task: blah blah homework
+  //     deps: [study, project]
+  // project:
+  //     task: blah blah project
+  // study:
+  //     task: study blah blah
 }
 
 const HOMEWORKS = `homework:
     task: blah blah homework
     deps: [study, project]
 study:
-    task: study blah balh
+    task: study blah blah
 project:
-    task: blah balh project
+    task: blah blah project
 `
 
 func ExampleTodoMap_PrintKeys() {
@@ -93,9 +101,9 @@ func ExampleTodoMap_PrintKeys() {
   ParseYaml(todomap, []byte(HOMEWORKS))
   todomap.PrintKeys()
   // Unordered output:
-  // 0
-  // 1
-  // 2
+  // t0
+  // t1
+  // t2
   // homework
   // study
   // project

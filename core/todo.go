@@ -5,7 +5,7 @@ import (
 
 type Todo struct {
   Task string     `yaml:",omitempty"`
-  Deps []string   `yaml:",omitempty"`
+  Deps []string   `yaml:",omitempty,flow"`
   Done bool       `yaml:",omitempty"`
   DoneDeps bool   `yaml:",omitempty"`
 }
