@@ -20,8 +20,7 @@ var (
   rootCmd = &cobra.Command{
   Use:   "ydo",
   Short: "ydo is a frictionless and fast todo app",
-  Long: `Fast and featureful todo app 
-made with love by nimaaskarian`,
+  Long: `Fast, featurefull and frictionless todo app with a graph structure`,
   Run: func(cmd *cobra.Command, args []string) {
     todomap = utils.LoadTodos(path)
     core.PrintYaml(todomap)
