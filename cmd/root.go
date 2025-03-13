@@ -15,9 +15,7 @@ import (
 
 func TaskKeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
   taskmap = core.LoadTaskMap(tasks_path)
-
   keys := make([]string, len(taskmap))
-
   i := 0
   for key := range taskmap {
 		if strings.HasPrefix(key, toComplete) {
@@ -26,6 +24,48 @@ func TaskKeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]
     }
   }
   return keys, cobra.ShellCompDirectiveDefault
+}
+
+func TaskKeyCompletionOnFirst(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  if len(args) > 0 {
+    return []string{}, cobra.ShellCompDirectiveDefault
+  }
+  return TaskKeyCompletion(cmd, args, toComplete)
+}
+
+func TaskKeyCompletionDone(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  taskmap = core.LoadTaskMap(tasks_path)
+  keys := make([]string, len(taskmap))
+  i := 0
+  for key,task := range taskmap {
+		if task.IsDone(taskmap) && strings.HasPrefix(key, toComplete) {
+      keys[i] = key
+      i++
+    }
+  }
+  return keys, cobra.ShellCompDirectiveDefault
+}
+
+func TaskKeyCompletionNotDone(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  taskmap = core.LoadTaskMap(tasks_path)
+  keys := make([]string, len(taskmap))
+  i := 0
+  for key,task := range taskmap {
+		if !task.IsDone(taskmap) && strings.HasPrefix(key, toComplete) {
+      keys[i] = key
+      i++
+    }
+  }
+  return keys, cobra.ShellCompDirectiveDefault
+}
+
+var NeedKeysCmd = &cobra.Command{
+	Use:   "base [keys]",
+	Short: "Base command that takes non-flag arguments",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		keys = args
+	},
 }
 
 type Config struct  {
@@ -67,7 +107,7 @@ func (config *Config) SlogLevel() slog.Level {
 
 var (
   // flags
-  key string
+  keys []string
   tasks_path string
   config_path string
   // global state
@@ -95,8 +135,10 @@ var (
     }
   },
   Run: func(cmd *cobra.Command, args []string) {
-    if task, ok := taskmap[key]; ok {
-      task.PrintMarkdown(taskmap, 1, []string{key}, nil)
+    if len(keys) > 0 {
+      for _,key := range keys {
+        taskmap[key].PrintMarkdown(taskmap, 1, []string{key}, nil)
+      }
     } else {
       taskmap.PrintMarkdown()
     }
@@ -108,8 +150,6 @@ func init() {
   config_dir = utils.ConfigDir()
   rootCmd.PersistentFlags().StringVarP(&tasks_path, "file","f","", "path to tasks file")
   rootCmd.PersistentFlags().StringVarP(&config_path, "config","c",filepath.Join(config_dir, "config.yaml"), "path to config file")
-  rootCmd.PersistentFlags().StringVarP(&key, "key","k", "", "task key")
-  rootCmd.RegisterFlagCompletionFunc("key", TaskKeyCompletion)
 }
 
 func Execute() {

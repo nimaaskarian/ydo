@@ -10,11 +10,13 @@ import (
 )
 
 var deps []string
+var key string
 func init() {
   rootCmd.AddCommand(addCmd)
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
+  addCmd.Flags().StringArrayVarP(&deps, "key", "k", []string{}, "dependencies for the task to add")
+  addCmd.PersistentFlags().StringVarP(&key, "key","k", "", "task key")
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
-
 }
 
 var addCmd = &cobra.Command{

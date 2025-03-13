@@ -7,25 +7,25 @@ import (
 
 func init() {
   rootCmd.AddCommand(doCmd)
-  doCmd.ValidArgsFunction = TaskKeyCompletion
+  doCmd.ValidArgsFunction = TaskKeyCompletionNotDone
 }
 
 var doCmd = &cobra.Command{
   Use: "do",
   Short: "set a task as done",
   Run: func(cmd *cobra.Command, args []string) {
-    if len(args) > 0 {
-      key = args[0];
-    }
-    if key == ""  {
+    NeedKeysCmd.Run(cmd, args)
+    if len(keys) > 0 {
+      for _,key := range keys {
+        taskmap.Do(key)
+      }
+    } else {
       if !utils.ReadYesNo("This will set all tasks as completed. ARE YOU REALLY SURE? (yes/no) ")  {
         return
       }
       for key := range taskmap {
         taskmap.Do(key)
       }
-    } else {
-      taskmap.Do(key)
     }
     taskmap.Write(tasks_path)
   },
