@@ -9,12 +9,7 @@ import (
 	"strings"
 
 	"runtime"
-
-	"github.com/nimaaskarian/ydo/core"
-	"gopkg.in/yaml.v3"
 )
-
-const APP_NAME = "ydo";
 
 func ConfigDir() string {
   var base string;
@@ -28,43 +23,13 @@ func ConfigDir() string {
       base = filepath.Join(os.Getenv("HOME"), ".config")
     }
   }
-  return filepath.Join(base, APP_NAME)
-}
-
-func LoadTasks(path string) core.TaskMap {
-  slog.Info("File loaded.\n", "path", path)
-  taskmap := make(core.TaskMap)
-  content, _ := os.ReadFile(path)
-  core.ParseYaml(taskmap, content)
-  return taskmap
+  return filepath.Join(base, "ydo")
 }
 
 func Check(e error) {
   if e != nil {
     panic(e)
   }
-}
-
-func MustHaveTask(taskmap core.TaskMap, key string) {
-  if !taskmap.HasTask(key) {
-    slog.Error("No such task", "key",key)
-    os.Exit(1)
-  }
-}
-
-func MustNotHaveTask(taskmap core.TaskMap, key string) {
-  if taskmap.HasTask(key) {
-    slog.Error("Task already exists", "key",key)
-    os.Exit(1)
-  }
-}
-
-func WriteTaskmap(taskmap core.TaskMap, path string) {
-  content, err := yaml.Marshal(taskmap)
-  Check(err)
-  err = os.WriteFile(path, content, 0644)
-  Check(err)
-  slog.Info("Wrote to file", "path", path)
 }
 
 func ReadYesNo(format string, a ...any) bool {

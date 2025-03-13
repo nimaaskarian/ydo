@@ -3,10 +3,12 @@ package core
 import (
 	"fmt"
 	"log/slog"
+	"os"
 	"slices"
 	"sort"
 	"strconv"
 
+	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,7 +30,7 @@ func (taskmap TaskMap) Do(key string) {
   if entry, ok := taskmap[key]; ok {
     entry.Done = true
     taskmap[key] = entry
-    slog.Info("Completed task %q (%q)\n", key, entry.Task)
+    slog.Info("Completed task","key" ,key, "task", entry.Task)
   }
 }
 
@@ -36,7 +38,7 @@ func (taskmap TaskMap) Undo(key string) {
   if entry, ok := taskmap[key]; ok {
     entry.Done = false
     taskmap[key] = entry
-    slog.Info("Un-completed task %q (%q)\n", key, taskmap[key].Task)
+    slog.Info("Un-completed task","key" ,key, "task", entry.Task)
   }
 }
 
@@ -102,3 +104,34 @@ func (taskmap TaskMap) PrintKeys() {
     fmt.Printf("%s\n", key)
   }
 }
+
+func (taskmap TaskMap) MustHaveTask(key string) {
+  if !taskmap.HasTask(key) {
+    slog.Error("No such task", "key",key)
+    os.Exit(1)
+  }
+}
+
+func (taskmap TaskMap) MustNotHaveTask(key string) {
+  if taskmap.HasTask(key) {
+    slog.Error("Task already exists", "key",key)
+    os.Exit(1)
+  }
+}
+
+func (taskmap TaskMap) Write(path string) {
+  content, err := yaml.Marshal(taskmap)
+  utils.Check(err)
+  err = os.WriteFile(path, content, 0644)
+  utils.Check(err)
+  slog.Info("Wrote to file", "path", path)
+}
+
+func LoadTaskMap(path string) TaskMap {
+  slog.Info("Task file loaded.", "path", path)
+  taskmap := make(TaskMap)
+  content, _ := os.ReadFile(path)
+  ParseYaml(taskmap, content)
+  return taskmap
+}
+

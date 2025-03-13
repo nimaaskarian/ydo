@@ -40,6 +40,7 @@ func (config *Config) ReadFile(path string) {
   if err != nil {
     slog.Error("Error reading config file", "err", err)
   }
+  slog.Info("Config file loaded", "path", path)
 }
 
 func (config *Config) FirstFileAvailable() string {
