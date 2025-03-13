@@ -135,13 +135,7 @@ var (
     }
   },
   Run: func(cmd *cobra.Command, args []string) {
-    if len(keys) > 0 {
-      for _,key := range keys {
-        taskmap[key].PrintMarkdown(taskmap, 1, []string{key}, nil)
-      }
-    } else {
-      taskmap.PrintMarkdown()
-    }
+    taskmap.PrintMarkdown()
   },
 }
 )

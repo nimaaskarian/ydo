@@ -11,8 +11,8 @@ func init() {
 }
 
 var doCmd = &cobra.Command{
-  Use: "do",
-  Short: "set a task as done",
+  Use: "do [tasks]",
+  Short: "set tasks as completed",
   Run: func(cmd *cobra.Command, args []string) {
     NeedKeysCmd.Run(cmd, args)
     if len(keys) > 0 {
