@@ -16,8 +16,7 @@ tree:
     done: true
 webgui:
     task: add webgui
-    deps: [cli]
 ydo:
     task: complete ydo development
-    deps: [webgui, filedep]
+    deps: [webgui, filedep, cli]
     donedeps: true

@@ -1,10 +1,10 @@
-all: test main
+all: coverage.out ydo
 
-DEP_DIRS=core utils
+DEP_DIRS=core utils cmd
 DEP_FILES=$(foreach dir, ${DEP_DIRS}, $(wildcard $(dir)/*.go))
 
-test:
+coverage.out: ${DEP_FILES} main.go
 	go test ./... -coverprofile=coverage.out
 
-main: *
-	go build main.go
+ydo: ${DEP_FILES} main.go
+	go build
