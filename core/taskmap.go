@@ -83,12 +83,11 @@ func (taskmap TaskMap) PrintMarkdown() {
     return depths[keys[i]] > depths[keys[j]]
   })
 
-  var seen_keys []string
-  var seen_in_deps []string
+  seen_keys := make([]string, 0, len(taskmap))
   for _,key := range keys {
-    if !slices.Contains(seen_keys, key) && !slices.Contains(seen_in_deps, key) {
+    if !slices.Contains(seen_keys, key) {
       seen_keys = append(seen_keys, key)
-      taskmap[key].PrintMarkdown(taskmap, 1, seen_keys, &seen_in_deps)
+      taskmap[key].PrintMarkdown(taskmap, 1, &seen_keys)
     }
   }
 }

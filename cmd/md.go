@@ -4,33 +4,30 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/nimaaskarian/ydo/core"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-  rootCmd.AddCommand(yamlCmd)
-  yamlCmd.ValidArgsFunction = TaskKeyCompletion
+  rootCmd.AddCommand(mdCmd)
+  mdCmd.ValidArgsFunction = TaskKeyCompletion
 }
 
-var yamlCmd = &cobra.Command{
-  Use: "yaml [tasks (optional)]",
-  Short: "output tasks as yaml",
+var mdCmd = &cobra.Command{
+  Use: "md [tasks (optional)]",
+  Short: "output tasks as markdown (run with no args so it'd output all tasks like `ydo` does)",
   Run: func(cmd *cobra.Command, args []string) {
     NeedKeysCmd.Run(cmd, args)
     if len(keys) == 0 {
-      core.PrintYaml(taskmap)
+      taskmap.PrintMarkdown()
     } else {
-        tmp_map := make(core.TaskMap, len(keys))
         for _, key := range keys {
           task, ok := taskmap[key];
           if !ok {
             slog.Error("No such task", "key", key)
             os.Exit(1)
           }
-          tmp_map[key] = task
+          task.PrintMarkdown(taskmap, 1, &[]string{})
         }
-        core.PrintYaml(tmp_map)
     }
   },
 }
