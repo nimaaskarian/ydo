@@ -3,7 +3,7 @@ package utils
 import (
 	"bufio"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,7 +32,7 @@ func ConfigDir() string {
 }
 
 func LoadTasks(path string) core.TaskMap {
-  log.Printf("File %q loaded\n", path)
+  slog.Info("File loaded.\n", "path", path)
   taskmap := make(core.TaskMap)
   content, _ := os.ReadFile(path)
   core.ParseYaml(taskmap, content)
@@ -47,13 +47,15 @@ func Check(e error) {
 
 func MustHaveTask(taskmap core.TaskMap, key string) {
   if !taskmap.HasTask(key) {
-    log.Fatalf("No such task %q\n",key)
+    slog.Error("No such task", "key",key)
+    os.Exit(1)
   }
 }
 
 func MustNotHaveTask(taskmap core.TaskMap, key string) {
   if taskmap.HasTask(key) {
-    log.Fatalf("Task %q already exists\n",key)
+    slog.Error("Task already exists", "key",key)
+    os.Exit(1)
   }
 }
 
@@ -62,7 +64,7 @@ func WriteTaskmap(taskmap core.TaskMap, path string) {
   Check(err)
   err = os.WriteFile(path, content, 0644)
   Check(err)
-  log.Printf("Wrote to file %q", path)
+  slog.Info("Wrote to file", "path", path)
 }
 
 func ReadYesNo(format string, a ...any) bool {
@@ -71,7 +73,8 @@ func ReadYesNo(format string, a ...any) bool {
     fmt.Printf(format, a...)
     line, err := reader.ReadString('\n')
     if err != nil {
-      log.Fatalln("Error reading input:", err)
+      slog.Error("Error reading input:", "err", err)
+      panic(err)
     }
     lower_line := strings.ToLower(strings.TrimSpace(line))
     if strings.HasPrefix("yes", lower_line) {

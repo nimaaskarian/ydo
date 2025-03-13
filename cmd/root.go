@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,25 +31,38 @@ func TaskKeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]
 type Config struct  {
   // files to look for if --file option is not present
   Files []string `yaml:",omitempty"`
+  LogLevel string `yaml:",omitempty"`
 }
+
 func (config *Config) ReadFile(path string) {
   content, _ := os.ReadFile(path)
   err := yaml.Unmarshal([]byte(content), config)
   if err != nil {
-    log.Fatalf("%v\n", err)
-  }
-  if len(config.Files) == 0 {
-    config.Files = []string{filepath.Join(config_dir, "tasks.yaml")}
+    slog.Error("Error reading config file", "err", err)
   }
 }
+
 func (config *Config) FirstFileAvailable() string {
   for _, file := range config.Files {
     if _, err := os.Stat(file); err == nil {
       return file
     }
   }
-  log.Fatal("No file in config:files is available.")
-  return ""
+  slog.Warn("No tasks file available. Falling back to default")
+  return filepath.Join(config_dir, "tasks.yaml")
+}
+
+func (config *Config) SlogLevel() slog.Level {
+  switch config.LogLevel {
+    case "debug":
+    return slog.LevelDebug
+    case "warn":
+    return slog.LevelWarn
+    case "info":
+    return slog.LevelInfo
+    default:
+    return slog.LevelError
+  }
 }
 
 var (
@@ -69,8 +82,11 @@ var (
   PersistentPreRun: func(cmd *cobra.Command, args []string) {
     config = Config{};
     config.ReadFile(config_path)
+    loglevel := config.SlogLevel()
+    slog.SetLogLoggerLevel(loglevel)
+    slog.Info("Log level set", "loglevel", loglevel)
     if tasks_path == "" {
-        tasks_path = config.FirstFileAvailable()
+      tasks_path = config.FirstFileAvailable()
     }
     taskmap = utils.LoadTasks(tasks_path)
     if taskmap == nil {

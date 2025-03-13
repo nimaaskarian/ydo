@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -26,12 +25,10 @@ var editCmd = &cobra.Command{
       task = taskmap[key].Task
     }
     for _,key := range deps {
-      if _, ok := taskmap[key]; !ok {
-        log.Fatalf("No such task %q\n",key)
-      }
+      utils.MustHaveTask(taskmap, key)
     }
     taskmap[key] = core.Task {Task: task, Deps: deps}
     utils.WriteTaskmap(taskmap, tasks_path)
-    fmt.Printf("Task %q created\n", key)
+    slog.Info("Task created", "key", key)
   },
 }

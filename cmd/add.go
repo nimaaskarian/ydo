@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -28,13 +27,14 @@ var addCmd = &cobra.Command{
     utils.MustNotHaveTask(taskmap, key)
     task := strings.Join(args, " ")
     if task == "" {
-      log.Fatalln("Task can't be empty")
+      slog.Error("Task can't be empty")
+      panic("task can not be empty")
     }
     for _,key := range deps {
       utils.MustHaveTask(taskmap, key)
     }
     taskmap[key] = core.Task {Task: task, Deps: deps}
     utils.WriteTaskmap(taskmap, tasks_path)
-    fmt.Printf("Task %q created\n", key)
+    slog.Info("Task created", "key", key)
   },
 }

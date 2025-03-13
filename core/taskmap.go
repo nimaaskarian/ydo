@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"slices"
 	"sort"
 	"strconv"
@@ -13,7 +13,7 @@ import (
 func ParseYaml(obj any, input []byte) {
   err := yaml.Unmarshal([]byte(input), obj)
   if err != nil {
-    log.Fatalf("%v\n", err)
+    slog.Error("Failed unmarshaling yaml", "err", err)
   }
 }
 
@@ -28,7 +28,7 @@ func (taskmap TaskMap) Do(key string) {
   if entry, ok := taskmap[key]; ok {
     entry.Done = true
     taskmap[key] = entry
-    log.Printf("Completed task %q (%q)\n", key, entry.Task)
+    slog.Info("Completed task %q (%q)\n", key, entry.Task)
   }
 }
 
@@ -36,14 +36,14 @@ func (taskmap TaskMap) Undo(key string) {
   if entry, ok := taskmap[key]; ok {
     entry.Done = false
     taskmap[key] = entry
-    log.Printf("Un-completed task %q (%q)\n", key, taskmap[key].Task)
+    slog.Info("Un-completed task %q (%q)\n", key, taskmap[key].Task)
   }
 }
 
 func PrintYaml(obj any) {
   s,err:=yaml.Marshal(obj)
   if err != nil {
-    log.Fatalf("%v\n", err)
+    slog.Error("Failed marshaling yaml", "err", err)
   }
   fmt.Printf("%s", s)
 }
