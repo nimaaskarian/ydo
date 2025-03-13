@@ -4,10 +4,13 @@ cli:
     done: true
 filedep:
     task: add file dependencies
+    deps: [relative]
 markdown:
     task: fix markdown output for circular dependencies
     deps: [tree]
     done: true
+relative:
+    task: relative path todos
 tree:
     task: read tree depth to see which one to start with
     done: true
