@@ -4,8 +4,10 @@ cli:
 markdown:
     task: fix markdown output for circular dependencies
     deps: [tree]
+    done: true
 tree:
     task: read tree depth to see which one to start with
+    done: true
 webgui:
     task: add webgui
     deps: [cli]

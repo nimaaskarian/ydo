@@ -1,11 +1,13 @@
 package core
 
 import (
-  "gopkg.in/yaml.v3"
-  "log"
-  "fmt"
-  "strconv"
+	"fmt"
+	"log"
 	"slices"
+	"sort"
+	"strconv"
+
+	"gopkg.in/yaml.v3"
 )
 
 func ParseYaml(obj any, input []byte) {
@@ -46,13 +48,39 @@ func PrintYaml(obj any) {
   fmt.Printf("%s", s)
 }
 
+func (taskmap TaskMap) Depth(key string, visited []string) int {
+  depth := 0
+  depth += len(taskmap[key].Deps)
+  for _,key := range taskmap[key].Deps {
+    if slices.Contains(visited, key) {
+      continue
+    }
+    visited = append(visited, key)
+    depth += taskmap.Depth(key, visited)
+  }
+  return depth
+}
 func (taskmap TaskMap) PrintMarkdown() {
+  depths := make(map[string]int, len(taskmap))
+  keys := make([]string, 0 ,len(taskmap))
+  for key := range taskmap {
+    depths[key] = taskmap.Depth(key, []string{})
+    keys = append(keys, key)
+    if depths[key] == len(taskmap) {
+      keys = []string{key}
+      break
+    }
+  }
+  sort.SliceStable(keys, func(i, j int) bool {
+    return depths[keys[i]] > depths[keys[j]]
+  })
+
   var seen_keys []string
   var seen_in_deps []string
-  for key,task := range taskmap {
+  for _,key := range keys {
     if !slices.Contains(seen_keys, key) && !slices.Contains(seen_in_deps, key) {
       seen_keys = append(seen_keys, key)
-      task.PrintMarkdown(taskmap, 1, seen_keys, &seen_in_deps)
+      taskmap[key].PrintMarkdown(taskmap, 1, seen_keys, &seen_in_deps)
     }
   }
 }
