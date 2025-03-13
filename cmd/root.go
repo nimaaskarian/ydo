@@ -40,7 +40,6 @@ func (config *Config) ReadFile(path string) {
   if err != nil {
     slog.Error("Error reading config file", "err", err)
   }
-  slog.Info("Config file loaded", "path", path)
 }
 
 func (config *Config) FirstFileAvailable() string {
@@ -85,6 +84,7 @@ var (
     config.ReadFile(config_path)
     loglevel := config.SlogLevel()
     slog.SetLogLoggerLevel(loglevel)
+    slog.Info("Config file loaded", "path", config_path)
     slog.Info("Log level set", "loglevel", loglevel)
     if tasks_path == "" {
       tasks_path = config.FirstFileAvailable()
