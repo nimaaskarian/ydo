@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log/slog"
+  "log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -83,13 +84,14 @@ func (config *Config) ReadFile(path string) {
 }
 
 func (config *Config) FirstFileAvailable() string {
-  for _, file := range config.Files {
+  for _, file := range append(config.Files, filepath.Join(config_dir, "tasks.yaml")) {
     if _, err := os.Stat(file); err == nil {
       return file
     }
   }
-  slog.Warn("No tasks file available. Falling back to default")
-  return filepath.Join(config_dir, "tasks.yaml")
+  slog.Error("No tasks file available.")
+  os.Exit(1)
+  return ""
 }
 
 func (config *Config) SlogLevel() slog.Level {
@@ -124,6 +126,7 @@ var (
     config.ReadFile(config_path)
     loglevel := config.SlogLevel()
     slog.SetLogLoggerLevel(loglevel)
+    log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
     slog.Info("Config file loaded", "path", config_path)
     slog.Info("Log level set", "loglevel", loglevel)
     if tasks_path == "" {

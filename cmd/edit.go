@@ -20,6 +20,10 @@ var editCmd = &cobra.Command{
   Use: "edit [key] [new task message (optional)]",
   Short: "edit a task",
   Run: func(cmd *cobra.Command, args []string) {
+    if len(args) == 0 {
+      slog.Error("No key to edit")
+      return
+    }
     key := args[0]
     task := taskmap[key]
     if new_task := strings.Join(args[1:], " "); new_task != "" {

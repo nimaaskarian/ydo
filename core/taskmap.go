@@ -32,7 +32,7 @@ func (taskmap TaskMap) Do(key string) {
     taskmap[key] = entry
     slog.Info("Completed task","key" ,key, "task", entry.Task)
   } else {
-    slog.Error("No such task", "key",key)
+    slog.Error("No such task")
     os.Exit(1)
   }
 }
@@ -43,7 +43,7 @@ func (taskmap TaskMap) Undo(key string) {
     taskmap[key] = entry
     slog.Info("Un-completed task","key" ,key, "task", entry.Task)
   } else {
-    slog.Error("No such task", "key",key)
+    slog.Error("No such task")
     os.Exit(1)
   }
 }
@@ -69,6 +69,10 @@ func (taskmap TaskMap) Depth(key string, visited []string) int {
   return depth
 }
 func (taskmap TaskMap) PrintMarkdown() {
+  if len(taskmap) == 0 {
+    fmt.Println("No tasks found")
+    return
+  }
   depths := make(map[string]int, len(taskmap))
   keys := make([]string, 0 ,len(taskmap))
   for key := range taskmap {
@@ -112,7 +116,7 @@ func (taskmap TaskMap) PrintKeys() {
 
 func (taskmap TaskMap) MustHaveTask(key string) {
   if !taskmap.HasTask(key) {
-    slog.Error("No such task", "key",key)
+    slog.Error("No such task")
     os.Exit(1)
   }
 }
@@ -137,5 +141,10 @@ func LoadTaskMap(path string) TaskMap {
   taskmap := make(TaskMap)
   content, _ := os.ReadFile(path)
   ParseYaml(taskmap, content)
+  for _, task := range taskmap {
+    if task.FileDep != "" {
+      task.fileDepMap = LoadTaskMap(task.FileDep)
+    }
+  }
   return taskmap
 }
