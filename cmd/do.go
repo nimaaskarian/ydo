@@ -25,9 +25,8 @@ var doCmd = &cobra.Command{
         taskmap.Do(key)
       }
     } else {
-      utils.MustHaveTask(taskmap, key)
       taskmap.Do(key)
     }
-    utils.WriteTaskmap(taskmap, tasks_path)
+    taskmap.Write(tasks_path)
   },
 }

@@ -14,7 +14,7 @@ import (
 )
 
 func TaskKeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  taskmap = utils.LoadTasks(tasks_path)
+  taskmap = core.LoadTaskMap(tasks_path)
 
   keys := make([]string, len(taskmap))
 
@@ -89,7 +89,7 @@ var (
     if tasks_path == "" {
       tasks_path = config.FirstFileAvailable()
     }
-    taskmap = utils.LoadTasks(tasks_path)
+    taskmap = core.LoadTaskMap(tasks_path)
     if taskmap == nil {
       taskmap = make(core.TaskMap)
     }

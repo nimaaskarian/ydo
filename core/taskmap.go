@@ -31,6 +31,9 @@ func (taskmap TaskMap) Do(key string) {
     entry.Done = true
     taskmap[key] = entry
     slog.Info("Completed task","key" ,key, "task", entry.Task)
+  } else {
+    slog.Error("No such task", "key",key)
+    os.Exit(1)
   }
 }
 
@@ -39,6 +42,9 @@ func (taskmap TaskMap) Undo(key string) {
     entry.Done = false
     taskmap[key] = entry
     slog.Info("Un-completed task","key" ,key, "task", entry.Task)
+  } else {
+    slog.Error("No such task", "key",key)
+    os.Exit(1)
   }
 }
 
@@ -134,4 +140,3 @@ func LoadTaskMap(path string) TaskMap {
   ParseYaml(taskmap, content)
   return taskmap
 }
-

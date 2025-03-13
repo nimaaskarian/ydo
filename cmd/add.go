@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
-	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -24,17 +24,17 @@ var addCmd = &cobra.Command{
     if key == "" {
       key = taskmap.NextKey()
     }
-    utils.MustNotHaveTask(taskmap, key)
     task := strings.Join(args, " ")
     if task == "" {
       slog.Error("Task can't be empty")
-      panic("task can not be empty")
+      os.Exit(1)
     }
+    taskmap.MustNotHaveTask(key)
     for _,key := range deps {
-      utils.MustHaveTask(taskmap, key)
+      taskmap.MustHaveTask(key)
     }
     taskmap[key] = core.Task {Task: task, Deps: deps}
-    utils.WriteTaskmap(taskmap, tasks_path)
-    slog.Info("Task created", "key", key)
+    slog.Info("Task added", "task", taskmap[key])
+    taskmap.Write(tasks_path)
   },
 }
