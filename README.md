@@ -10,7 +10,7 @@ is a fast, frictionless, easy to use, simple and featureful commandline utility 
 - no database, easy to sync (using syncthing and what not)
 - graph dependencies
 
-# what is has compared to [c3](https://github.com/nimaaskarian) 
+# what is has compared to [c3](https://github.com/nimaaskarian/c3) 
 - less speed :<
 - no built in tui :<
 - human readable dependency tree (and a more human readable file format)
