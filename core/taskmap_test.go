@@ -49,6 +49,18 @@ func TestDo(t *testing.T) {
   assert.True(t, taskmap["t3"].IsDone(taskmap))
 }
 
+func TestUndo(t *testing.T) {
+  taskmap := make(TaskMap)
+  ParseYaml(taskmap, []byte(GROCERIES))
+  taskmap.Do("t2")
+  assert.True(t, taskmap["t2"].IsDone(taskmap))
+  taskmap.Undo("t2")
+  taskmap.Do("t3")
+  assert.True(t, taskmap["t3"].IsDone(taskmap))
+  taskmap.Undo("t3")
+  assert.False(t, taskmap["t3"].IsDone(taskmap))
+}
+
 func TestDepIsDone(t *testing.T) {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES))
@@ -58,6 +70,15 @@ func TestDepIsDone(t *testing.T) {
   taskmap.Do("t3")
   assert.True(t, taskmap["t1"].IsDone(taskmap))
 }
+
+func TestDepth(t *testing.T) {
+  taskmap := make(TaskMap)
+  ParseYaml(taskmap, []byte(GROCERIES))
+  assert.Equal(t, taskmap.Depth("t1", []string{}), 2)
+  assert.Equal(t, taskmap.Depth("t2", []string{}), 0)
+  assert.Equal(t, taskmap.Depth("t3", []string{}), 0)
+}
+
 
 func ExamplePrintYaml() {
   taskmap := make(TaskMap)
@@ -107,4 +128,15 @@ func ExampleTaskMap_PrintKeys() {
   // homework
   // study
   // project
+}
+
+func TestHasTask(t *testing.T) {
+  taskmap := make(TaskMap)
+  ParseYaml(taskmap, []byte(GROCERIES))
+  assert.False(t, taskmap.HasTask("homework"))
+  assert.False(t, taskmap.HasTask("project"))
+  assert.False(t, taskmap.HasTask(""))
+  assert.True(t, taskmap.HasTask("t1"))
+  assert.True(t, taskmap.HasTask("t2"))
+  assert.True(t, taskmap.HasTask("t3"))
 }

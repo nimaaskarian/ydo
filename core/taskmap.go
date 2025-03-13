@@ -72,7 +72,7 @@ func (taskmap TaskMap) PrintMarkdown() {
   depths := make(map[string]int, len(taskmap))
   keys := make([]string, 0 ,len(taskmap))
   for key := range taskmap {
-    depths[key] = taskmap.Depth(key, []string{})
+    depths[key] = taskmap.Depth(key, make([]string, 0, len(taskmap)))
     keys = append(keys, key)
     if depths[key] == len(taskmap) {
       keys = []string{key}
