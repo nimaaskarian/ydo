@@ -62,7 +62,7 @@ func WriteTaskmap(taskmap core.TaskMap, path string) {
   Check(err)
   err = os.WriteFile(path, content, 0644)
   Check(err)
-  log.Println("Wrote to file")
+  log.Printf("Wrote to file %q", path)
 }
 
 func ReadYesNo(format string, a ...any) bool {

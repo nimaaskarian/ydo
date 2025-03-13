@@ -1,6 +1,7 @@
 cli:
     task: complete frictionless cli
     deps: [markdown]
+    done: true
 markdown:
     task: fix markdown output for circular dependencies
     deps: [tree]

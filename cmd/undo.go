@@ -28,6 +28,6 @@ var undoCmd = &cobra.Command{
       taskmap.Undo(key)
       utils.MustHaveTask(taskmap, key)
     }
-    utils.WriteTaskmap(taskmap, path)
+    utils.WriteTaskmap(taskmap, tasks_path)
   },
 }

@@ -31,7 +31,7 @@ var editCmd = &cobra.Command{
       }
     }
     taskmap[key] = core.Task {Task: task, Deps: deps}
-    utils.WriteTaskmap(taskmap, path)
+    utils.WriteTaskmap(taskmap, tasks_path)
     fmt.Printf("Task %q created\n", key)
   },
 }
