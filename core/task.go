@@ -3,13 +3,15 @@ package core
 import (
 	"fmt"
 	"slices"
+  "time"
 )
 
 type Task struct {
-  Task string     `yaml:",omitempty"`
-  Deps []string   `yaml:",omitempty,flow"`
-  Done bool       `yaml:",omitempty"`
-  AutoComplete bool   `yaml:"auto-complete,omitempty"`
+  Task string           `yaml:",omitempty"`
+  Deps []string         `yaml:",omitempty,flow"`
+  Done bool             `yaml:",omitempty"`
+  AutoComplete bool     `yaml:"auto-complete,omitempty"`
+  CreatedAt time.Time   `yaml:"created-at,omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap) bool {

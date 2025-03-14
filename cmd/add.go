@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+  "time"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/spf13/cobra"
@@ -52,7 +53,7 @@ var addCmd = &cobra.Command{
         slog.Error("No such task", "key", dep_key)
       }
     }
-    taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete}
+    taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now() }
     fmt.Printf("Task %q added\n", key)
     slog.Info("Task added", "task", taskmap[key])
     taskmap.Write(tasks_path)
