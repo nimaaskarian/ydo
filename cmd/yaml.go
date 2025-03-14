@@ -14,6 +14,7 @@ func init() {
 }
 
 var yamlCmd = &cobra.Command{
+  Aliases: []string{"y"},
   Use: "yaml [tasks (optional)]",
   Short: "output tasks as yaml",
   Run: func(cmd *cobra.Command, args []string) {

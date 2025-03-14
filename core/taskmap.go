@@ -21,6 +21,16 @@ func ParseYaml(obj any, input []byte) {
 
 type TaskMap map[string]Task;
 
+func (taskmap TaskMap) WipeDependenciesToKey(key string) {
+    for each_key, task := range taskmap {
+    index := slices.Index(task.Deps, key)
+    if index != -1 {
+      task.Deps = slices.Delete(task.Deps, index, index+1)
+      taskmap[each_key] = task
+    }
+  }
+}
+
 func (taskmap TaskMap) HasTask(key string) bool {
   _, ok := taskmap[key]
   return ok

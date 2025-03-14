@@ -11,6 +11,7 @@ func init() {
 }
 
 var undoCmd = &cobra.Command{
+  Aliases: []string{"u"},
   Use: "undo [keys]",
   Short: "set tasks as not completed",
   Run: func(cmd *cobra.Command, args []string) {

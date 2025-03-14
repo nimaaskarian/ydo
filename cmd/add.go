@@ -30,6 +30,7 @@ func init() {
 }
 
 var addCmd = &cobra.Command{
+  Aliases: []string{"a"},
   Use: "add",
   Short: "add a task",
   Run: func(cmd *cobra.Command, args []string) {

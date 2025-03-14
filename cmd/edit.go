@@ -32,6 +32,7 @@ func init() {
 }
 
 var editCmd = &cobra.Command{
+  Aliases: []string{"e"},
   Use: "edit [key] [new task message (optional)]",
   Short: "edit a task",
   Run: func(cmd *cobra.Command, args []string) {
@@ -52,16 +53,7 @@ var editCmd = &cobra.Command{
       task.Deps = make([]string, 0, len(deps))
     }
     if remove_dep_to {
-      for dep_key, task := range taskmap {
-        index := slices.IndexFunc(task.Deps, func(dep string)bool {
-          return dep == key
-        })
-        if index == -1 {
-          continue
-        }
-        task.Deps = slices.Delete(task.Deps, index, index+1)
-        taskmap[dep_key] = task
-      }
+      taskmap.WipeDependenciesToKey(key)
     }
     for _, dep_key := range dep_to {
       if task, ok := taskmap[dep_key]; ok {
@@ -73,14 +65,11 @@ var editCmd = &cobra.Command{
     }
     if new_key != "" {
       for dep_key, task := range taskmap {
-        index := slices.IndexFunc(task.Deps, func(dep string)bool {
-          return dep == key
-        })
-        if index == -1 {
-          continue
+        index := slices.Index(task.Deps, key)
+        if index != -1 {
+          task.Deps = slices.Replace(task.Deps, index, index+1, new_key)
+          taskmap[dep_key] = task
         }
-        task.Deps = slices.Replace(task.Deps, index, index+1, new_key)
-        taskmap[dep_key] = task
       }
       delete(taskmap, key)
       key = new_key
