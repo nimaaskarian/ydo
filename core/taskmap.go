@@ -90,8 +90,7 @@ func (taskmap TaskMap) PrintMarkdown() {
   seen_keys := make([]string, 0, len(taskmap))
   for _,key := range keys {
     if !slices.Contains(seen_keys, key) {
-      seen_keys = append(seen_keys, key)
-      taskmap[key].PrintMarkdown(taskmap, 1, &seen_keys)
+      taskmap[key].PrintMarkdown(taskmap, 1, &seen_keys, key)
     }
   }
 }

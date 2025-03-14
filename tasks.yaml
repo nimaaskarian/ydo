@@ -1,17 +1,36 @@
+better-md:
+    task: improve markdown output
+    done: true
 cli:
     task: complete frictionless cli
     deps: [markdown, fix-minor]
     done: true
     auto-complete: true
+core:
+    task: complete core
+    deps: [due, date-added, file-dep]
+    auto-complete: true
+date-added:
+    task: add task "date added"
+due:
+    task: add task due
+file-dep:
+    task: add task file dependency
 filedep:
     task: add file dependencies
     deps: [relative]
 fix-minor:
     task: fix minor issues and inconveniences
 markdown:
-    task: fix markdown output for circular dependencies
-    deps: [tree]
+    task: fix markdown output
+    deps: [tree, markdown-key, better-md, md-circular]
     done: true
+    auto-complete: true
+markdown-key:
+    task: add key to markdown output
+    done: true
+md-circular:
+    task: improve fix markdown circular output
 relative:
     task: relative path todos
 tree:
@@ -21,5 +40,5 @@ webgui:
     task: add webgui
 ydo:
     task: complete ydo development
-    deps: [webgui, filedep, cli]
+    deps: [webgui, filedep, cli, core]
     auto-complete: true

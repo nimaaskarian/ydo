@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// edit flags
 var (
 new_key string
 remove_deps bool

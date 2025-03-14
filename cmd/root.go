@@ -114,7 +114,7 @@ func (config *Config) SlogLevel() slog.Level {
 }
 
 var (
-  // flags
+  // global flags
   keys []string
   tasks_path string
   config_path string

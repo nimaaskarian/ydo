@@ -10,10 +10,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var deps []string
-var dep_to []string
-var key string
-var auto_complete bool
+// add flags
+var (
+deps []string
+dep_to []string
+key string
+auto_complete bool
+)
+
 func init() {
   rootCmd.AddCommand(addCmd)
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")

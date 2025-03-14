@@ -24,14 +24,17 @@ func (task Task) IsDone(taskmap TaskMap) bool {
   return task.Done
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, key string) {
   var inner string;
   if task.IsDone(taskmap) {
     inner = "x"
   } else {
     inner = " "
   }
-  fmt.Printf("- [%s] %s\n", inner,task.Task)
+  if key != "" {
+    key = key + ": "
+  }
+  fmt.Printf("- [%s] %s%s\n", inner, key, task.Task)
   for _, key := range task.Deps {
     if seen_keys != nil && slices.Contains(*seen_keys, key) {
       continue
@@ -42,6 +45,6 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string) 
     if seen_keys != nil {
       *seen_keys = append(*seen_keys, key)
     }
-    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys)
+    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key)
   }
 }
