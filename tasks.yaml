@@ -23,7 +23,7 @@ fix-minor:
     task: fix minor issues and inconveniences
 markdown:
     task: fix markdown output
-    deps: [tree, markdown-key, better-md, md-circular]
+    deps: [tree, markdown-key, better-md, md-circular, sort-date]
     done: true
     auto-complete: true
 markdown-key:
@@ -31,8 +31,12 @@ markdown-key:
     done: true
 md-circular:
     task: improve fix markdown circular output
+    done: true
 relative:
     task: relative path todos
+sort-date:
+    task: sort markdown based on date added instead of depth
+    deps: [date-added]
 tree:
     task: read tree depth to see which one to start with
     done: true

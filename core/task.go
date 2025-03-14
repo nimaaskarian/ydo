@@ -35,10 +35,10 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
     key = key + ": "
   }
   fmt.Printf("- [%s] %s%s\n", inner, key, task.Task)
+  if seen_keys != nil && slices.Contains(*seen_keys, key) {
+    return
+  }
   for _, key := range task.Deps {
-    if seen_keys != nil && slices.Contains(*seen_keys, key) {
-      continue
-    }
     for range depth {
       fmt.Print("   ")
     }
