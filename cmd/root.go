@@ -144,7 +144,11 @@ var (
     }
   },
   Run: func(cmd *cobra.Command, args []string) {
-    taskmap.PrintMarkdown(nil)
+    if len(taskmap) >= 10 {
+      taskmap.PrintMarkdown(core.Task.IsDone)
+    } else {
+      taskmap.PrintMarkdown(nil)
+    }
   },
 }
 )
