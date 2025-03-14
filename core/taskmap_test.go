@@ -71,15 +71,6 @@ func TestDepIsDone(t *testing.T) {
   assert.True(t, taskmap["t1"].IsDone(taskmap))
 }
 
-func TestDepth(t *testing.T) {
-  taskmap := make(TaskMap)
-  ParseYaml(taskmap, []byte(GROCERIES))
-  assert.Equal(t, taskmap.Depth("t1", []string{}), 2)
-  assert.Equal(t, taskmap.Depth("t2", []string{}), 0)
-  assert.Equal(t, taskmap.Depth("t3", []string{}), 0)
-}
-
-
 func ExamplePrintYaml() {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES))

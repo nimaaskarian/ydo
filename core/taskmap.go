@@ -66,35 +66,17 @@ func PrintYaml(obj any) {
   fmt.Printf("%s", s)
 }
 
-func (taskmap TaskMap) Depth(key string, visited []string) int {
-  depth := 0
-  depth += len(taskmap[key].Deps)
-  for _,key := range taskmap[key].Deps {
-    if slices.Contains(visited, key) {
-      continue
-    }
-    visited = append(visited, key)
-    depth += taskmap.Depth(key, visited)
-  }
-  return depth
-}
 func (taskmap TaskMap) PrintMarkdown() {
   if len(taskmap) == 0 {
     fmt.Println("No tasks found")
     return
   }
-  depths := make(map[string]int, len(taskmap))
   keys := make([]string, 0 ,len(taskmap))
   for key := range taskmap {
-    depths[key] = taskmap.Depth(key, make([]string, 0, len(taskmap)))
     keys = append(keys, key)
-    if depths[key] == len(taskmap) {
-      keys = []string{key}
-      break
-    }
   }
   sort.SliceStable(keys, func(i, j int) bool {
-    return depths[keys[i]] > depths[keys[j]]
+    return taskmap[keys[i]].CreatedAt.Before(taskmap[keys[j]].CreatedAt)
   })
 
   seen_keys := make([]string, 0, len(taskmap))

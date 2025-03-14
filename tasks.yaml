@@ -1,48 +1,58 @@
 better-md:
     task: improve markdown output
     done: true
+    created-at: 2025-03-14T17:04:28.346380724+03:30
 cli:
     task: complete frictionless cli
-    deps: [markdown, fix-minor]
-    done: true
+    deps: [markdown, polish]
     auto-complete: true
+    created-at: 2025-03-14T16:29:10.768608377+03:30
 core:
     task: complete core
-    deps: [due, date-added, file-dep]
+    deps: [date-added, due, filedep]
     auto-complete: true
+    created-at: 2025-03-14T17:08:45.437914813+03:30
 date-added:
     task: add task "date added"
+    done: true
+    created-at: 2025-03-14T17:10:43.529415478+03:30
 due:
-    task: add task due
-file-dep:
-    task: add task file dependency
+    task: add task due date
+    created-at: 2025-03-14T17:11:19.659795653+03:30
 filedep:
     task: add file dependencies
     deps: [relative]
-fix-minor:
-    task: fix minor issues and inconveniences
+    created-at: 2025-03-14T16:30:28.46166198+03:30
 markdown:
     task: fix markdown output
-    deps: [tree, markdown-key, better-md, md-circular, sort-date]
+    deps: [sort-date, markdown-key, better-md, md-circular]
     done: true
     auto-complete: true
+    created-at: 2025-03-14T17:02:13.776832216+03:30
 markdown-key:
     task: add key to markdown output
     done: true
+    created-at: 2025-03-14T17:03:58.705663369+03:30
 md-circular:
     task: improve fix markdown circular output
     done: true
+    created-at: 2025-03-14T17:04:50.975357064+03:30
+polish:
+    task: fix minor issues and inconveniences
+    created-at: 2025-03-14T17:05:36.369742212+03:30
 relative:
     task: relative path todos
+    created-at: 2025-03-14T16:32:27.329519062+03:30
 sort-date:
-    task: sort markdown based on date added instead of depth
+    task: sort markdown based on date added instead of path
     deps: [date-added]
-tree:
-    task: read tree depth to see which one to start with
     done: true
+    created-at: 2025-03-14T17:03:28.501359453+03:30
 webgui:
     task: add webgui
+    created-at: 2025-03-14T16:28:47.101184579+03:30
 ydo:
     task: complete ydo development
-    deps: [webgui, filedep, cli, core]
+    deps: [webgui, cli, filedep, core]
     auto-complete: true
+    created-at: 2025-03-14T16:28:20.755500724+03:30
