@@ -82,7 +82,7 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
   seen_keys := make([]string, 0, len(taskmap))
   for _,key := range keys {
     if !slices.Contains(seen_keys, key) {
-      taskmap[key].PrintMarkdown(taskmap, 1, &seen_keys, key, filter)
+      taskmap[key].PrintMarkdown(taskmap, 0, &seen_keys, key, filter)
     }
   }
 }

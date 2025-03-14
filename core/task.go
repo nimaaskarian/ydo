@@ -30,6 +30,9 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
   if filter != nil && filter(taskmap[key], taskmap){
     return
   }
+  for range depth {
+    fmt.Print("   ")
+  }
   var inner string;
   if task.IsDone(taskmap) {
     inner = "x"
@@ -48,9 +51,6 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
     *seen_keys = append(*seen_keys, key)
   }
   for _, key := range task.Deps {
-    for range depth {
-      fmt.Print("   ")
-    }
     taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, filter)
   }
 }
