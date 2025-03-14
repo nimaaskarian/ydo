@@ -23,7 +23,9 @@ func ConfigDir() string {
       base = filepath.Join(os.Getenv("HOME"), ".config")
     }
   }
-  return filepath.Join(base, "ydo")
+  dir := filepath.Join(base, "ydo")
+  os.Mkdir(dir, 0755)
+  return dir
 }
 
 func Check(e error) {
