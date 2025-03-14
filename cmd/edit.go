@@ -2,20 +2,28 @@ package cmd
 
 import (
 	"log/slog"
+	"os"
 	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
 
-var new_key string
-var remove_deps, remove_dep_to bool
+var (
+new_key string
+remove_deps bool
+remove_dep_to bool
+no_auto_complete bool
+)
+
 func init() {
   rootCmd.AddCommand(editCmd)
   editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
   editCmd.Flags().StringArrayVarP(&dep_to, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
   editCmd.Flags().BoolVarP(&remove_deps, "remove-deps", "r", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
   editCmd.Flags().BoolVarP(&remove_dep_to, "remove-dep-to", "R", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
+  editCmd.Flags().BoolVarP(&auto_complete, "--auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
+  editCmd.Flags().BoolVarP(&no_auto_complete, "--no-auto-complete", "A", false, "disable auto complete for the task (done when deps are done)")
   editCmd.Flags().StringVarP(&new_key, "new-key", "k", "", "new key to the task")
   editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
   editCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletion)
@@ -75,6 +83,16 @@ var editCmd = &cobra.Command{
       }
       delete(taskmap, key)
       key = new_key
+    }
+    if auto_complete && no_auto_complete {
+      slog.Error("Can't use both auto-complete and no-auto-complete flags at the same time")
+      os.Exit(1)
+    }
+    if auto_complete {
+      task.AutoComplete = true
+    }
+    if no_auto_complete {
+      task.AutoComplete = false
     }
     task.Deps = append(task.Deps, deps...)
     taskmap[key] = task

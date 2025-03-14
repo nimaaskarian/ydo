@@ -9,7 +9,7 @@ import (
 const GROCERIES = `t1:
   task: buy groceries
   deps: [t3, t2]
-  donedeps: true
+  auto-complete: true
 t2:
   task: buy milk
 t3:
@@ -91,7 +91,7 @@ func ExamplePrintYaml() {
   // t1:
   //     task: buy groceries
   //     deps: [t3, t2]
-  //     donedeps: true
+  //     auto-complete: true
   // t2:
   //     task: buy milk
   // t3:

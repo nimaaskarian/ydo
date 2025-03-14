@@ -9,11 +9,11 @@ type Task struct {
   Task string     `yaml:",omitempty"`
   Deps []string   `yaml:",omitempty,flow"`
   Done bool       `yaml:",omitempty"`
-  DoneDeps bool   `yaml:",omitempty"`
+  AutoComplete bool   `yaml:"auto-complete,omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap) bool {
-  if task.DoneDeps {
+  if task.AutoComplete {
     for _,key := range task.Deps {
       if !taskmap[key].IsDone(taskmap) {
         return false

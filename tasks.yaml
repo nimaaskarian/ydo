@@ -2,6 +2,7 @@ cli:
     task: complete frictionless cli
     deps: [markdown, fix-minor]
     done: true
+    auto-complete: true
 filedep:
     task: add file dependencies
     deps: [relative]
@@ -21,4 +22,4 @@ webgui:
 ydo:
     task: complete ydo development
     deps: [webgui, filedep, cli]
-    donedeps: true
+    auto-complete: true
