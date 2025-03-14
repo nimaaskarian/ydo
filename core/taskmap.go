@@ -141,10 +141,5 @@ func LoadTaskMap(path string) TaskMap {
   taskmap := make(TaskMap)
   content, _ := os.ReadFile(path)
   ParseYaml(taskmap, content)
-  for _, task := range taskmap {
-    if task.FileDep != "" {
-      task.fileDepMap = LoadTaskMap(task.FileDep)
-    }
-  }
   return taskmap
 }

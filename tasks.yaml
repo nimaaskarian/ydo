@@ -1,10 +1,12 @@
 cli:
     task: complete frictionless cli
-    deps: [markdown]
+    deps: [markdown, fix-minor]
     done: true
 filedep:
     task: add file dependencies
     deps: [relative]
+fix-minor:
+    task: fix minor issues and inconveniences
 markdown:
     task: fix markdown output for circular dependencies
     deps: [tree]

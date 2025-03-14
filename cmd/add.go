@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -10,12 +11,15 @@ import (
 )
 
 var deps []string
+var dep_to []string
 var key string
 func init() {
   rootCmd.AddCommand(addCmd)
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
+  addCmd.Flags().StringArrayVarP(&dep_to, "dep-to", "D", []string{}, "task keys for this task to be dependent to")
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
+  addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletion)
 }
 
 var addCmd = &cobra.Command{
@@ -34,7 +38,16 @@ var addCmd = &cobra.Command{
     for _,key := range deps {
       taskmap.MustHaveTask(key)
     }
+    for _, dep_key := range dep_to {
+      if task, ok := taskmap[dep_key]; ok {
+        task.Deps = append(task.Deps, key)
+        taskmap[dep_key] = task
+      } else {
+        slog.Error("No such task", "key", dep_key)
+      }
+    }
     taskmap[key] = core.Task {Task: task, Deps: deps}
+    fmt.Printf("Task %q added\n", key)
     slog.Info("Task added", "task", taskmap[key])
     taskmap.Write(tasks_path)
   },
