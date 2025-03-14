@@ -84,12 +84,18 @@ func (config *Config) ReadFile(path string) {
 }
 
 func (config *Config) FirstFileAvailable() string {
-  for _, file := range append(config.Files, filepath.Join(config_dir, "tasks.yaml")) {
+  for _, file := range config.Files {
     if _, err := os.Stat(file); err == nil {
       return file
     }
   }
-  slog.Error("No tasks file available.")
+  if _, err := os.Stat(config_dir); err == nil {
+    path := filepath.Join(config_dir, "tasks.yaml")
+    slog.Info("No tasks file available. Using task file in default path", "path", path)
+    return path
+  }
+  slog.Error("No tasks file available and the default path can't be used")
+  slog.Error("Because config directory doesn't exist and can't be created", "dir", config_dir)
   os.Exit(1)
   return ""
 }
