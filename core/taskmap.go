@@ -66,7 +66,7 @@ func PrintYaml(obj any) {
   fmt.Printf("%s", s)
 }
 
-func (taskmap TaskMap) PrintMarkdown() {
+func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) bool) {
   if len(taskmap) == 0 {
     fmt.Println("No tasks found")
     return
@@ -82,7 +82,7 @@ func (taskmap TaskMap) PrintMarkdown() {
   seen_keys := make([]string, 0, len(taskmap))
   for _,key := range keys {
     if !slices.Contains(seen_keys, key) {
-      taskmap[key].PrintMarkdown(taskmap, 1, &seen_keys, key)
+      taskmap[key].PrintMarkdown(taskmap, 1, &seen_keys, key, filter)
     }
   }
 }

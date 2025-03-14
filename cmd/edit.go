@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -85,8 +87,12 @@ var editCmd = &cobra.Command{
       task.AutoComplete = false
     }
     task.Deps = append(task.Deps, deps...)
-    taskmap[key] = task
-    slog.Info("Task edited", "task", taskmap[key])
-    taskmap.Write(tasks_path)
+    if reflect.DeepEqual(taskmap[key], task) {
+      fmt.Println("Task not edited")
+    } else {
+      taskmap[key] = task
+      slog.Info("Task edited", "task", task)
+      taskmap.Write(tasks_path)
+    }
   },
 }

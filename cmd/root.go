@@ -144,7 +144,7 @@ var (
     }
   },
   Run: func(cmd *cobra.Command, args []string) {
-    taskmap.PrintMarkdown()
+    taskmap.PrintMarkdown(nil)
   },
 }
 )
