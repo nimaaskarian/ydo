@@ -23,7 +23,7 @@ func init() {
   rootCmd.AddCommand(addCmd)
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
   addCmd.Flags().StringArrayVarP(&dep_to, "dep-to", "D", []string{}, "task keys for this task to be dependent to")
-  addCmd.Flags().BoolVarP(&auto_complete, "--auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
+  addCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
   addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletion)
