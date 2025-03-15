@@ -27,7 +27,7 @@ func init() {
   editCmd.Flags().BoolVarP(&remove_dep_to, "remove-dep-to", "R", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
   editCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
   editCmd.Flags().BoolVarP(&no_auto_complete, "no-auto-complete", "A", false, "disable auto complete for the task (done when deps are done)")
-  editCmd.Flags().StringVarP(&new_key, "new-key", "k", "", "new key to the task")
+  editCmd.Flags().StringVarP(&new_key, "key", "k", "", "new key to the task")
   editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
   editCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletion)
   editCmd.ValidArgsFunction = TaskKeyCompletionOnFirst

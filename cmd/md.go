@@ -26,7 +26,7 @@ var mdCmd = &cobra.Command{
             slog.Error("No such task", "key", key)
             os.Exit(1)
           }
-          task.PrintMarkdown(taskmap, 1, &[]string{}, key, nil)
+          task.PrintMarkdown(taskmap, 0, &[]string{}, key, nil)
         }
     }
   },
