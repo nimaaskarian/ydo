@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	"github.com/nimaaskarian/ydo/utils"
 )
 
 type Task struct {
@@ -12,6 +14,7 @@ type Task struct {
   Done bool             `yaml:",omitempty"`
   AutoComplete bool     `yaml:"auto-complete,omitempty"`
   CreatedAt time.Time   `yaml:"created-at,omitempty"`
+  Due time.Time         `yaml:",omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap) bool {
@@ -37,16 +40,25 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
   for range depth {
     fmt.Print("   ")
   }
-  var inner string;
-  if task.IsDone(taskmap) {
-    inner = "x"
-  } else {
-    inner = " "
-  }
+  var print_key string
   if key != "" {
-    fmt.Printf("- [%s] %s: %s\n", inner, key, task.Task)
+    print_key = key+": "
+  }
+  if task.IsDone(taskmap) {
+    fmt.Printf("- [x] %s%s\n", print_key,task.Task)
   } else {
-    fmt.Printf("- [%s] %s\n", inner, task.Task)
+    due_print := ""
+    if !task.Due.IsZero() {
+      diff := task.Due.Sub(time.Now())
+      due_print = " ("
+      if diff < 0 {
+        due_print = " (-"
+        diff = - diff
+      }
+      due_print += utils.FormatDuration(diff)
+      due_print += ")"
+    }
+    fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }
   if seen_keys != nil && slices.Contains(*seen_keys, key) {
     return

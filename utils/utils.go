@@ -5,9 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"runtime"
 )
@@ -55,4 +58,66 @@ func ReadYesNo(format string, a ...any) bool {
       return false
     }
   }
+}
+
+func ParseDate(date string) (time.Time, error) {
+  now := time.Now()
+  today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+  weekday := now.Weekday()
+  var target_weekday time.Weekday
+
+  switch strings.ToLower(date) {
+  case "today":
+    return today, nil
+  case "tomorrow":
+    return today.Add(24*time.Hour), nil
+  case "sunday", "sun":
+    target_weekday = time.Sunday
+  case "monday", "mon":
+    target_weekday = time.Monday
+  case "tuesday", "tue":
+    target_weekday = time.Tuesday
+  case "wednesday", "wed":
+    target_weekday = time.Wednesday
+  case "thursday", "thu":
+    target_weekday = time.Thursday
+  case "friday", "fri":
+    target_weekday = time.Friday
+  case "saturday", "sat":
+    target_weekday = time.Saturday
+  default:
+    return time.Parse("2006-01-02", date)
+  }
+  day := 24*time.Hour
+  count_days := (7 + target_weekday-weekday) % 7
+  if count_days == 0 {
+    count_days = 7
+  }
+  return today.Add(time.Duration(count_days)*day), nil
+}
+
+const (
+	SecondsInMinutes = 60
+	SecondsInHour   = 3600
+	SecondsInDay    = 86400
+	SecondsInWeek   = 604800
+)
+
+func FormatDuration(diff time.Duration) string {
+	rounded_seconds := int(math.Round(diff.Seconds()))
+	rounded_minutes := rounded_seconds / SecondsInMinutes
+	rounded_hours := rounded_minutes / SecondsInMinutes
+	rounded_days := rounded_hours / 24
+	rounded_weeks := rounded_days / 7
+	if rounded_weeks > 0 {
+		return strconv.Itoa(rounded_weeks) + "w"
+	} else if rounded_days > 0 {
+		return strconv.Itoa(rounded_days) + "d"
+	} else if rounded_hours > 0 {
+		return strconv.Itoa(rounded_hours) + "h" + strconv.Itoa(rounded_minutes%60) + "m"
+	} else if rounded_minutes > 0 {
+		return strconv.Itoa(rounded_minutes) + "m" + strconv.Itoa(rounded_seconds%SecondsInMinutes) + "s"
+	} else {
+		return strconv.Itoa(rounded_seconds) + "s"
+	}
 }
