@@ -74,17 +74,7 @@ var editCmd = &cobra.Command{
         slog.Error("No such task", "key", dep_key)
       }
     }
-    if new_key != "" && new_key != key {
-      for dep_key, task := range taskmap {
-        index := slices.Index(task.Deps, key)
-        if index != -1 {
-          task.Deps = slices.Replace(task.Deps, index, index+1, new_key)
-          taskmap[dep_key] = task
-        }
-      }
-      delete(taskmap, key)
-      key = new_key
-    }
+    key = taskmap.ReplaceKey(key, new_key)
     if auto_complete && no_auto_complete {
       slog.Error("Can't use both auto-complete and no-auto-complete flags at the same time")
       os.Exit(1)

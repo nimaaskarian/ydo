@@ -152,6 +152,22 @@ func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key
   return taskmap.NextKey()
 }
 
+func (taskmap TaskMap) ReplaceKey(old_key string, new_key string) string {
+  if new_key != "" && new_key != old_key && !taskmap.HasTask(new_key) {
+    for dep_key, task := range taskmap {
+      index := slices.Index(task.Deps, old_key)
+      if index != -1 {
+        task.Deps = slices.Replace(task.Deps, index, index+1, new_key)
+        taskmap[dep_key] = task
+      }
+    }
+    delete(taskmap, old_key)
+    return new_key
+  } else {
+    return old_key
+  }
+}
+
 func (taskmap TaskMap) PrintKeys() {
   for key := range taskmap {
     fmt.Printf("%s\n", key)
