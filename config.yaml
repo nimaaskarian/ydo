@@ -1,0 +1,7 @@
+files:
+  - tasks.yaml
+# possible values: debug, info, warn, error (default)
+loglevel: error
+tfidf:
+  enabled: true
+  min-task-count: 1
