@@ -61,11 +61,15 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
   }
   if task.IsDone(taskmap) {
     done_at := task.FindDoneAt(taskmap)
-    overdue := ""
-    if !task.Due.IsZero() && task.DoneAt.After(task.Due) {
-      overdue += ", " + utils.FormatDuration(task.DoneAt.Sub(task.Due)) + " overdue"
+    if !done_at.IsZero() {
+      overdue := ""
+      if !task.Due.IsZero() && task.DoneAt.After(task.Due) {
+        overdue += ", " + utils.FormatDuration(task.DoneAt.Sub(task.Due)) + " overdue"
+      }
+      fmt.Printf("- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
+    } else {
+      fmt.Printf("- [x] %s%s\n", print_key,task.Task)
     }
-    fmt.Printf("- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
   } else {
     due_print := ""
     if !task.Due.IsZero() {
