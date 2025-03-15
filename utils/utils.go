@@ -38,12 +38,6 @@ func ConfigDir() string {
   return dir
 }
 
-func Check(e error) {
-  if e != nil {
-    panic(e)
-  }
-}
-
 func ReadYesNo(format string, a ...any) bool {
   for {
     reader := bufio.NewReader(os.Stdin)

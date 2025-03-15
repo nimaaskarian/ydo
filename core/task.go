@@ -26,8 +26,12 @@ func (task Task) IsDone(taskmap TaskMap) bool {
   return task.Done
 }
 
+func (task Task) IsNotDone(taskmap TaskMap) bool {
+  return !task.IsDone(taskmap)
+}
+
 func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, key string, filter func(task Task, taskmap TaskMap) bool) {
-  if filter != nil && filter(taskmap[key], taskmap){
+  if filter != nil && !filter(taskmap[key], taskmap) {
     return
   }
   for range depth {

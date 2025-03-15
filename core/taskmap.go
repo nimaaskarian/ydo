@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -121,9 +120,14 @@ func (taskmap TaskMap) MustNotHaveTask(key string) {
 
 func (taskmap TaskMap) Write(path string) {
   content, err := yaml.Marshal(taskmap)
-  utils.Check(err)
-  err = os.WriteFile(path, content, 0644)
-  utils.Check(err)
+  if err != nil {
+    slog.Error("Failed converting the tasks to yaml.")
+    os.Exit(1)
+  }
+  if os.WriteFile(path, content, 0644) != nil {
+    slog.Error("Failed writing the tasks to file.", "path", path)
+    os.Exit(1)
+  }
   slog.Info("Wrote to file", "path", path)
 }
 
