@@ -1,3 +1,6 @@
+"":
+    task: add tutorial subcommand
+    created-at: 2025-03-15T18:04:39.557932048+03:30
 better-md:
     task: improve markdown output
     done: true
@@ -54,6 +57,6 @@ webgui:
     created-at: 2025-03-14T16:28:47.101184579+03:30
 ydo:
     task: complete ydo development
-    deps: [webgui, cli, core]
+    deps: [webgui, cli, core, ""]
     auto-complete: true
     created-at: 2025-03-14T16:28:20.755500724+03:30
