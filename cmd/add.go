@@ -22,6 +22,27 @@ auto_complete bool
 tfidf bool
 )
 
+func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  return []string{
+  "saturday",
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sun",
+  "mon",
+  "tue",
+  "wed",
+  "thu",
+  "fri",
+  "today",
+  "tomorrow",
+  }, cobra.ShellCompDirectiveDefault
+}
+
 func init() {
   rootCmd.AddCommand(addCmd)
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
@@ -32,6 +53,7 @@ func init() {
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
   addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletion)
+  addCmd.RegisterFlagCompletionFunc("due", DueCompletion)
 }
 
 var addCmd = &cobra.Command{
