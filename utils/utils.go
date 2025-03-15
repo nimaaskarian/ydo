@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -24,7 +25,16 @@ func ConfigDir() string {
     }
   }
   dir := filepath.Join(base, "ydo")
-  os.Mkdir(dir, 0755)
+  if err := os.Mkdir(dir, 0755); err != nil {
+    if errors.Is(err, os.ErrExist)  {
+      stat, _ := os.Stat(dir)
+      if stat.IsDir() {
+        return dir
+      }
+    }
+    slog.Error("Couldn't create config directory. Using the current directory.", "config_dir", dir)
+    return "."
+  }
   return dir
 }
 

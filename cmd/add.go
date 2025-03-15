@@ -59,4 +59,5 @@ var addCmd = &cobra.Command{
     slog.Info("Task added", "task", taskmap[key])
     taskmap.Write(tasks_path)
   },
+  PostRun: rootCmd.Run,
 }

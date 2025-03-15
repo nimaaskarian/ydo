@@ -95,4 +95,5 @@ var editCmd = &cobra.Command{
       taskmap.Write(tasks_path)
     }
   },
+  PostRun: rootCmd.Run,
 }

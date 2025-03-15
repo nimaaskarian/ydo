@@ -9,7 +9,7 @@ cli:
     created-at: 2025-03-14T16:29:10.768608377+03:30
 core:
     task: complete core
-    deps: [date-added, due, filedep]
+    deps: [date-added, due]
     auto-complete: true
     created-at: 2025-03-14T17:08:45.437914813+03:30
 date-added:
@@ -19,10 +19,6 @@ date-added:
 due:
     task: add task due date
     created-at: 2025-03-14T17:11:19.659795653+03:30
-filedep:
-    task: add file dependencies
-    deps: [relative]
-    created-at: 2025-03-14T16:30:28.46166198+03:30
 markdown:
     task: fix markdown output
     deps: [sort-date, markdown-key, better-md, md-circular]
@@ -40,9 +36,6 @@ md-circular:
 polish:
     task: fix minor issues and inconveniences
     created-at: 2025-03-14T17:05:36.369742212+03:30
-relative:
-    task: relative path todos
-    created-at: 2025-03-14T16:32:27.329519062+03:30
 sort-date:
     task: sort markdown based on date added instead of path
     deps: [date-added]
@@ -53,6 +46,6 @@ webgui:
     created-at: 2025-03-14T16:28:47.101184579+03:30
 ydo:
     task: complete ydo development
-    deps: [webgui, cli, filedep, core]
+    deps: [webgui, cli, core]
     auto-complete: true
     created-at: 2025-03-14T16:28:20.755500724+03:30
