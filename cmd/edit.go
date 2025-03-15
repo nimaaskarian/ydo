@@ -74,7 +74,7 @@ var editCmd = &cobra.Command{
         slog.Error("No such task", "key", dep_key)
       }
     }
-    if new_key != key {
+    if new_key != "" && new_key != key {
       for dep_key, task := range taskmap {
         index := slices.Index(task.Deps, key)
         if index != -1 {
