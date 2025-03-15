@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -40,6 +41,7 @@ func (taskmap TaskMap) HasTask(key string) bool {
 func (taskmap TaskMap) Do(key string) {
   if entry, ok := taskmap[key]; ok {
     entry.Done = true
+    entry.DoneAt = time.Now()
     taskmap[key] = entry
     slog.Info("Completed task","key" ,key, "task", entry.Task)
   } else {
@@ -51,6 +53,7 @@ func (taskmap TaskMap) Do(key string) {
 func (taskmap TaskMap) Undo(key string) {
   if entry, ok := taskmap[key]; ok {
     entry.Done = false
+    entry.DoneAt = time.Time{}
     taskmap[key] = entry
     slog.Info("Un-completed task","key" ,key, "task", entry.Task)
   } else {

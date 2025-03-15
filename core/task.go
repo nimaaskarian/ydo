@@ -15,6 +15,7 @@ type Task struct {
   AutoComplete bool     `yaml:"auto-complete,omitempty"`
   CreatedAt time.Time   `yaml:"created-at,omitempty"`
   Due time.Time         `yaml:",omitempty"`
+  DoneAt time.Time      `yaml:"done-at,omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap) bool {
@@ -27,6 +28,20 @@ func (task Task) IsDone(taskmap TaskMap) bool {
     return true
   }
   return task.Done
+}
+
+func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
+  if task.AutoComplete {
+    max_doneat := time.Time{}
+    for _,key := range task.Deps {
+      task := taskmap[key]
+      if task.DoneAt.After(max_doneat) {
+        max_doneat = task.DoneAt
+      }
+      return max_doneat
+    }
+  }
+  return task.DoneAt
 }
 
 func (task Task) IsNotDone(taskmap TaskMap) bool {
@@ -45,7 +60,12 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
     print_key = key+": "
   }
   if task.IsDone(taskmap) {
-    fmt.Printf("- [x] %s%s\n", print_key,task.Task)
+    done_at := task.FindDoneAt(taskmap)
+    overdue := ""
+    if !task.Due.IsZero() && task.DoneAt.After(task.Due) {
+      overdue += ", " + utils.FormatDuration(task.DoneAt.Sub(task.Due)) + " overdue"
+    }
+    fmt.Printf("- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
   } else {
     due_print := ""
     if !task.Due.IsZero() {
@@ -55,8 +75,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
         due_print = " (-"
         diff = - diff
       }
-      due_print += utils.FormatDuration(diff)
-      due_print += ")"
+      due_print += utils.FormatDuration(diff) + ")"
     }
     fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }

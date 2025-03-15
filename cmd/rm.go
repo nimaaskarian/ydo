@@ -15,7 +15,7 @@ var cascade bool;
 func init() {
   rootCmd.AddCommand(rmCmd)
   rmCmd.Flags().BoolVarP(&cascade, "cascade", "C", false, "cascade remove the dependencies of this task that aren't a dependency to other tasks")
-  rmCmd.ValidArgsFunction = TaskKeyCompletionNotDone
+  rmCmd.ValidArgsFunction = TaskKeyCompletion
 }
 
 func delete_task(taskmap core.TaskMap, key string) {

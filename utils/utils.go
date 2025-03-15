@@ -114,9 +114,17 @@ func FormatDuration(diff time.Duration) string {
 	} else if rounded_days > 0 {
 		return strconv.Itoa(rounded_days) + "d"
 	} else if rounded_hours > 0 {
-		return strconv.Itoa(rounded_hours) + "h" + strconv.Itoa(rounded_minutes%60) + "m"
+    minutes := rounded_minutes%60
+    if minutes != 0 {
+      return strconv.Itoa(rounded_hours) + "h" + strconv.Itoa(minutes) + "m"
+    }
+    return strconv.Itoa(rounded_hours) + "h"
 	} else if rounded_minutes > 0 {
-		return strconv.Itoa(rounded_minutes) + "m" + strconv.Itoa(rounded_seconds%SecondsInMinutes) + "s"
+    seconds := rounded_seconds%SecondsInMinutes
+    if seconds != 0 {
+      return strconv.Itoa(rounded_minutes) + "m" + strconv.Itoa(seconds) + "s"
+    }
+    return strconv.Itoa(rounded_minutes) + "m"
 	} else {
 		return strconv.Itoa(rounded_seconds) + "s"
 	}
