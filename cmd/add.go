@@ -17,6 +17,7 @@ deps []string
 dep_to []string
 key string
 auto_complete bool
+tfidf bool
 )
 
 func init() {
@@ -24,6 +25,7 @@ func init() {
   addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
   addCmd.Flags().StringArrayVarP(&dep_to, "dep-to", "D", []string{}, "task keys for this task to be dependent to")
   addCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
+  addCmd.Flags().BoolVarP(&tfidf, "tfidf", "t", false, "use tfidf for automatic key generation (overrides config file and --key flag)")
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletion)
   addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletion)
@@ -39,8 +41,12 @@ var addCmd = &cobra.Command{
       slog.Error("Task can't be empty")
       os.Exit(1)
     }
-    if key == "" {
-      key = taskmap.TfidfNextKey(task, config.Tfidf, "")
+    if tfidf {
+      key = taskmap.TfidfNextKey(task, core.TfidfConfig {Enabled: true}, "")
+    } else {
+      if key == "" {
+        key = taskmap.TfidfNextKey(task, config.Tfidf, "")
+      }
     }
     taskmap.MustNotHaveTask(key)
     for _,key := range deps {
