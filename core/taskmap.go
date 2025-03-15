@@ -91,20 +91,28 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
 func (taskmap TaskMap) NextKey() string {
   i := 1
   for {
-    s_i := "t"+strconv.Itoa(i);
-    if _, ok := taskmap[s_i]; ok {
+    key := "t"+strconv.Itoa(i);
+    if _, ok := taskmap[key]; ok {
       i++
     } else {
-      return s_i
+      return key
     }
   }
 }
 
-func (taskmap TaskMap) TfidfNextKey(task string) string {
-  if len(taskmap) > 5 {
+type TfidfConfig struct {
+  Enabled bool `yaml:",omitempty"`
+  MinTaskCount int `yaml:"min-task-count,omitempty"`
+}
+
+func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key string) string {
+  if config.Enabled && len(taskmap) >= config.MinTaskCount {
     words := strings.Split(task, " ")
     word_count_in_docs := make(map[string]int, len(words))
-    for _, task := range taskmap {
+    for key, task := range taskmap {
+      if key == current_key {
+        continue
+      }
       for _, word := range words {
         count := word_count_in_docs[word]
         if strings.Contains(task.Task, word) {
@@ -129,12 +137,18 @@ func (taskmap TaskMap) TfidfNextKey(task string) string {
     slices.SortFunc(words, func(a,b string) int {
       return cmp.Compare(tfidf_map[b], tfidf_map[a])
     })
+    slog.Info("Tfidf calculated","tfidf", tfidf_map)
     for _, word := range words {
       if _, ok := taskmap[word]; !ok {
         return word
+      } else {
+        if word == current_key {
+          return word
+        }
       }
     }
   }
+  slog.Info("Tfidf fallback to NextKey.")
   return taskmap.NextKey()
 }
 

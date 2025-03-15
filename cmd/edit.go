@@ -13,10 +13,11 @@ import (
 
 // edit flags
 var (
-new_key string
-remove_deps bool
-remove_dep_to bool
-no_auto_complete bool
+  new_key string
+  remove_deps bool
+  key_regen bool
+  remove_dep_to bool
+  no_auto_complete bool
 )
 
 func init() {
@@ -24,6 +25,7 @@ func init() {
   editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
   editCmd.Flags().StringArrayVarP(&dep_to, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
   editCmd.Flags().BoolVarP(&remove_deps, "remove-deps", "r", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
+  editCmd.Flags().BoolVarP(&key_regen, "key-regen", "K", false, "regen key using the tfidf next key generator")
   editCmd.Flags().BoolVarP(&remove_dep_to, "remove-dep-to", "R", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
   editCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
   editCmd.Flags().BoolVarP(&no_auto_complete, "no-auto-complete", "A", false, "disable auto complete for the task (done when deps are done)")
@@ -47,6 +49,9 @@ var editCmd = &cobra.Command{
     if new_task := strings.Join(args[1:], " "); new_task != "" {
       task.Task = new_task
     }
+    if key_regen {
+      new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, key)
+    }
     taskmap.MustHaveTask(key)
     for _,key := range deps {
       taskmap.MustHaveTask(key)
@@ -69,7 +74,7 @@ var editCmd = &cobra.Command{
         slog.Error("No such task", "key", dep_key)
       }
     }
-    if new_key != "" {
+    if new_key != key {
       for dep_key, task := range taskmap {
         index := slices.Index(task.Deps, key)
         if index != -1 {

@@ -47,6 +47,7 @@ tfidf:
     created-at: 2025-03-15T15:28:06.977334058+03:30
 tfidf-conf:
     task: add tfidf generation config option
+    done: true
     created-at: 2025-03-15T15:31:35.346741874+03:30
 webgui:
     task: add webgui

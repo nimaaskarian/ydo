@@ -40,7 +40,7 @@ var addCmd = &cobra.Command{
       os.Exit(1)
     }
     if key == "" {
-      key = taskmap.TfidfNextKey(task)
+      key = taskmap.TfidfNextKey(task, config.Tfidf, "")
     }
     taskmap.MustNotHaveTask(key)
     for _,key := range deps {

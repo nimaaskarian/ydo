@@ -73,6 +73,7 @@ type Config struct  {
   // files to look for if --file option is not present
   Files []string `yaml:",omitempty"`
   LogLevel string `yaml:",omitempty"`
+  Tfidf core.TfidfConfig `yaml:",omitempty"`
 }
 
 func (config *Config) ReadFile(path string) {
