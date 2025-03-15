@@ -57,10 +57,14 @@ var editCmd = &cobra.Command{
     if remove_dep_to {
       taskmap.WipeDependenciesToKey(key)
     }
+    dep_to_changed := false
     for _, dep_key := range dep_to {
       if task, ok := taskmap[dep_key]; ok {
-        task.Deps = append(task.Deps, key)
-        taskmap[dep_key] = task
+        if !slices.Contains(task.Deps, key) {
+          dep_to_changed = true
+          task.Deps = append(task.Deps, key)
+          taskmap[dep_key] = task
+        }
       } else {
         slog.Error("No such task", "key", dep_key)
       }
@@ -87,13 +91,13 @@ var editCmd = &cobra.Command{
       task.AutoComplete = false
     }
     task.Deps = append(task.Deps, deps...)
-    if reflect.DeepEqual(taskmap[key], task) {
+    if !dep_to_changed && reflect.DeepEqual(taskmap[key], task) {
       fmt.Println("Task not edited")
     } else {
       taskmap[key] = task
       slog.Info("Task edited", "task", task)
+      rootCmd.Run(cmd, args)
       taskmap.Write(tasks_path)
     }
   },
-  PostRun: rootCmd.Run,
 }

@@ -34,13 +34,13 @@ var addCmd = &cobra.Command{
   Use: "add",
   Short: "add a task",
   Run: func(cmd *cobra.Command, args []string) {
-    if key == "" {
-      key = taskmap.NextKey()
-    }
     task := strings.Join(args, " ")
     if task == "" {
       slog.Error("Task can't be empty")
       os.Exit(1)
+    }
+    if key == "" {
+      key = taskmap.TfidfNextKey(task)
     }
     taskmap.MustNotHaveTask(key)
     for _,key := range deps {

@@ -9,7 +9,7 @@ cli:
     created-at: 2025-03-14T16:29:10.768608377+03:30
 core:
     task: complete core
-    deps: [date-added, due]
+    deps: [date-added, due, tfidf, tfidf-conf]
     auto-complete: true
     created-at: 2025-03-14T17:08:45.437914813+03:30
 date-added:
@@ -41,6 +41,13 @@ sort-date:
     deps: [date-added]
     done: true
     created-at: 2025-03-14T17:03:28.501359453+03:30
+tfidf:
+    task: add tfidf automatic key generation
+    done: true
+    created-at: 2025-03-15T15:28:06.977334058+03:30
+tfidf-conf:
+    task: add tfidf generation config option
+    created-at: 2025-03-15T15:31:35.346741874+03:30
 webgui:
     task: add webgui
     created-at: 2025-03-14T16:28:47.101184579+03:30

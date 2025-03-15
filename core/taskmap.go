@@ -1,12 +1,14 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"slices"
-	"sort"
 	"strconv"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -74,8 +76,8 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
   for key := range taskmap {
     keys = append(keys, key)
   }
-  sort.SliceStable(keys, func(i, j int) bool {
-    return taskmap[keys[i]].CreatedAt.Before(taskmap[keys[j]].CreatedAt)
+  slices.SortFunc(keys, func(k1, k2 string) int {
+    return taskmap[k1].CreatedAt.Compare(taskmap[k2].CreatedAt)
   })
 
   seen_keys := make([]string, 0, len(taskmap))
@@ -96,6 +98,44 @@ func (taskmap TaskMap) NextKey() string {
       return s_i
     }
   }
+}
+
+func (taskmap TaskMap) TfidfNextKey(task string) string {
+  if len(taskmap) > 5 {
+    words := strings.Split(task, " ")
+    word_count_in_docs := make(map[string]int, len(words))
+    for _, task := range taskmap {
+      for _, word := range words {
+        count := word_count_in_docs[word]
+        if strings.Contains(task.Task, word) {
+          word_count_in_docs[word] = count + 1
+        }
+      }
+    }
+    num_tasks := len(taskmap)+1
+    idf_map := make(map[string]float64, len(words))
+    for _, word := range words {
+      count := word_count_in_docs[word]+1
+      idf_map[word] = math.Log(float64(num_tasks/count))
+    }
+    word_count_in_current := make(map[string]int, len(words))
+    for _, word := range words {
+      word_count_in_current[word] += 1
+    }
+    tfidf_map := make(map[string]float64, len(words))
+    for _, word := range words {
+      tfidf_map[word] = float64(word_count_in_current[word])/float64(len(words)) * idf_map[word]
+    }
+    slices.SortFunc(words, func(a,b string) int {
+      return cmp.Compare(tfidf_map[b], tfidf_map[a])
+    })
+    for _, word := range words {
+      if _, ok := taskmap[word]; !ok {
+        return word
+      }
+    }
+  }
+  return taskmap.NextKey()
 }
 
 func (taskmap TaskMap) PrintKeys() {
