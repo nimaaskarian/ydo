@@ -11,7 +11,7 @@ import (
 
 func init() {
   rootCmd.AddCommand(mdCmd)
-  mdCmd.Flags().StringVar(&due, "due", "", "specify due for the tasks to print")
+  mdCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
   mdCmd.RegisterFlagCompletionFunc("due", DueCompletion)
   mdCmd.ValidArgsFunction = TaskKeyCompletion
 }
@@ -43,7 +43,7 @@ var mdCmd = &cobra.Command{
             slog.Error("No such task", "key", key)
             os.Exit(1)
           }
-          if !due_time.IsZero() && task.Due == due_time {
+          if due_time.IsZero() != (task.Due == due_time) {
             task.PrintMarkdown(taskmap, 0, &seen_keys, key, nil, config.Markdown.Indent)
           }
         }
