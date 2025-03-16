@@ -40,6 +40,7 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
   "fri",
   "today",
   "tomorrow",
+  "yesterday",
   }, cobra.ShellCompDirectiveDefault
 }
 

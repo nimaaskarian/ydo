@@ -71,6 +71,8 @@ func ParseDate(date string) time.Time {
     return today
   case "tomorrow":
     return today.Add(24*time.Hour)
+  case "yesterday":
+    return today.Add(-24*time.Hour)
   case "sunday", "sun":
     target_weekday = time.Sunday
   case "monday", "mon":

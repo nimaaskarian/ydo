@@ -3,13 +3,17 @@ package cmd
 import (
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
 func init() {
   rootCmd.AddCommand(todoCmd)
+  todoCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
+  todoCmd.RegisterFlagCompletionFunc("due", DueCompletion)
   todoCmd.ValidArgsFunction = TaskKeyCompletionNotDone
 }
 
@@ -19,8 +23,20 @@ var todoCmd = &cobra.Command{
   Short: "output to-do (unfinished) tasks as markdown",
   Run: func(cmd *cobra.Command, args []string) {
     NeedKeysCmd.Run(cmd, args)
+    var due_time time.Time
+    if due != "" {
+      due_time = utils.ParseDate(due)
+    }
     if len(keys) == 0 {
-      taskmap.PrintMarkdown(core.Task.IsNotDone, config.Markdown)
+      if due_time.IsZero() {
+        taskmap.PrintMarkdown(core.Task.IsNotDone, config.Markdown)
+      } else {
+        for key, task := range taskmap {
+          if task.Due == due_time {
+            task.PrintMarkdown(taskmap, 0, &[]string{}, key, core.Task.IsNotDone, config.Markdown.Indent)
+          }
+        }
+      }
     } else {
         for _, key := range keys {
           task, ok := taskmap[key];
@@ -28,7 +44,9 @@ var todoCmd = &cobra.Command{
             slog.Error("No such task", "key", key)
             os.Exit(1)
           }
-          task.PrintMarkdown(taskmap, 0, &[]string{}, key, core.Task.IsNotDone, config.Markdown.Indent)
+          if due_time.IsZero() != (task.Due == due_time) {
+            task.PrintMarkdown(taskmap, 0, &[]string{}, key, core.Task.IsNotDone, config.Markdown.Indent)
+          }
         }
     }
   },
