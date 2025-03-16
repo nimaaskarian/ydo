@@ -129,3 +129,12 @@ func FormatDuration(diff time.Duration) string {
 		return strconv.Itoa(rounded_seconds) + "s"
 	}
 }
+
+func DeepCopyMap[K comparable, V any](m map[K]V) map[K]V {
+  out := make(map[K]V, len(m))
+  var key K
+  for key = range m {
+    out[key] = m[key]
+  }
+  return out
+}

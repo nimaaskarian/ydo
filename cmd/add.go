@@ -95,8 +95,6 @@ var addCmd = &cobra.Command{
     }
     taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
     fmt.Printf("Task %q added\n", key)
-    slog.Info("Task added", "task", taskmap[key])
-    taskmap.Write(tasks_path)
+    slog.Debug("Added a task", "task", taskmap[key])
   },
-  PostRun: rootCmd.Run,
 }

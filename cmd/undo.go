@@ -28,7 +28,5 @@ var undoCmd = &cobra.Command{
         taskmap.Undo(key)
       }
     }
-    taskmap.Write(tasks_path)
   },
-  PostRun: rootCmd.Run,
 }

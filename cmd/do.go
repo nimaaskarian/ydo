@@ -27,7 +27,5 @@ var doCmd = &cobra.Command{
         taskmap.Do(key)
       }
     }
-    taskmap.Write(tasks_path)
   },
-  PostRun: rootCmd.Run,
 }

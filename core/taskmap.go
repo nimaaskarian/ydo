@@ -204,6 +204,15 @@ func (taskmap TaskMap) Write(path string) {
   slog.Info("Wrote to file", "path", path)
 }
 
+func (taskmap TaskMap) DryWrite(path string) {
+  _, err := yaml.Marshal(taskmap)
+  if err != nil {
+    slog.Error("Failed converting the tasks to yaml.")
+    os.Exit(1)
+  }
+  slog.Info("(dry) Wrote to file", "path", path)
+}
+
 func LoadTaskMap(path string) TaskMap {
   slog.Info("Task file loaded.", "path", path)
   taskmap := make(TaskMap)

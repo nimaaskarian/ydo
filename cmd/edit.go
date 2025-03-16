@@ -91,8 +91,6 @@ var editCmd = &cobra.Command{
     } else {
       taskmap[key] = task
       slog.Info("Task edited", "task", task)
-      rootCmd.Run(cmd, args)
-      taskmap.Write(tasks_path)
     }
   },
 }

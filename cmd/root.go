@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
-  "log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -119,8 +120,10 @@ var (
   keys []string
   tasks_path string
   config_path string
+  dry_run bool
   // global state
-  taskmap core.TaskMap
+  old_taskmap, taskmap core.TaskMap
+  
   config_dir string
   config Config
 
@@ -141,14 +144,26 @@ var (
     }
     taskmap = core.LoadTaskMap(tasks_path)
     if taskmap == nil {
-      taskmap = make(core.TaskMap)
+      taskmap = core.TaskMap{}
     }
+    old_taskmap = utils.DeepCopyMap(taskmap)
   },
   Run: func(cmd *cobra.Command, args []string) {
     if len(taskmap) >= 10 {
       taskmap.PrintMarkdown(core.Task.IsNotDone)
     } else {
       taskmap.PrintMarkdown(nil)
+    }
+  },
+  PersistentPostRun: func(cmd *cobra.Command, args []string) {
+    if !reflect.DeepEqual(old_taskmap, taskmap) {
+      slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
+      taskmap.PrintMarkdown(nil)
+      if dry_run {
+        taskmap.DryWrite(tasks_path)
+      } else {
+        taskmap.Write(tasks_path)
+      }
     }
   },
 }
@@ -158,6 +173,7 @@ func init() {
   config_dir = utils.ConfigDir()
   rootCmd.PersistentFlags().StringVarP(&tasks_path, "file","f","", "path to tasks file")
   rootCmd.PersistentFlags().StringVarP(&config_path, "config","c",filepath.Join(config_dir, "config.yaml"), "path to config file")
+  rootCmd.PersistentFlags().BoolVarP(&dry_run, "dry-run","n", false, "perform a trial run with no changes made")
 }
 
 func Execute() {

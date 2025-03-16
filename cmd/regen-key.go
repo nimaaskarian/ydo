@@ -33,7 +33,5 @@ var regenKeyCmd = &cobra.Command{
         taskmap[new_key] = task
       }
     }
-    taskmap.Write(tasks_path)
   },
-  PostRun: rootCmd.Run,
 }

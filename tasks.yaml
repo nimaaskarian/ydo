@@ -4,7 +4,7 @@ better-md:
     created-at: 2025-03-14T17:04:28.346380724+03:30
 cli:
     task: complete frictionless cli
-    deps: [markdown, polish]
+    deps: [markdown, polish, dry]
     auto-complete: true
     created-at: 2025-03-14T16:29:10.768608377+03:30
 core:
@@ -21,6 +21,11 @@ day:
     deps: [ydo]
     created-at: 2025-03-15T23:40:02.839592251+03:30
     due: 2025-03-17T00:00:00+03:30
+dry:
+    task: add dry-run flag
+    done: true
+    created-at: 2025-03-16T11:40:30.10367031+03:30
+    done-at: 2025-03-16T12:53:43.510923145+03:30
 due:
     task: add task due date
     done: true
@@ -42,11 +47,18 @@ md-circular:
 polish:
     task: fix minor issues and inconveniences
     created-at: 2025-03-14T17:05:36.369742212+03:30
+refactor:
+    task: refactor and make the code clean
+    deps: [ydo, study-gh]
+    created-at: 2025-03-16T09:04:51.630768648+03:30
 sort-date:
     task: sort markdown based on date added instead of path
     deps: [date-added]
     done: true
     created-at: 2025-03-14T17:03:28.501359453+03:30
+study-gh:
+    task: study github cli's code
+    created-at: 2025-03-16T09:06:03.762083839+03:30
 tfidf:
     task: add tfidf automatic key generation
     done: true

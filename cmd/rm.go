@@ -57,7 +57,5 @@ var rmCmd = &cobra.Command{
       }
       taskmap = make(core.TaskMap)
     }
-    taskmap.Write(tasks_path)
   },
-  PostRun: rootCmd.Run,
 }
