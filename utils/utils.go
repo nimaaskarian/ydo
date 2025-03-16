@@ -60,7 +60,7 @@ func ReadYesNo(format string, a ...any) bool {
   }
 }
 
-func ParseDate(date string) (time.Time, error) {
+func ParseDate(date string) time.Time {
   now := time.Now()
   today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
   weekday := now.Weekday()
@@ -68,9 +68,9 @@ func ParseDate(date string) (time.Time, error) {
 
   switch strings.ToLower(date) {
   case "today":
-    return today, nil
+    return today
   case "tomorrow":
-    return today.Add(24*time.Hour), nil
+    return today.Add(24*time.Hour)
   case "sunday", "sun":
     target_weekday = time.Sunday
   case "monday", "mon":
@@ -86,14 +86,19 @@ func ParseDate(date string) (time.Time, error) {
   case "saturday", "sat":
     target_weekday = time.Saturday
   default:
-    return time.Parse("2006-01-02", date)
+    date, err := time.Parse("2006-01-02", date)
+    if err != nil {
+      slog.Error("Due date specified is invalid. Use YYYY-MM-DD format, today, tomorrow or a week day")
+      os.Exit(1)
+    }
+    return date
   }
   day := 24*time.Hour
   count_days := (7 + target_weekday-weekday) % 7
   if count_days == 0 {
     count_days = 7
   }
-  return today.Add(time.Duration(count_days)*day), nil
+  return today.Add(time.Duration(count_days)*day)
 }
 
 const (

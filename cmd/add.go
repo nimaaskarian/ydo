@@ -87,11 +87,7 @@ var addCmd = &cobra.Command{
     }
     var due_time time.Time
     if due != "" {
-      var err error
-      if due_time, err = utils.ParseDate(due); err != nil {
-        slog.Error("Due date specified is invalid")
-        os.Exit(1)
-      }
+      due_time = utils.ParseDate(due)
     }
     taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
     fmt.Printf("Task %q added\n", key)

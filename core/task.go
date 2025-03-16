@@ -83,10 +83,10 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys *[]string,
     }
     fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }
-  if seen_keys != nil && slices.Contains(*seen_keys, key) {
-    return
-  }
-  if seen_keys != nil {
+  if seen_keys != nil  {
+    if slices.Contains(*seen_keys, key) {
+      return
+    }
     *seen_keys = append(*seen_keys, key)
   }
   for _, key := range task.Deps {
