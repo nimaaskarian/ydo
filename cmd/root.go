@@ -70,14 +70,13 @@ var NeedKeysCmd = &cobra.Command{
 	},
 }
 
-func PrintMarkdown(md_config core.MarkdownConfig) func (core.TaskMap) {
+func PrintMarkdown(md_config core.MarkdownConfig) {
   switch md_config.Mode {
   case "todo":
     taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
   case "md":
     taskmap.PrintMarkdown(nil, md_config)
-  }
-  return func(taskmap core.TaskMap) {
+  default:
     if len(taskmap) >= 10 {
       taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
     } else {
