@@ -9,7 +9,7 @@ cli:
     created-at: 2025-03-14T16:29:10.768608377+03:30
 core:
     task: complete core
-    deps: [date-added, due, tfidf, tfidf-conf]
+    deps: [date-added, due, tfidf, tfidf-conf, print-mode]
     auto-complete: true
     created-at: 2025-03-14T17:08:45.437914813+03:30
 date-added:
@@ -47,6 +47,11 @@ md-circular:
 polish:
     task: fix minor issues and inconveniences
     created-at: 2025-03-14T17:05:36.369742212+03:30
+print-mode:
+    task: add print mode config option
+    done: true
+    created-at: 2025-03-16T12:56:38.999617167+03:30
+    done-at: 2025-03-16T13:42:07.98252852+03:30
 refactor:
     task: refactor and make the code clean
     deps: [ydo, study-gh]

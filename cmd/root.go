@@ -70,11 +70,28 @@ var NeedKeysCmd = &cobra.Command{
 	},
 }
 
+func PrintMarkdown(md_config core.MarkdownConfig) func (core.TaskMap) {
+  switch md_config.Mode {
+  case "todo":
+    taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
+  case "md":
+    taskmap.PrintMarkdown(nil, md_config)
+  }
+  return func(taskmap core.TaskMap) {
+    if len(taskmap) >= 10 {
+      taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
+    } else {
+      taskmap.PrintMarkdown(nil, md_config)
+    }
+  }
+}
+
 type Config struct  {
   // files to look for if --file option is not present
   Files []string `yaml:",omitempty"`
   LogLevel string `yaml:",omitempty"`
   Tfidf core.TfidfConfig `yaml:",omitempty"`
+  Markdown core.MarkdownConfig `yaml:",omitempty"`
 }
 
 func (config *Config) ReadFile(path string) {
@@ -82,6 +99,9 @@ func (config *Config) ReadFile(path string) {
   err := yaml.Unmarshal([]byte(content), config)
   if err != nil {
     slog.Error("Error reading config file", "err", err)
+  }
+  if config.Markdown.Indent == 0 {
+    config.Markdown.Indent = 3
   }
 }
 
@@ -149,16 +169,12 @@ var (
     old_taskmap = utils.DeepCopyMap(taskmap)
   },
   Run: func(cmd *cobra.Command, args []string) {
-    if len(taskmap) >= 10 {
-      taskmap.PrintMarkdown(core.Task.IsNotDone)
-    } else {
-      taskmap.PrintMarkdown(nil)
-    }
+      PrintMarkdown(config.Markdown)
   },
   PersistentPostRun: func(cmd *cobra.Command, args []string) {
     if !reflect.DeepEqual(old_taskmap, taskmap) {
       slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
-      taskmap.PrintMarkdown(nil)
+      PrintMarkdown(config.Markdown)
       if dry_run {
         taskmap.DryWrite(tasks_path)
       } else {

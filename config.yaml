@@ -2,6 +2,11 @@ files:
   - tasks.yaml
 # possible values: debug, info, warn, error (default)
 loglevel: error
+markdown: 
+  # number of spaces on each indent. 0 is replaced with 3 (default)
+  indent: 2
+  # possible values: todo, md, smart (default)
+  mode: todo
 tfidf:
   enabled: true
   min-task-count: 1

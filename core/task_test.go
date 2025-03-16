@@ -34,12 +34,12 @@ func ExampleTask_PrintMarkdown() {
   task := Task{};
   ParseYaml(&task, []byte(DATA));
   task.Deps = []string{};
-  task.PrintMarkdown(nil, 0, nil, "", nil)
+  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   task.Done = false;
-  task.PrintMarkdown(nil, 0, nil, "", nil)
+  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   task.Deps = []string{"2"};
   task.Done = true;
-  task.PrintMarkdown(nil, 0, nil, "", nil)
+  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries

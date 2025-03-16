@@ -70,7 +70,12 @@ func PrintYaml(obj any) {
   fmt.Printf("%s", s)
 }
 
-func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) bool) {
+type MarkdownConfig struct  {
+  Indent uint `yaml:",omitempty"`
+  Mode string `yaml:",omitempty"`
+}
+
+func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) bool, config MarkdownConfig) {
   if len(taskmap) == 0 {
     fmt.Println("No tasks found")
     return
@@ -86,7 +91,7 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
   seen_keys := make([]string, 0, len(taskmap))
   for _,key := range keys {
     if !slices.Contains(seen_keys, key) {
-      taskmap[key].PrintMarkdown(taskmap, 0, &seen_keys, key, filter)
+      taskmap[key].PrintMarkdown(taskmap, 0, &seen_keys, key, filter, config.Indent)
     }
   }
 }

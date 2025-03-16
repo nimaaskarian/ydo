@@ -18,7 +18,7 @@ var mdCmd = &cobra.Command{
   Run: func(cmd *cobra.Command, args []string) {
     NeedKeysCmd.Run(cmd, args)
     if len(keys) == 0 {
-      taskmap.PrintMarkdown(nil)
+      taskmap.PrintMarkdown(nil, config.Markdown)
     } else {
         for _, key := range keys {
           task, ok := taskmap[key];
@@ -26,7 +26,7 @@ var mdCmd = &cobra.Command{
             slog.Error("No such task", "key", key)
             os.Exit(1)
           }
-          task.PrintMarkdown(taskmap, 0, &[]string{}, key, nil)
+          task.PrintMarkdown(taskmap, 0, &[]string{}, key, nil, config.Markdown.Indent)
         }
     }
   },

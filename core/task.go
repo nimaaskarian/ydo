@@ -48,12 +48,12 @@ func (task Task) IsNotDone(taskmap TaskMap) bool {
   return !task.IsDone(taskmap)
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, key string, filter func(task Task, taskmap TaskMap) bool) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys *[]string, key string, filter func(task Task, taskmap TaskMap) bool, indent uint) {
   if filter != nil && !filter(taskmap[key], taskmap) {
     return
   }
-  for range depth {
-    fmt.Print("   ")
+  for range depth*indent {
+    fmt.Print(" ")
   }
   var print_key string
   if key != "" {
@@ -90,6 +90,6 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth int, seen_keys *[]string, 
     *seen_keys = append(*seen_keys, key)
   }
   for _, key := range task.Deps {
-    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, filter)
+    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, filter, indent)
   }
 }
