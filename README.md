@@ -120,3 +120,6 @@ then copy the binary to one of the directories under your `PATH` variable.
 - yaml
 - graph instead of tree
 - frictionless, and complete cli interface
+
+# License
+GPL-3.0
