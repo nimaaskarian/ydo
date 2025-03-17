@@ -2,3 +2,5 @@ main
 *.out
 ydo
 ydo.exe
+node_modules/
+tw-out.*

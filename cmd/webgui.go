@@ -26,6 +26,7 @@ var (
   port int
 )
 
+var tmpls *template.Template
 func init() {
   rootCmd.AddCommand(webguiCmd)
   webguiCmd.Flags().StringVarP(&address, "address", "a", "127.0.0.1", "address to listen and serve to")
@@ -39,7 +40,6 @@ type Data struct {
   Filter map[string]bool
 }
 
-var tmpls = template.Must(template.New("").Funcs(func_map).ParseFS(embed_fs, "webgui/templates/*"))
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
     SeenKeys: make(map[string]bool, len(taskmap) ),
@@ -58,21 +58,16 @@ type TaskData struct {
 }
 
 func dict(args ...any) map[string]any {
-    m := make(map[string]any)
-    for i := 0; i < len(args); i += 2 {
-        m[args[i].(string)] = args[i+1]
-    }
-    return m
+  m := make(map[string]any)
+  for i := 0; i < len(args); i += 2 {
+      m[args[i].(string)] = args[i+1]
+  }
+  return m
 }
 
 func see(seen map[string]bool, key string) string {
   seen[key] = true
   return ""
-}
-
-var func_map = template.FuncMap{
-  "dict": dict,
-  "see": see,
 }
 
 func Task(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -116,6 +111,11 @@ var webguiCmd = &cobra.Command{
   Use: "webgui",
   Short: "run the webgui on the current file",
   Run: func(cmd *cobra.Command, args []string) {
+    func_map := template.FuncMap{
+      "dict": dict,
+      "see": see,
+    }
+    tmpls = template.Must(template.New("").Funcs(func_map).ParseFS(embed_fs, "webgui/templates/*"))
     sorted_keys = make([]string, 0, len(taskmap))
     for key := range taskmap {
       sorted_keys = append(sorted_keys, key)

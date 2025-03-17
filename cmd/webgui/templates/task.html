@@ -1,7 +1,8 @@
 <label>
 {{- $task := index .Taskmap .Key }}
 <input
-hx-target="body"
+hx-target="#main-list"
+hx-swap="outerHTML"
 type="checkbox"
 {{- if $task.IsDone .Taskmap}} checked="checked" hx-put="/undo/{{.Key}}" {{- else}}
 hx-put="/do/{{ .Key }}"

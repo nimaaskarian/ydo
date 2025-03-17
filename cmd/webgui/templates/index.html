@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/static/htmx.min.js" defer></script>
+<link href="/static/tw-out.min.css" defer></link>
 <title>Ydo</title>
 </head>
 <body>
-  <ul>{{- range $key := .Keys }}<li>{{- template "task.html" (dict "Taskmap" $.Taskmap "Key" $key "SeenKeys" $.SeenKeys "Filter" $.Filter ) }}</li>{{- end }}</ul>
+  <ul id="main-list">{{- range $key := .Keys }}<li>{{- template "task.html" (dict "Taskmap" $.Taskmap "Key" $key "SeenKeys" $.SeenKeys "Filter" $.Filter ) }}</li>{{- end }}</ul>
 </body>
 </html>
