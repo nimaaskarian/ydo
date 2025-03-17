@@ -19,6 +19,7 @@ date-added:
 day:
     task: finish development in day 6th and chill in day 7th
     deps: [ydo]
+    auto-complete: true
     created-at: 2025-03-15T23:40:02.839592251+03:30
     due: 2025-03-17T00:00:00+03:30
 dry:
@@ -46,6 +47,7 @@ md-circular:
     created-at: 2025-03-14T17:04:50.975357064+03:30
 polish:
     task: fix minor issues and inconveniences
+    done: true
     created-at: 2025-03-14T17:05:36.369742212+03:30
 print-mode:
     task: add print mode config option
@@ -63,6 +65,7 @@ sort-date:
     created-at: 2025-03-14T17:03:28.501359453+03:30
 study-gh:
     task: study github cli's code
+    done: true
     created-at: 2025-03-16T09:06:03.762083839+03:30
 tests:
     task: add more tests
@@ -77,9 +80,11 @@ tfidf-conf:
     created-at: 2025-03-15T15:31:35.346741874+03:30
 webgui:
     task: add webgui
+    done: true
     created-at: 2025-03-14T16:28:47.101184579+03:30
+    done-at: 2025-03-18T03:07:30.231366478+03:30
 ydo:
     task: complete ydo development
-    deps: [webgui, cli, core, tests]
+    deps: [webgui, cli, core]
     auto-complete: true
     created-at: 2025-03-14T16:28:20.755500724+03:30

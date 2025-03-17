@@ -34,8 +34,9 @@ func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
     max_doneat := time.Time{}
     for _,key := range task.Deps {
       task := taskmap[key]
-      if task.DoneAt.After(max_doneat) {
-        max_doneat = task.DoneAt
+      doneat := task.FindDoneAt(taskmap)
+      if doneat.After(max_doneat) {
+        max_doneat = doneat
       }
       return max_doneat
     }
@@ -62,8 +63,8 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     done_at := task.FindDoneAt(taskmap)
     if !done_at.IsZero() {
       overdue := ""
-      if !task.Due.IsZero() && task.DoneAt.After(task.Due) {
-        overdue += ", " + utils.FormatDuration(task.DoneAt.Sub(task.Due)) + " overdue"
+      if !task.Due.IsZero() && done_at.After(task.Due) {
+        overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due)) + " overdue"
       }
       fmt.Printf("- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
     } else {

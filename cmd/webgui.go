@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"reflect"
 	"slices"
 	"strconv"
 
@@ -24,6 +25,7 @@ var embed_fs embed.FS
 var (
   address string
   port int
+  changed bool
 )
 
 var tmpls *template.Template
@@ -39,13 +41,22 @@ type Data struct {
   SeenKeys map[string]bool
   Filter map[string]bool
   Url string
+  Changed bool
+}
+
+func updateChanged() {
+  if !changed {
+    changed = !reflect.DeepEqual(old_taskmap, taskmap)
+  }
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+  updateChanged()
   err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
     SeenKeys: make(map[string]bool, len(taskmap) ),
     Keys: sorted_keys,
     Url: r.URL.String(),
+    Changed: changed,
   })
   if err != nil {
     slog.Error("Error in executing the template", "err", err)
@@ -92,8 +103,7 @@ func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   key := ps.ByName("key")
   task := taskmap[key]
   if !task.AutoComplete {
-    task.Done = true
-    taskmap[key] = task
+    taskmap.Do(key)
   }
 
   url := r.URL.Query().Get("redirect")
@@ -104,22 +114,30 @@ func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+  updateChanged()
   err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
     SeenKeys: make(map[string]bool, len(taskmap) ),
     Keys: sorted_keys,
     Filter: makeFilter(core.Task.IsNotDone),
     Url: r.URL.String(),
+    Changed: changed,
   })
   if err != nil {
     slog.Error("Error in executing the template", "err", err)
   }
 }
 
+func Write(cmd *cobra.Command) func (w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+  return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+    rootCmd.PersistentPostRun(cmd, []string{})
+    old_taskmap = utils.DeepCopyMap(taskmap)
+    changed = false
+  }
+}
+
 func UndoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   key := ps.ByName("key")
-  task := taskmap[key]
-  task.Done = false
-  taskmap[key] = task
+  taskmap.Undo(key)
   url := r.URL.Query().Get("redirect")
   if url == "" {
     url = "/"
@@ -154,6 +172,7 @@ var webguiCmd = &cobra.Command{
     router.GET("/", Index)
     router.GET("/todo", Todo)
     router.GET("/task/:key", Task)
+    router.PUT("/write", Write(cmd))
     router.PUT("/do/:key", DoTask)
     router.PUT("/undo/:key", UndoTask)
     router.Handler("GET", "/static/*filepath", http.StripPrefix("/static/", static_server))

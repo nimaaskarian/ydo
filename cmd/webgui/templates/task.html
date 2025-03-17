@@ -1,11 +1,15 @@
 {{- $task := index .Taskmap .Key }}
 {{- $isdone := $task.IsDone .Taskmap }}
-{{- $color_class := "bg-gruv-white-300 dark:bg-gruv-black-800 hover:bg-gruv-white-200 dark:hover:bg-gruv-black-700" }}
+{{- $color_class := "bg-gruv-white-300 dark:bg-gruv-black-700 hover:bg-gruv-white-200 dark:hover:bg-gruv-black-600" }}
 {{- if $task.AutoComplete }}
 {{- $color_class = "pl-0" }}
+{{- if $isdone}}
+{{- $color_class = "bg-gruv-green-dim text-gruv-white-100" }}
 {{- end }}
+{{- else }}
 {{- if $isdone}}
 {{- $color_class = "bg-gruv-green-dim hover:bg-gruv-green-100 text-gruv-white-100" }}
+{{- end }}
 {{- end }}
 <li class="m-2 list-disc list-outside {{- if $isdone}} list-image-[url(/static/check.svg)] {{end}}">
 <button
@@ -21,8 +25,8 @@ hx-put="/do/{{.Key}}?redirect={{.Url}}"
 {{- end}}
 >{{ $task.Task }}</button>
 {{- $is_seen := index .SeenKeys .Key }}
-{{- if and (not $is_seen) (ne (len $task.Deps) 0) }}
 {{- see .SeenKeys .Key }}
+{{- if and (not $is_seen) (ne (len $task.Deps) 0) }}
 {{template "tasklist.html" (dict "Keys" $task.Deps "SeenKeys" .SeenKeys "Taskmap" .Taskmap "Filter" $.Filter "Url" $.Url)}}
 {{- end }}
 </li>

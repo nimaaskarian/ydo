@@ -22,10 +22,9 @@ ydo.exe: ${ICONS} ${DEP_FILES} main.go ${TW_OUT}
 ${ICONS}: imgs/ydo.png imgs/resize.sh
 	./imgs/resize.sh
 
-.PHONY: ${TW_OUT} clean
 # thank you tailwind. we love you but don't write extra bytes in my css.
 # sorry if you got tailed
-${TW_OUT}:
+${TW_OUT}: $(wildcard cmd/webgui/*/*.html ) ${TW_IN}
 ifndef HAS_TW
 	npm install
 	npx @tailwindcss/cli -i ${TW_IN} -m | tail -n 1 > ${TW_OUT}

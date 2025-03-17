@@ -10,7 +10,20 @@
 <link rel="shortcut icon" href="/static/imgs/icon-48x48.png">
 <title>Ydo</title>
 </head>
-<body class="bg-gruv-white-100 text-gruv-black-700 dark:bg-gruv-black-900 dark:text-gruv-white-200">
+<body class="bg-gruv-white-100 text-gruv-black-800 dark:bg-gruv-black-800 dark:text-gruv-white-200">
+<div class="mb-4 p-2 flex items-center sticky bg-inherit top-0 drop-shadow-sm justify-between" hx-boost="true">
+<div class="items-center gap-4 flex justify-self-start px-4">
+<a href="/">
+<img src="/static/imgs/icon-180x180.png" alt="ydo logo" class="size-16">
+</a>
+<a href="/todo" class="text-gruv-blue-dim hover:underline">todos</a>
+</div class="flex">
+{{- if .Changed}}
+  <a href="/write" hx-put="/write" hx-swap="outerHTML" class="bg-gruv-blue-dim text-gruv-white-200 p-2 rounded">Write</a>
+{{- end }}
+</div>
+<div class="px-4">
 {{template "tasklist.html" $}}
+</div>
 </body>
 </html>
