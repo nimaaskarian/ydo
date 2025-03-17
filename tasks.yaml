@@ -31,6 +31,9 @@ due:
     task: add task due date
     done: true
     created-at: 2025-03-14T17:11:19.659795653+03:30
+find:
+    task: find another name for undo (like the old undo)
+    created-at: 2025-03-18T03:23:15.398178952+03:30
 markdown:
     task: fix markdown output
     deps: [sort-date, markdown-key, better-md, md-circular]
@@ -67,6 +70,9 @@ study-gh:
     task: study github cli's code
     done: true
     created-at: 2025-03-16T09:06:03.762083839+03:30
+svg-color:
+    task: fix check svg color
+    created-at: 2025-03-18T03:25:47.202755854+03:30
 tests:
     task: add more tests
     created-at: 2025-03-16T15:30:58.57412532+03:30
@@ -78,6 +84,10 @@ tfidf-conf:
     task: add tfidf generation config option
     done: true
     created-at: 2025-03-15T15:31:35.346741874+03:30
+undo:
+    task: add undo to webgui (like real undo)
+    deps: [find]
+    created-at: 2025-03-18T03:22:15.397799013+03:30
 webgui:
     task: add webgui
     done: true
