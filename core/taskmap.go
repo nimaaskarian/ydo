@@ -90,7 +90,7 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
 
   seen_keys := make(map[string]bool, len(taskmap))
   for _,key := range keys {
-    if seen_keys[key] {
+    if value, ok := seen_keys[key]; !ok || !value {
       taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, filter, config.Indent)
     }
   }
