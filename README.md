@@ -1,6 +1,7 @@
 <div align="center">
+   
+# ![ydo](https://raw.githubusercontent.com/nimaaskarian/ydo/refs/heads/master/cmd/webgui/static/imgs/icon-48x48.png)
 
-<h1> <img src="https://raw.githubusercontent.com/nimaaskarian/ydo/refs/heads/master/cmd/webgui/static/imgs/icon-32x32.png"/> ydo</h1>
 ![Github top language](https://img.shields.io/github/languages/top/nimaaskarian/ydo?style=flat&color=blue)
 
 ###### a frictionless, fast and featureful cli to-do application
