@@ -38,12 +38,14 @@ type Data struct {
   Keys []string
   SeenKeys map[string]bool
   Filter map[string]bool
+  Url string
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
     SeenKeys: make(map[string]bool, len(taskmap) ),
     Keys: sorted_keys,
+    Url: r.URL.String(),
   })
   if err != nil {
     slog.Error("Error in executing the template", "err", err)
@@ -94,7 +96,23 @@ func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
     taskmap[key] = task
   }
 
-  Index(w, r, ps)
+  url := r.URL.Query().Get("redirect")
+  if url == "" {
+    url = "/"
+  }
+  w.Header().Add("HX-Location", url)
+}
+
+func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+  err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
+    SeenKeys: make(map[string]bool, len(taskmap) ),
+    Keys: sorted_keys,
+    Filter: makeFilter(core.Task.IsNotDone),
+    Url: r.URL.String(),
+  })
+  if err != nil {
+    slog.Error("Error in executing the template", "err", err)
+  }
 }
 
 func UndoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -102,8 +120,11 @@ func UndoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   task := taskmap[key]
   task.Done = false
   taskmap[key] = task
-
-  Index(w, r, ps)
+  url := r.URL.Query().Get("redirect")
+  if url == "" {
+    url = "/"
+  }
+  w.Header().Add("HX-Location", url)
 }
 
 var sorted_keys []string
@@ -131,6 +152,7 @@ var webguiCmd = &cobra.Command{
 
     router := httprouter.New()
     router.GET("/", Index)
+    router.GET("/todo", Todo)
     router.GET("/task/:key", Task)
     router.PUT("/do/:key", DoTask)
     router.PUT("/undo/:key", UndoTask)

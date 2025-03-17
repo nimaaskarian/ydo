@@ -1,0 +1,8 @@
+<ul class="list-disc list-inside ml-4">
+{{- range .Keys }}
+{{if and (not (index $.SeenKeys .)) (or (eq $.Filter nil) (index $.Filter .))}}
+{{- template "task.html" (dict "Taskmap" $.Taskmap "Key" . "SeenKeys" $.SeenKeys
+  "Filter" $.Filter "Url" $.Url)  }}
+{{- end}}
+{{- end }}
+</ul>

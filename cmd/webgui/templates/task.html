@@ -1,19 +1,28 @@
-<label>
 {{- $task := index .Taskmap .Key }}
-<input
-hx-target="#main-list"
-hx-swap="outerHTML"
+{{- $isdone := $task.IsDone .Taskmap }}
+{{- $color_class := "bg-gruv-white-300 dark:bg-gruv-black-800 hover:bg-gruv-white-200 dark:hover:bg-gruv-black-700" }}
+{{- if $task.AutoComplete }}
+{{- $color_class = "pl-0" }}
+{{- end }}
+{{- if $isdone}}
+{{- $color_class = "bg-gruv-green-dim hover:bg-gruv-green-100 text-gruv-white-100" }}
+{{- end }}
+<li class="m-2 list-disc list-outside {{- if $isdone}} list-image-[url(/static/check.svg)] {{end}}">
+<button
+hx-target="body"
 type="checkbox"
-{{- if $task.IsDone .Taskmap}} checked="checked" hx-put="/undo/{{.Key}}" {{- else}}
-hx-put="/do/{{ .Key }}"
-{{- end}}> {{ $task.Task }}
+class="ease-out duration-100 p-2 rounded {{ $color_class }} {{- if not $task.AutoComplete}} cursor-pointer {{- end}}"
+{{- if not $task.AutoComplete}}
+{{- if $isdone}}
+hx-put="/undo/{{.Key}}?redirect={{.Url}}"
+{{- else }}
+hx-put="/do/{{.Key}}?redirect={{.Url}}"
+{{- end}}
+{{- end}}
+>{{ $task.Task }}</button>
 {{- $is_seen := index .SeenKeys .Key }}
-{{- if and (not $is_seen) (ne (len $task.Deps) 0) (or (eq .Filter nil) (index .Filter .Key)) }}
+{{- if and (not $is_seen) (ne (len $task.Deps) 0) }}
 {{- see .SeenKeys .Key }}
-<ul>
-{{- range $key := $task.Deps }}
-<li>{{- template "task.html" (dict "Taskmap" $.Taskmap "Key" $key "SeenKeys" $.SeenKeys ) }}</li>
+{{template "tasklist.html" (dict "Keys" $task.Deps "SeenKeys" .SeenKeys "Taskmap" .Taskmap "Filter" $.Filter "Url" $.Url)}}
 {{- end }}
-</ul>
-{{- end }}
-</label>
+</li>

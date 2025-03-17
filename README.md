@@ -123,3 +123,5 @@ then copy the binary to one of the directories under your `PATH` variable.
 
 # License
 GPL-3.0
+
+also the cmd/webgui/tailwind.css' theme section is the modernized version of [wheatjs' gruvbox tailwind theme](https://github.com/wheatjs/gruvbox-tailwind-theme/) 

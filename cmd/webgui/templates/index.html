@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/static/htmx.min.js" defer></script>
-<link href="/static/tw-out.min.css" defer></link>
+<link rel="stylesheet" href="/static/tw-out.min.css"></link>
+<link rel="icon" type="image/png" sizes="32x32" href="/static/imgs/icon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/imgs/icon-16x16.png">
+<link rel="shortcut icon" href="/static/imgs/icon-48x48.png">
 <title>Ydo</title>
 </head>
-<body>
-  <ul id="main-list">{{- range $key := .Keys }}<li>{{- template "task.html" (dict "Taskmap" $.Taskmap "Key" $key "SeenKeys" $.SeenKeys "Filter" $.Filter ) }}</li>{{- end }}</ul>
+<body class="bg-gruv-white-100 text-gruv-black-700 dark:bg-gruv-black-900 dark:text-gruv-white-200">
+{{template "tasklist.html" $}}
 </body>
 </html>
