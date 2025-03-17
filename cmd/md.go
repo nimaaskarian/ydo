@@ -31,12 +31,12 @@ var mdCmd = &cobra.Command{
       } else {
         for key, task := range taskmap {
           if task.Due == due_time {
-            task.PrintMarkdown(taskmap, 0, &[]string{}, key, nil, config.Markdown.Indent)
+            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, nil, config.Markdown.Indent)
           }
         }
       }
     } else {
-        seen_keys := make([]string, 0, len(keys))
+        seen_keys := make(map[string]bool, len(keys))
         for _, key := range keys {
           task, ok := taskmap[key];
           if !ok {
@@ -44,7 +44,7 @@ var mdCmd = &cobra.Command{
             os.Exit(1)
           }
           if due_time.IsZero() != (task.Due == due_time) {
-            task.PrintMarkdown(taskmap, 0, &seen_keys, key, nil, config.Markdown.Indent)
+            task.PrintMarkdown(taskmap, 0, seen_keys, key, nil, config.Markdown.Indent)
           }
         }
     }

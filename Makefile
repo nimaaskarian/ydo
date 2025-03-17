@@ -1,5 +1,7 @@
-no-windows: coverage.out ydo
-all: no-windows ydo.exe
+run: coverage.out ydo
+	./ydo ${ARGS}
+
+all: coverage.out ydo ydo.exe
 
 DEP_DIRS=core utils cmd
 DEP_FILES=$(foreach dir, ${DEP_DIRS}, $(wildcard $(dir)/*.go))

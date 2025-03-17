@@ -88,10 +88,10 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
     return taskmap[k1].CreatedAt.Compare(taskmap[k2].CreatedAt)
   })
 
-  seen_keys := make([]string, 0, len(taskmap))
+  seen_keys := make(map[string]bool, len(taskmap))
   for _,key := range keys {
-    if !slices.Contains(seen_keys, key) {
-      taskmap[key].PrintMarkdown(taskmap, 0, &seen_keys, key, filter, config.Indent)
+    if seen_keys[key] {
+      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, filter, config.Indent)
     }
   }
 }

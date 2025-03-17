@@ -64,6 +64,9 @@ sort-date:
 study-gh:
     task: study github cli's code
     created-at: 2025-03-16T09:06:03.762083839+03:30
+tests:
+    task: add more tests
+    created-at: 2025-03-16T15:30:58.57412532+03:30
 tfidf:
     task: add tfidf automatic key generation
     done: true
@@ -77,6 +80,6 @@ webgui:
     created-at: 2025-03-14T16:28:47.101184579+03:30
 ydo:
     task: complete ydo development
-    deps: [webgui, cli, core]
+    deps: [webgui, cli, core, tests]
     auto-complete: true
     created-at: 2025-03-14T16:28:20.755500724+03:30

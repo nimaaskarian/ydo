@@ -7,22 +7,33 @@ import (
 	"log/slog"
 	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"runtime"
 )
 
+const (
+  Windows = "windows"
+  Darwin = "darwin"
+)
+
+const (
+  IsWindows = runtime.GOOS == Windows
+  IsDarwin  = runtime.GOOS == Darwin
+)
+
 func ConfigDir() string {
   var base string;
-  switch runtime.GOOS {
-  case "windows":
+  if IsWindows {
     base = os.Getenv("APPDATA")
-  case "darwin":
+  } else if IsDarwin {
     base = filepath.Join(os.Getenv("HOME"), "Library", "Application Support")
-  default:
+  } else {
     if base=os.Getenv("XDG_CONFIG_HOME"); base == "" {
       base = filepath.Join(os.Getenv("HOME"), ".config")
     }
@@ -144,4 +155,18 @@ func DeepCopyMap[K comparable, V any](m map[K]V) map[K]V {
     out[key] = m[key]
   }
   return out
+}
+
+func OpenURL(url string) error {
+  if IsWindows {
+    return exec.Command("cmd.exe", "/C", "start "+url).Run()
+  }
+	if IsDarwin {
+		return exec.Command("open", url).Run()
+	}
+	cmd := exec.Command("xdg-open", url)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+	return cmd.Run()
 }

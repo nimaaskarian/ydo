@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
@@ -48,7 +47,7 @@ func (task Task) IsNotDone(taskmap TaskMap) bool {
   return !task.IsDone(taskmap)
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys *[]string, key string, filter func(task Task, taskmap TaskMap) bool, indent uint) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, filter func(task Task, taskmap TaskMap) bool, indent uint) {
   if filter != nil && !filter(taskmap[key], taskmap) {
     return
   }
@@ -84,10 +83,10 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys *[]string,
     fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }
   if seen_keys != nil  {
-    if slices.Contains(*seen_keys, key) {
+    if seen_keys[key] {
       return
     }
-    *seen_keys = append(*seen_keys, key)
+    seen_keys[key] = true
   }
   for _, key := range task.Deps {
     taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, filter, indent)

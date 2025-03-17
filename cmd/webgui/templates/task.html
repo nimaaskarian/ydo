@@ -1,0 +1,18 @@
+<label>
+{{- $task := index .Taskmap .Key }}
+<input
+hx-target="body"
+type="checkbox"
+{{- if $task.IsDone .Taskmap}} checked="checked" hx-put="/undo/{{.Key}}" {{- else}}
+hx-put="/do/{{ .Key }}"
+{{- end}}> {{ $task.Task }}
+{{- $is_seen := index .SeenKeys .Key }}
+{{- if and (not $is_seen) (ne (len $task.Deps) 0) (or (eq .Filter nil) (index .Filter .Key)) }}
+{{- see .SeenKeys .Key }}
+<ul>
+{{- range $key := $task.Deps }}
+<li>{{- template "task.html" (dict "Taskmap" $.Taskmap "Key" $key "SeenKeys" $.SeenKeys ) }}</li>
+{{- end }}
+</ul>
+{{- end }}
+</label>
