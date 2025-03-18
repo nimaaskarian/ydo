@@ -12,17 +12,21 @@
 </head>
 <body class="bg-gruv-white-100 text-gruv-black-800 dark:bg-gruv-black-800 dark:text-gruv-white-200">
 <div class="mb-4 p-2 flex items-center sticky bg-inherit top-0 drop-shadow-sm justify-between" hx-boost="true">
-<div class="items-center gap-4 flex justify-self-start px-4">
-<a href="/" title="home" aria-label="home" class="mr-4 size-16">
-<img src="/static/imgs/logo-light.svg" alt="ydo logo" class="dark:hidden block" />
-<img src="/static/imgs/logo-dark.svg" alt="ydo logo" class="hidden dark:block" />
-</a>
-<a href="/todo" aria-label="todo" class="dark:text-gruv-aqua-100 text-gruv-blue-200 hover:underline">todos</a>
-</div class="flex">
-{{- if .Changed}}
-  <a href="/write" hx-put="/write" hx-swap="outerHTML" class="dark:bg-gruv-aqua-100 bg-gruv-blue-200 dark:text-gruv-black-800 text-gruv-white-200 p-2 rounded">Write</a>
-{{- end }}
+  <div class="items-center gap-4 flex justify-self-start px-4 dark:text-gruv-aqua-100 text-gruv-blue-200 hover:underline">
+    <a href="/" title="home" aria-label="home" class="mr-4 size-16">
+    <img src="/static/imgs/logo-light.svg" alt="ydo logo" class="dark:hidden block" />
+    <img src="/static/imgs/logo-dark.svg" alt="ydo logo" class="hidden dark:block" />
+    </a>
+    <a href="/todo" aria-label="todo">todos</a>
+  </div>
+  <div class="flex content-end gap-4">
+    {{- if .Changed}}
+    <a href="/write" hx-put="/write" hx-swap="outerHTML" class="bg-gruv-blue-100 text-gruv-black-800 p-2 rounded font-bold">Write</a>
+    {{- end }}
+    <a href="/exit" hx-put="/exit" hx-swap="outerHTML" class="bg-gruv-red-200 text-gruv-white-200 p-2 rounded font-bold">Exit</a>
+  </div>
 </div>
+
 <div class="px-4">
 {{template "tasklist.html" $}}
 </div>

@@ -4,3 +4,4 @@ ydo
 ydo.exe
 node_modules/
 tw-out.*
+cmd/webgui/contrast-check.csv

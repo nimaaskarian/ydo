@@ -1,18 +1,23 @@
 {{- $task := index .Taskmap .Key }}
 {{- $isdone := $task.IsDone .Taskmap }}
-{{- $color_class := "bg-gruv-white-300 dark:bg-gruv-black-700 hover:bg-gruv-white-200 dark:hover:bg-gruv-black-600" }}
+{{- /* not auto completed and not done */}}
+{{- $color_class := "bg-gruv-white-300 hover:bg-gruv-white-200 dark:bg-gruv-black-700 dark:hover:bg-gruv-black-600" }}
 {{- if $task.AutoComplete }}
+{{- /* auto completed but not done */}}
 {{- $color_class = "pl-0" }}
 {{- if $isdone}}
-{{- $color_class = "bg-gruv-green-dim text-gruv-black-800" }}
+{{- /* auto completed and done */}}
+{{- $color_class = "bg-gruv-green-100 text-gruv-black-800" }}
 {{- end }}
 {{- else }}
 {{- if $isdone}}
-{{- $color_class = "bg-gruv-green-dim hover:bg-gruv-green-100 text-gruv-black-800" }}
+{{- /* not auto completed but done */}}
+{{- $color_class = "text-gruv-black-800 bg-gruv-green-100 hover:bg-gruv-green-50" }}
 {{- end }}
 {{- end }}
 <li class="m-2 {{- if $isdone}} list-image-[url(/static/imgs/check-light.svg)] dark:list-image-[url(/static/imgs/check-dark.svg)] {{end}}">
 <button
+aria-label="set as done"
 hx-target="body"
 type="checkbox"
 class="ease-out duration-100 p-2 rounded {{ $color_class }} {{- if not $task.AutoComplete}} cursor-pointer {{- end}}"
