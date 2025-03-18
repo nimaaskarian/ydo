@@ -96,14 +96,14 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
   }
 }
 
-func (taskmap TaskMap) NextKey() string {
+func (taskmap TaskMap) NextKey(current string) string {
   i := 1
   for {
     key := "t"+strconv.Itoa(i);
-    if _, ok := taskmap[key]; ok {
-      i++
-    } else {
+    if _, ok := taskmap[key]; (!ok || (current != "" && key == current)){
       return key
+    } else {
+      i++
     }
   }
 }
@@ -157,7 +157,7 @@ func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key
     }
   }
   slog.Info("Tfidf fallback to NextKey.")
-  return taskmap.NextKey()
+  return taskmap.NextKey(current_key)
 }
 
 func (taskmap TaskMap) ReplaceKey(old_key string, new_key string) string {

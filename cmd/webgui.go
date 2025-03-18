@@ -35,15 +35,6 @@ func init() {
   webguiCmd.Flags().IntVarP(&port, "port", "p", 8485, "port to listen and serve to")
 }
 
-type Data struct {
-  Taskmap core.TaskMap
-  Keys []string
-  SeenKeys map[string]bool
-  Filter map[string]bool
-  Url string
-  Changed bool
-}
-
 func updateChanged() {
   if !changed {
     changed = !reflect.DeepEqual(old_taskmap, taskmap)
@@ -52,11 +43,11 @@ func updateChanged() {
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   updateChanged()
-  err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
-    SeenKeys: make(map[string]bool, len(taskmap) ),
-    Keys: sorted_keys,
-    Url: r.URL.String(),
-    Changed: changed,
+  err := tmpls.ExecuteTemplate(w, "index.html", map[string]any { "Taskmap": taskmap,
+    "SeenKeys": make(map[string]bool, len(taskmap) ),
+    "Keys": sorted_keys,
+    "Url": r.URL.String(),
+    "Changed": changed,
   })
   if err != nil {
     slog.Error("Error in executing the template", "err", err)
@@ -77,6 +68,14 @@ func dict(args ...any) map[string]any {
   }
   return m
 }
+
+func add2map(m map[string]any, args ...any) map[string]any {
+  for i := 0; i < len(args); i += 2 {
+      m[args[i].(string)] = args[i+1]
+  }
+  return m
+}
+
 
 func see(seen map[string]bool, key string) string {
   seen[key] = true
@@ -115,12 +114,12 @@ func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   updateChanged()
-  err := tmpls.ExecuteTemplate(w, "index.html", Data { Taskmap: taskmap,
-    SeenKeys: make(map[string]bool, len(taskmap) ),
-    Keys: sorted_keys,
-    Filter: makeFilter(core.Task.IsNotDone),
-    Url: r.URL.String(),
-    Changed: changed,
+    err := tmpls.ExecuteTemplate(w, "index.html", map[string]any { "Taskmap": taskmap,
+    "SeenKeys": make(map[string]bool, len(taskmap) ),
+    "Keys": sorted_keys,
+    "Url": r.URL.String(),
+    "Changed": changed,
+    "Filter": makeFilter(core.Task.IsNotDone),
   })
   if err != nil {
     slog.Error("Error in executing the template", "err", err)
@@ -153,6 +152,7 @@ var webguiCmd = &cobra.Command{
     func_map := template.FuncMap{
       "dict": dict,
       "see": see,
+      "add2map": add2map,
     }
     tmpls = template.Must(template.New("").Funcs(func_map).ParseFS(embed_fs, "webgui/templates/*"))
     sorted_keys = make([]string, 0, len(taskmap))

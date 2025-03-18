@@ -29,13 +29,13 @@ func TestNextKey(t *testing.T) {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES));
   for i:=range 20 {
-    assert.Equal(t, taskmap.NextKey(), "t"+strconv.Itoa(4+i))
+    assert.Equal(t, taskmap.NextKey(""), "t"+strconv.Itoa(4+i))
     taskmap["t"+strconv.Itoa(4+i)] = Task{};
   }
   taskmap["t25"] = Task{};
-  assert.Equal(t, "t24", taskmap.NextKey())
+  assert.Equal(t, "t24", taskmap.NextKey(""))
   taskmap["t24"] = Task{};
-  assert.Equal(t, "t26", taskmap.NextKey())
+  assert.Equal(t, "t26", taskmap.NextKey(""))
 }
 
 func TestDo(t *testing.T) {

@@ -32,6 +32,6 @@ hx-put="/do/{{.Key}}?redirect={{.Url}}"
 {{- $is_seen := index .SeenKeys .Key }}
 {{- see .SeenKeys .Key }}
 {{- if and (not $is_seen) (ne (len $task.Deps) 0) }}
-{{template "tasklist.html" (dict "Keys" $task.Deps "SeenKeys" .SeenKeys "Taskmap" .Taskmap "Filter" $.Filter "Url" $.Url)}}
+{{template "tasklist.html" (add2map $ "Keys" $task.Deps)}}
 {{- end }}
 </li>

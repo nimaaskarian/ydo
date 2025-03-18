@@ -72,7 +72,9 @@ study-gh:
     created-at: 2025-03-16T09:06:03.762083839+03:30
 svg-color:
     task: fix check svg color
+    done: true
     created-at: 2025-03-18T03:25:47.202755854+03:30
+    done-at: 2025-03-18T19:26:22.742265864+03:30
 tests:
     task: add more tests
     created-at: 2025-03-16T15:30:58.57412532+03:30
