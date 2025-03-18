@@ -4,14 +4,14 @@
 {{- if $task.AutoComplete }}
 {{- $color_class = "pl-0" }}
 {{- if $isdone}}
-{{- $color_class = "bg-gruv-green-dim text-gruv-white-100" }}
+{{- $color_class = "bg-gruv-green-dim text-gruv-black-800" }}
 {{- end }}
 {{- else }}
 {{- if $isdone}}
-{{- $color_class = "bg-gruv-green-dim hover:bg-gruv-green-100 text-gruv-white-100" }}
+{{- $color_class = "bg-gruv-green-dim hover:bg-gruv-green-100 text-gruv-black-800" }}
 {{- end }}
 {{- end }}
-<li class="m-2 list-disc list-outside {{- if $isdone}} list-image-[url(/static/check.svg)] {{end}}">
+<li class="m-2 {{- if $isdone}} list-image-[url(/static/imgs/check-light.svg)] dark:list-image-[url(/static/imgs/check-dark.svg)] {{end}}">
 <button
 hx-target="body"
 type="checkbox"
