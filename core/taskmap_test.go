@@ -31,6 +31,11 @@ func TestTaskMapParseYaml(t *testing.T) {
   }
 }
 
+func TestTaskMapParseYamlFail(t *testing.T) {
+  taskmap := make(TaskMap)
+  assert.Panics(t, func () { ParseYaml(taskmap, []byte(GROCERIES+"laksjdflj;alsdrandombytesidk")); })
+}
+
 func TestNextKey(t *testing.T) {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES));
@@ -130,13 +135,18 @@ func TestHasTask(t *testing.T) {
 
 func  TestTfidfNextKey(t *testing.T) {
   config := TfidfConfig {Enabled: true};
-  taskmap := make(TaskMap)
-  ParseYaml(taskmap, []byte(HOMEWORKS))
-  key := taskmap.TfidfNextKey("buy some laptop for uni", config, "")
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(HOMEWORKS))
+  msg := "buy some laptop for uni"
+  key := tm.TfidfNextKey(msg, config, "")
+  tm[key] = Task { Task: msg}
   assert.Equal(t, "laptop", key)
+  key = tm.TfidfNextKey("buy some milk (fresh)", config, "milk")
+  assert.Equal(t, "milk", key)
   config = TfidfConfig {Enabled: false};
-  key = taskmap.TfidfNextKey("buy some laptop for uni", config, "")
+  key = tm.TfidfNextKey("buy some laptop for uni", config, "")
   assert.Equal(t, "t1", key)
+
 }
 
 func TestReplaceKeyInDeps(t *testing.T) {
@@ -194,4 +204,11 @@ func TestFindDoneAt(t *testing.T) {
   ParseYaml(tm, []byte(GROCERIES))
   tm.Do("t3")
   assert.Equal(t, tm["t3"].DoneAt, tm["t1"].FindDoneAt(tm))
+}
+
+func TestWipeDependenciesToKey(t *testing.T) {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(GROCERIES))
+  tm.WipeDependenciesToKey("t3")
+  assert.Equal(t, []string{"t2"}, tm["t1"].Deps)
 }

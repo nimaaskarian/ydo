@@ -18,6 +18,7 @@ func ParseYaml(obj any, input []byte) {
   err := yaml.Unmarshal([]byte(input), obj)
   if err != nil {
     slog.Error("Failed unmarshaling yaml", "err", err)
+    panic("Failed unmarshaling yaml");
   }
 }
 
