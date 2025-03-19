@@ -74,9 +74,9 @@ var addCmd = &cobra.Command{
         key = taskmap.TfidfNextKey(task, config.Tfidf, "")
       }
     }
-    taskmap.MustNotHaveTask(key)
+    taskmap.MustNotHave(key)
     for _,key := range deps {
-      taskmap.MustHaveTask(key)
+      taskmap.MustHave(key)
     }
     for _, dep_key := range dep_to {
       if task, ok := taskmap[dep_key]; ok {

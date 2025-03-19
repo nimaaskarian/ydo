@@ -19,7 +19,7 @@ var regenKeyCmd = &cobra.Command{
       for _,key := range keys {
         task := taskmap[key]
         new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, key)
-        taskmap.ReplaceKey(key, new_key)
+        taskmap.ReplaceKeyInDeps(key, new_key)
         taskmap[new_key] = task
       }
     } else {
@@ -29,7 +29,7 @@ var regenKeyCmd = &cobra.Command{
       for key := range taskmap {
         task := taskmap[key]
         new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, key)
-        taskmap.ReplaceKey(key, new_key)
+        taskmap.ReplaceKeyInDeps(key, new_key)
         taskmap[new_key] = task
       }
     }

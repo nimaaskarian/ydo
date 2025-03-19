@@ -148,8 +148,8 @@ return strconv.Itoa(rounded_seconds) + "s"
 }
 }
 
-func DeepCopyMap[K comparable, V any](m map[K]V) map[K]V {
-  out := make(map[K]V, len(m))
+func DeepCopyMap[K comparable, V any](m map[K]V) (out map[K]V) {
+  out = make(map[K]V, len(m))
   var key K
   for key = range m {
     out[key] = m[key]
@@ -169,4 +169,13 @@ func OpenURL(url string) error {
     Setpgid: true,
   }
   return cmd.Run()
+}
+
+func Filter[T any] (arr[]T, test func(T) bool) (out []T) {
+  for _, item := range arr {
+    if test(item) {
+      out = append(out, item)
+    }
+  }
+  return out
 }

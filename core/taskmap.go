@@ -113,18 +113,21 @@ type TfidfConfig struct {
   MinTaskCount int `yaml:"min-task-count,omitempty"`
 }
 
+// gets a config, if the config says the tfidf should be enabled, returns
+// tfidf. 
+// it skips current_key and also falls back to TaskMap.NextKey if config is
+// says it should be disabled
 func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key string) string {
   if config.Enabled && len(taskmap) >= config.MinTaskCount {
-    words := strings.Split(task, " ")
+    words := strings.Fields(task)
     word_count_in_docs := make(map[string]int, len(words))
     for key, task := range taskmap {
       if key == current_key {
         continue
       }
       for _, word := range words {
-        count := word_count_in_docs[word]
         if strings.Contains(task.Task, word) {
-          word_count_in_docs[word] = count + 1
+          word_count_in_docs[word] += 1
         }
       }
     }
@@ -160,7 +163,9 @@ func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key
   return taskmap.NextKey(current_key)
 }
 
-func (taskmap TaskMap) ReplaceKey(old_key string, new_key string) string {
+// replaces keys in dependencies of the whole list. returns the new key if the 
+// transition went good, the old key if not
+func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) string {
   if new_key != "" && new_key != old_key && !taskmap.HasTask(new_key) {
     for dep_key, task := range taskmap {
       index := slices.Index(task.Deps, old_key)
@@ -176,20 +181,14 @@ func (taskmap TaskMap) ReplaceKey(old_key string, new_key string) string {
   }
 }
 
-func (taskmap TaskMap) PrintKeys() {
-  for key := range taskmap {
-    fmt.Printf("%s\n", key)
-  }
-}
-
-func (taskmap TaskMap) MustHaveTask(key string) {
+func (taskmap TaskMap) MustHave(key string) {
   if !taskmap.HasTask(key) {
     slog.Error("No such task")
     os.Exit(1)
   }
 }
 
-func (taskmap TaskMap) MustNotHaveTask(key string) {
+func (taskmap TaskMap) MustNotHave(key string) {
   if taskmap.HasTask(key) {
     slog.Error("Task already exists", "key",key)
     os.Exit(1)

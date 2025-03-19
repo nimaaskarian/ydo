@@ -52,9 +52,9 @@ var editCmd = &cobra.Command{
     if key_regen {
       new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, key)
     }
-    taskmap.MustHaveTask(key)
+    taskmap.MustHave(key)
     for _,key := range deps {
-      taskmap.MustHaveTask(key)
+      taskmap.MustHave(key)
     }
     if remove_deps {
       task.Deps = make([]string, 0, len(deps))
@@ -74,7 +74,7 @@ var editCmd = &cobra.Command{
         slog.Error("No such task", "key", dep_key)
       }
     }
-    key = taskmap.ReplaceKey(key, new_key)
+    key = taskmap.ReplaceKeyInDeps(key, new_key)
     if auto_complete && no_auto_complete {
       slog.Error("Can't use both auto-complete and no-auto-complete flags at the same time")
       os.Exit(1)

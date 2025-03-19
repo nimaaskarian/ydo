@@ -1,8 +1,10 @@
 package core
 
 import (
-  "testing"
-  "github.com/stretchr/testify/assert"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const DATA = `
@@ -36,13 +38,17 @@ func ExampleTask_PrintMarkdown() {
   task.Deps = []string{};
   task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   task.Done = false;
+  task.DoneAt = time.Now().Add(-time.Hour*24)
+  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
+  task.Done = true;
   task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   task.Deps = []string{"2"};
-  task.Done = true;
+  task.Due = time.Now().Add(-time.Hour*24*2)
   task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries
-  // - [x] buy groceries
+  // - [x] buy groceries (1d ago)
+  // - [x] buy groceries (1d ago, 1d overdue)
   //    - [ ] 2:
 }
