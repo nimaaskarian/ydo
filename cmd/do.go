@@ -1,20 +1,20 @@
 package cmd
 
 import (
+	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
 func init() {
   rootCmd.AddCommand(doCmd)
-  doCmd.ValidArgsFunction = TaskKeyCompletionNotDone
+  doCmd.ValidArgsFunction = TaskKeyCompletionFilter(core.Task.IsNotDone)
 }
 
 var doCmd = &cobra.Command{
   Use: "do [tasks]",
   Short: "set tasks as completed",
-  Run: func(cmd *cobra.Command, args []string) {
-    NeedKeysCmd.Run(cmd, args)
+  Run: func(cmd *cobra.Command, keys []string) {
     if len(keys) > 0 {
       for _,key := range keys {
         taskmap.Do(key)

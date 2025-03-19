@@ -14,15 +14,14 @@ func init() {
   rootCmd.AddCommand(todoCmd)
   todoCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
   todoCmd.RegisterFlagCompletionFunc("due", DueCompletion)
-  todoCmd.ValidArgsFunction = TaskKeyCompletionNotDone
+  todoCmd.ValidArgsFunction = TaskKeyCompletionFilter(core.Task.IsNotDone)
 }
 
 var todoCmd = &cobra.Command{
   Aliases: []string{"t"},
   Use: "todo [tasks (optional)]",
   Short: "output to-do (unfinished) tasks as markdown",
-  Run: func(cmd *cobra.Command, args []string) {
-    NeedKeysCmd.Run(cmd, args)
+  Run: func(cmd *cobra.Command, keys []string) {
     var due_time time.Time
     if due != "" {
       due_time = utils.ParseDate(due)

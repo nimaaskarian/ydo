@@ -15,59 +15,26 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TaskKeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  taskmap = core.LoadTaskMap(tasks_path)
-  keys := make([]string, len(taskmap))
-  i := 0
-  for key := range taskmap {
-		if strings.HasPrefix(key, toComplete) {
-      keys[i] = key
-      i++
+func TaskKeyCompletionFilter(filter func(core.Task, core.TaskMap) bool) func (*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
+  return func (cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+    taskmap = core.LoadTaskMap(tasks_path)
+    keys := make([]string, len(taskmap))
+    i := 0
+    for key := range taskmap {
+      if (filter == nil || filter(taskmap[key], taskmap)) && strings.HasPrefix(key, toComplete) {
+        keys[i] = key
+        i++
+      }
     }
+    return keys, cobra.ShellCompDirectiveDefault
   }
-  return keys, cobra.ShellCompDirectiveDefault
 }
 
 func TaskKeyCompletionOnFirst(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
   if len(args) > 0 {
     return []string{}, cobra.ShellCompDirectiveDefault
   }
-  return TaskKeyCompletion(cmd, args, toComplete)
-}
-
-func TaskKeyCompletionDone(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  taskmap = core.LoadTaskMap(tasks_path)
-  keys := make([]string, len(taskmap))
-  i := 0
-  for key,task := range taskmap {
-		if task.IsDone(taskmap) && strings.HasPrefix(key, toComplete) {
-      keys[i] = key
-      i++
-    }
-  }
-  return keys, cobra.ShellCompDirectiveDefault
-}
-
-func TaskKeyCompletionNotDone(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  taskmap = core.LoadTaskMap(tasks_path)
-  keys := make([]string, len(taskmap))
-  i := 0
-  for key,task := range taskmap {
-		if !task.IsDone(taskmap) && strings.HasPrefix(key, toComplete) {
-      keys[i] = key
-      i++
-    }
-  }
-  return keys, cobra.ShellCompDirectiveDefault
-}
-
-var NeedKeysCmd = &cobra.Command{
-	Use:   "base [keys]",
-	Short: "Base command that takes non-flag arguments",
-	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		keys = args
-	},
+  return TaskKeyCompletionFilter(nil)(cmd, args, toComplete)
 }
 
 func PrintMarkdown(md_config core.MarkdownConfig) {
@@ -136,7 +103,6 @@ func (config *Config) SlogLevel() slog.Level {
 
 var (
   // global flags
-  keys []string
   tasks_path string
   config_path string
   dry_run bool
@@ -147,6 +113,8 @@ var (
   config Config
 
   rootCmd = &cobra.Command{
+  SilenceErrors: true,
+  SilenceUsage: true,
   Use:   "ydo",
   Short: "ydo is a frictionless and fast to-do app",
   Long: `Fast, featurefull and frictionless to-do app with a graph structure`,
@@ -168,7 +136,7 @@ var (
     old_taskmap = utils.DeepCopyMap(taskmap)
   },
   Run: func(cmd *cobra.Command, args []string) {
-      PrintMarkdown(config.Markdown)
+    PrintMarkdown(config.Markdown)
   },
   PersistentPostRun: func(cmd *cobra.Command, args []string) {
     if !reflect.DeepEqual(old_taskmap, taskmap) {

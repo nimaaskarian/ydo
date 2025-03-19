@@ -29,6 +29,24 @@ func (task Task) IsDone(taskmap TaskMap) bool {
   return task.Done
 }
 
+func (task *Task) Do() {
+  task.Done = true
+  task.DoneAt = time.Now()
+}
+
+func (task *Task) Undo() {
+  task.Done = false
+  task.DoneAt = time.Time{}
+}
+
+func (task Task) AddDep(tm TaskMap, key string) error {
+  if _, err := tm.GetTask(key); err != nil {
+    return err
+  }
+  task.Deps = append(task.Deps, key)
+  return nil
+}
+
 func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
   if task.AutoComplete {
     max_doneat := time.Time{}

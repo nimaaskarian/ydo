@@ -9,7 +9,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -34,44 +33,57 @@ func (taskmap TaskMap) WipeDependenciesToKey(key string) {
   }
 }
 
+type NoSuchTask struct {}
+func (e NoSuchTask) Error() string {
+  return "No such task"
+}
+
+func (taskmap TaskMap) GetTask(key string) (Task, error) {
+  task, ok := taskmap[key]
+  if !ok {
+    return task, NoSuchTask{}
+  }
+  return task, nil
+}
+
 func (taskmap TaskMap) HasTask(key string) bool {
   _, ok := taskmap[key]
   return ok
 }
 
-func (taskmap TaskMap) Do(key string) {
-  if entry, ok := taskmap[key]; ok {
-    entry.Done = true
-    entry.DoneAt = time.Now()
-    taskmap[key] = entry
-    slog.Info("Completed task","key" ,key, "task", entry.Task)
-  } else {
-    slog.Error("No such task")
-    os.Exit(1)
+func (taskmap TaskMap) Do(key string) error {
+  task, err := taskmap.GetTask(key)
+  if err != nil{
+    return err
   }
+  task.Do()
+  taskmap[key] = task
+  slog.Info("Completed task","key" ,key)
+  return nil
 }
 
-func (taskmap TaskMap) Undo(key string) {
-  if entry, ok := taskmap[key]; ok {
-    entry.Done = false
-    entry.DoneAt = time.Time{}
-    taskmap[key] = entry
-    slog.Info("Un-completed task","key" ,key, "task", entry.Task)
-  } else {
-    slog.Error("No such task")
-    os.Exit(1)
+func (taskmap TaskMap) Undo(key string) error {
+  task, err := taskmap.GetTask(key)
+  if err != nil{
+    return err
   }
+  task.Undo()
+  taskmap[key] = task
+  slog.Info("Un-completed task","key" ,key)
+  return nil
 }
 
-func PrintYaml(obj any) {
+func PrintYaml(obj any) error {
   s,err:=yaml.Marshal(obj)
   if err != nil {
     slog.Error("Failed marshaling yaml", "err", err)
+    return err
   }
   fmt.Printf("%s", s)
+  return nil
 }
 
-type MarkdownConfig struct  {
+type MarkdownConfig struct {
   Indent uint `yaml:",omitempty"`
   Mode string `yaml:",omitempty"`
 }
@@ -182,31 +194,18 @@ func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) string {
   }
 }
 
-func (taskmap TaskMap) MustHave(key string) {
-  if !taskmap.HasTask(key) {
-    slog.Error("No such task")
-    os.Exit(1)
-  }
-}
-
-func (taskmap TaskMap) MustNotHave(key string) {
-  if taskmap.HasTask(key) {
-    slog.Error("Task already exists", "key",key)
-    os.Exit(1)
-  }
-}
-
-func (taskmap TaskMap) Write(path string) {
+func (taskmap TaskMap) Write(path string) error {
   content, err := yaml.Marshal(taskmap)
   if err != nil {
     slog.Error("Failed converting the tasks to yaml.")
-    os.Exit(1)
+    return err
   }
-  if os.WriteFile(path, content, 0644) != nil {
+  if err := os.WriteFile(path, content, 0644); err != nil {
     slog.Error("Failed writing the tasks to file.", "path", path)
-    os.Exit(1)
+    return err
   }
   slog.Info("Wrote to file", "path", path)
+  return nil
 }
 
 func (taskmap TaskMap) DryWrite(path string) {

@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 	"testing"
 
@@ -59,17 +58,19 @@ func TestDo(t *testing.T) {
 }
 
 func TestUndo(t *testing.T) {
-  taskmap := make(TaskMap)
-  ParseYaml(taskmap, []byte(GROCERIES))
-  taskmap.Do("t2")
-  assert.True(t, taskmap["t2"].IsDone(taskmap))
-  taskmap.Undo("t2")
-  assert.True(t, taskmap["t2"].DoneAt.IsZero())
-  taskmap.Do("t3")
-  assert.True(t, taskmap["t3"].IsDone(taskmap))
-  taskmap.Undo("t3")
-  assert.False(t, taskmap["t3"].IsDone(taskmap))
-  assert.True(t, taskmap["t3"].DoneAt.IsZero())
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(GROCERIES))
+  assert.True(t, tm["t2"].IsDone(tm))
+  tm.Undo("t2")
+  assert.False(t, tm["t2"].IsDone(tm))
+}
+
+func TestUndoDoneAt(t *testing.T) {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(GROCERIES))
+  tm.Undo("t2")
+  fmt.Println(tm["t2"].DoneAt)
+  assert.True(t, tm["t2"].DoneAt.IsZero())
 }
 
 func TestDepIsDone(t *testing.T) {
@@ -146,7 +147,6 @@ func  TestTfidfNextKey(t *testing.T) {
   config = TfidfConfig {Enabled: false};
   key = tm.TfidfNextKey("buy some laptop for uni", config, "")
   assert.Equal(t, "t1", key)
-
 }
 
 func TestReplaceKeyInDeps(t *testing.T) {
@@ -164,39 +164,8 @@ func TestWriteAndLoad(t *testing.T) {
   tm.Write("test")
   tm2 := LoadTaskMap("test")
   assert.Equal(t, tm, tm2)
+  assert.Error(t, tm.Write(""))
   os.Remove("test")
-}
-
-func TestMustHave(t *testing.T) {
-  tm := make(TaskMap)
-  ParseYaml(tm, []byte(GROCERIES))
-  if os.Getenv("BE_CRASHER") == "1" {
-    tm.MustHave("t8")
-    return
-  }
-  cmd := exec.Command(os.Args[0], "-test.run=TestMustHave")
-  cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-  err := cmd.Run()
-  if e, ok := err.(*exec.ExitError); ok && !e.Success() {
-    return
-  }
-  t.Fatal("Crasher didn't crash")
-}
-
-func TestMustNotHave(t *testing.T) {
-  tm := make(TaskMap)
-  ParseYaml(tm, []byte(GROCERIES))
-  if os.Getenv("BE_CRASHER") == "1" {
-    tm.MustNotHave("t3")
-    return
-  }
-  cmd := exec.Command(os.Args[0], "-test.run=TestMustNotHave")
-  cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-  err := cmd.Run()
-  if e, ok := err.(*exec.ExitError); ok && !e.Success() {
-    return
-  }
-  t.Fatal("Crasher didn't crash.", "err:", err)
 }
 
 func TestFindDoneAt(t *testing.T) {

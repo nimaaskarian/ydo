@@ -10,15 +10,14 @@ import (
 
 func init() {
   rootCmd.AddCommand(yamlCmd)
-  yamlCmd.ValidArgsFunction = TaskKeyCompletion
+  yamlCmd.ValidArgsFunction = TaskKeyCompletionFilter(nil)
 }
 
 var yamlCmd = &cobra.Command{
   Aliases: []string{"y"},
   Use: "yaml [tasks (optional)]",
   Short: "output tasks as yaml",
-  Run: func(cmd *cobra.Command, args []string) {
-    NeedKeysCmd.Run(cmd, args)
+  Run: func(cmd *cobra.Command, keys []string) {
     if len(keys) == 0 {
       core.PrintYaml(taskmap)
     } else {

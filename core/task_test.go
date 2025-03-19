@@ -42,8 +42,8 @@ func ExampleTask_PrintMarkdown() {
   task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   task.Done = true;
   task.PrintMarkdown(nil, 0, nil, "", nil, 3)
-  task.Deps = []string{"2"};
   task.Due = time.Now().Add(-time.Hour*24*2)
+  task.Deps = []string{"2"};
   task.PrintMarkdown(nil, 0, nil, "", nil, 3)
   // Output:
   // - [x] buy groceries

@@ -7,14 +7,13 @@ import (
 
 func init() {
   rootCmd.AddCommand(regenKeyCmd)
-  regenKeyCmd.ValidArgsFunction = TaskKeyCompletion
+  regenKeyCmd.ValidArgsFunction = TaskKeyCompletionFilter(nil)
 }
 
 var regenKeyCmd = &cobra.Command{
   Use: "regen-key [tasks]",
   Short: "regen key with the automatic key generator (respects config file)",
-  Run: func(cmd *cobra.Command, args []string) {
-    NeedKeysCmd.Run(cmd, args)
+  Run: func(cmd *cobra.Command, keys []string) {
     if len(keys) > 0 {
       for _,key := range keys {
         task := taskmap[key]
