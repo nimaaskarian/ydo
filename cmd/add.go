@@ -93,18 +93,21 @@ var addCmd = &cobra.Command{
         return err
       }
     }
-    for _, dep_to := range dep_tos {
-      task, err := taskmap.GetTask(dep_to)
-      if err != nil {
-        return err
-      }
-      task.AddDep(taskmap, key)
-    }
     due_time, err := utils.ParseDate(due)
     if err != nil {
       return err
     }
     taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
+    for _, dep_to := range dep_tos {
+      task, err := taskmap.GetTask(dep_to)
+      if err != nil {
+        return err
+      }
+      if err := task.AddDep(taskmap, key); err != nil {
+        return err
+      }
+      taskmap[dep_to] = task
+    }
     fmt.Printf("Task %q added\n", key)
     slog.Debug("Added a task", "task", taskmap[key])
     return nil

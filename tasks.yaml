@@ -84,7 +84,20 @@ svg-color:
     done-at: 2025-03-18T19:26:22.742265864+03:30
 tests:
     task: add more tests
+    deps: [tests/core, tests/utils, tests/cmd]
+    auto-complete: true
     created-at: 2025-03-16T15:30:58.57412532+03:30
+tests/cmd:
+    task: add cmd tests
+    created-at: 2025-03-20T11:34:48.932953873+03:30
+tests/core:
+    task: add core tests
+    done: true
+    created-at: 2025-03-20T11:32:42.707136207+03:30
+    done-at: 2025-03-20T11:35:16.115830413+03:30
+tests/utils:
+    task: add utils tests
+    created-at: 2025-03-20T11:33:31.587651267+03:30
 tfidf:
     task: add tfidf automatic key generation
     done: true

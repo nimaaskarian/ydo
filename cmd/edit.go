@@ -74,6 +74,7 @@ var editCmd = &cobra.Command{
       if !slices.Contains(task.Deps, edit_key) {
         task.AddDep(taskmap, edit_key)
       }
+      taskmap[dep_key] = task
     }
     edit_key = taskmap.ReplaceKeyInDeps(edit_key, new_key)
     if auto_complete {
