@@ -70,14 +70,14 @@ func ReadYesNo(format string, a ...any) bool {
   }
 }
 
-func ParseDate(date string) (time.Time, error) {
-  if date == "" {
+func ParseDate(s string, now time.Time) (time.Time, error) {
+  if s == "" {
     return time.Time{}, nil
   }
-  now := time.Now()
-  date_time := strings.Split(date, "/")
-  var t time.Time
+  date_time := strings.Split(s, "/")
+  var time_duration time.Duration
   if len(date_time) == 2 {
+    var t time.Time
     switch date_time[1] {
     case "":
       t = time.Time{}
@@ -95,18 +95,19 @@ func ParseDate(date string) (time.Time, error) {
         return time.Time{}, fmt.Errorf("Invalid time %q. Time is a string with format HH:MM:SS, HH:MM or HH", date_time[1])
       }
     }
+    time_duration = time.Hour*time.Duration(t.Hour()) + time.Minute*time.Duration(t.Minute()) + time.Second*time.Duration(t.Second()) + time.Nanosecond*time.Duration(t.Nanosecond())
   }
-  today := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), now.Location())
+  today_with_time := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time_duration)
   weekday := now.Weekday()
   var target_weekday time.Weekday
 
   switch strings.ToLower(date_time[0]) {
   case "today":
-    return today, nil
+    return today_with_time, nil
   case "tomorrow":
-    return today.AddDate(0, 0, 1), nil
+    return today_with_time.AddDate(0, 0, 1), nil
   case "yesterday":
-    return today.AddDate(0, 0, -1), nil
+    return today_with_time.AddDate(0, 0, -1), nil
   case "sunday", "sun":
     target_weekday = time.Sunday
   case "monday", "mon":
@@ -124,23 +125,25 @@ func ParseDate(date string) (time.Time, error) {
   case "later":
     // max YYYY-MM-DD date possible
     return now.AddDate(1000, 0, 0), nil
-  case "next-year":
-    return today.AddDate(0, 1, 0), nil
-  case "next-month":
-    return today.AddDate(0, 0, 1), nil
+  case "nyear":
+    return today_with_time.AddDate(1, 0, 0), nil
+  case "nmonth":
+    return today_with_time.AddDate(0, 1, 0), nil
+  case "nweek":
+    return today_with_time.AddDate(0, 0, 7), nil
   default:
     date, err := time.Parse("2006-01-02", date_time[0])
     if err != nil {
       return date, fmt.Errorf("Invalid date %q. Date is a YY-MM-DD, weekday, yesterday, today, tomorrow or later", date_time[0])
     }
-    return date, nil
+    return date.Add(time.Duration(time_duration)), nil
   }
   day := 24*time.Hour
   count_days := (7 + target_weekday-weekday) % 7
   if count_days == 0 {
     count_days = 7
   }
-  return today.Add(time.Duration(count_days)*day), nil
+  return today_with_time.Add(time.Duration(count_days)*day), nil
 }
 
 func makeDatePartString(value uint64, indicator string) string {
@@ -148,6 +151,14 @@ func makeDatePartString(value uint64, indicator string) string {
     return fmt.Sprintf("%d%s", value, indicator)
   }
   return ""
+}
+
+func joinSpace(a,b string) string {
+  if b == "" {
+    return a
+  } else {
+    return a+" "+b
+  }
 }
 
 func FormatDuration(diff time.Duration) string {
@@ -166,22 +177,22 @@ func FormatDuration(diff time.Duration) string {
   months := makeDatePartString(rounded_months%12, "m")
   years := makeDatePartString(rounded_years, "y")
   if rounded_years > 0 {
-    return years+months
+    return joinSpace(years, months)
   }
   if rounded_months > 0 {
-    return months+weeks
+    return joinSpace(months, makeDatePartString(rounded_days%30, "d"))
   }
   if rounded_weeks > 0 {
-    return weeks+days
+    return joinSpace(weeks, days)
   }
   if rounded_days > 0 {
-    return days+hours
+    return joinSpace(days, hours)
   }
   if rounded_hours > 0 {
-    return hours+minutes
+    return joinSpace(hours, minutes)
   }
   if rounded_minutes > 0 {
-    return minutes+seconds
+    return joinSpace(minutes, seconds)
   }
   return fmt.Sprintf("%ds", rounded_seconds)
 }

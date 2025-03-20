@@ -7,6 +7,9 @@ cli:
     deps: [markdown, polish, dry]
     auto-complete: true
     created-at: 2025-03-14T16:29:10.768608377+03:30
+compile:
+    task: compile time directive for os specific builds (using go tags)
+    created-at: 2025-03-20T15:18:42.962923763+03:30
 core:
     task: complete core
     deps: [date-added, due, tfidf, tfidf-conf, print-mode]
@@ -37,6 +40,9 @@ due-enhanced:
 find:
     task: find another name for undo (like the old undo)
     created-at: 2025-03-18T03:23:15.398178952+03:30
+list:
+    task: list of done-ats
+    created-at: 2025-03-20T17:32:50.900545158+03:30
 markdown:
     task: fix markdown output
     deps: [sort-date, markdown-key, better-md, md-circular]
@@ -64,6 +70,10 @@ print-mode:
     done: true
     created-at: 2025-03-16T12:56:38.999617167+03:30
     done-at: 2025-03-16T13:42:07.98252852+03:30
+recuring:
+    task: recuring tasks
+    deps: [list]
+    created-at: 2025-03-20T17:32:31.703837402+03:30
 refactor:
     task: refactor and make the code clean
     deps: [ydo, study-gh]
@@ -97,7 +107,9 @@ tests/core:
     done-at: 2025-03-20T11:35:16.115830413+03:30
 tests/utils:
     task: add utils tests
+    done: true
     created-at: 2025-03-20T11:33:31.587651267+03:30
+    done-at: 2025-03-20T17:19:59.168797909+03:30
 tfidf:
     task: add tfidf automatic key generation
     done: true

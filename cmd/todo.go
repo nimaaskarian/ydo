@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
@@ -18,7 +20,7 @@ var todoCmd = &cobra.Command{
   Short: "output to-do (unfinished) tasks as markdown",
   ValidArgsFunction: TaskKeyCompletionFilter(core.Task.IsNotDone),
   RunE: func(cmd *cobra.Command, keys []string) error {
-    due_time, err := utils.ParseDate(due)
+    due_time, err := utils.ParseDate(due, time.Now())
     if err != nil {
       return err
     }

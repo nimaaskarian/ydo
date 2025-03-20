@@ -21,7 +21,7 @@ var mdCmd = &cobra.Command{
   Short: "output tasks as markdown (run with no args so it'd output all tasks like `ydo` does)",
   RunE: func(cmd *cobra.Command, keys []string) error {
     var due_time time.Time
-    due_time, err := utils.ParseDate(due)
+    due_time, err := utils.ParseDate(due, time.Now())
     if err != nil {
       return err
     }
