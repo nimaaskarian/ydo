@@ -22,7 +22,7 @@ tfidf bool
 )
 
 func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  return []string{
+  date := []string{
   "saturday",
   "sunday",
   "monday",
@@ -40,7 +40,25 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
   "today",
   "tomorrow",
   "yesterday",
-  }, cobra.ShellCompDirectiveDefault
+  "later",
+  }
+  time := []string {
+    "now",
+    "8:00",
+    "20:00",
+  }
+  var out []string
+  if strings.Contains(toComplete, "/") && !strings.HasPrefix(toComplete, "later/"){
+    out = make([]string, 0, len(time)*len(date))
+    for _, date := range date {
+      for _, time := range time {
+        out = append(out, date+"/"+time)
+      }
+    }
+  } else {
+    out = date
+  }
+  return out, cobra.ShellCompDirectiveDefault
 }
 
 func init() {
@@ -82,7 +100,10 @@ var addCmd = &cobra.Command{
       }
       task.AddDep(taskmap, key)
     }
-    due_time := utils.ParseDate(due)
+    due_time, err := utils.ParseDate(due)
+    if err != nil {
+      return err
+    }
     taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
     fmt.Printf("Task %q added\n", key)
     slog.Debug("Added a task", "task", taskmap[key])

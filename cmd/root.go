@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -37,17 +38,17 @@ func TaskKeyCompletionOnFirst(cmd *cobra.Command, args []string, toComplete stri
   return TaskKeyCompletionFilter(nil)(cmd, args, toComplete)
 }
 
-func PrintMarkdown(md_config core.MarkdownConfig) {
+func PrintMarkdown(md_config *core.MarkdownConfig) error {
   switch md_config.Mode {
   case "todo":
-    taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
+    return taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
   case "md":
-    taskmap.PrintMarkdown(nil, md_config)
+    return taskmap.PrintMarkdown(nil, md_config)
   default:
     if len(taskmap) >= 10 {
-      taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
+      return taskmap.PrintMarkdown(core.Task.IsNotDone, md_config)
     } else {
-      taskmap.PrintMarkdown(nil, md_config)
+      return taskmap.PrintMarkdown(nil, md_config)
     }
   }
 }
@@ -71,21 +72,18 @@ func (config *Config) ReadFile(path string) {
   }
 }
 
-func (config *Config) FirstFileAvailable() string {
+func (config *Config) FirstFileAvailable() (string, error) {
   for _, file := range config.Files {
     if _, err := os.Stat(file); err == nil {
-      return file
+      return file, nil
     }
   }
   if _, err := os.Stat(config_dir); err == nil {
     path := filepath.Join(config_dir, "tasks.yaml")
     slog.Info("No tasks file available. Using task file in default path", "path", path)
-    return path
+    return path, nil
   }
-  slog.Error("No tasks file available and the default path can't be used")
-  slog.Error("Because config directory doesn't exist and can't be created", "dir", config_dir)
-  os.Exit(1)
-  return ""
+  return "", errors.New("No file available")
 }
 
 func (config *Config) SlogLevel() slog.Level {
@@ -118,7 +116,7 @@ var (
   Use:   "ydo",
   Short: "ydo is a frictionless and fast to-do app",
   Long: `Fast, featurefull and frictionless to-do app with a graph structure`,
-  PersistentPreRun: func(cmd *cobra.Command, args []string) {
+  PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
     config = Config{};
     config.ReadFile(config_path)
     loglevel := config.SlogLevel()
@@ -127,27 +125,35 @@ var (
     slog.Info("Config file loaded", "path", config_path)
     slog.Info("Log level set", "loglevel", loglevel)
     if tasks_path == "" {
-      tasks_path = config.FirstFileAvailable()
+      var err error
+      tasks_path, err = config.FirstFileAvailable()
+      if err != nil {
+        return err
+      }
     }
     taskmap = core.LoadTaskMap(tasks_path)
     if taskmap == nil {
       taskmap = core.TaskMap{}
     }
     old_taskmap = utils.DeepCopyMap(taskmap)
+    return nil
   },
-  Run: func(cmd *cobra.Command, args []string) {
-    PrintMarkdown(config.Markdown)
+  RunE: func(cmd *cobra.Command, args []string) error {
+      return PrintMarkdown(&config.Markdown)
   },
-  PersistentPostRun: func(cmd *cobra.Command, args []string) {
+  PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
     if !reflect.DeepEqual(old_taskmap, taskmap) {
       slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
-      PrintMarkdown(config.Markdown)
+      if err := PrintMarkdown(&config.Markdown); err != nil {
+        return err
+      }
       if dry_run {
         taskmap.DryWrite(tasks_path)
       } else {
         taskmap.Write(tasks_path)
       }
     }
+    return nil
   },
 }
 )

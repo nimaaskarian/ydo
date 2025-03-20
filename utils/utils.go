@@ -46,7 +46,7 @@ func ConfigDir() string {
         return dir
       }
     }
-    slog.Error("Couldn't create config directory. Using the current directory.", "config_dir", dir)
+    slog.Error("Couldn't create config directory. Using the current directory.", "config_dir", ".")
     return "."
   }
   return dir
@@ -71,22 +71,43 @@ func ReadYesNo(format string, a ...any) bool {
   }
 }
 
-func ParseDate(date string) time.Time {
+func ParseDate(date string) (time.Time, error) {
   if date == "" {
-    return time.Time{}
+    return time.Time{}, nil
   }
   now := time.Now()
-  today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+  date_time := strings.Split(date, "/")
+  var t time.Time
+  if len(date_time) == 2 {
+    switch date_time[1] {
+    case "":
+      t = time.Time{}
+    case "now":
+      t = time.Date(0,0,0, now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+    default:
+      var err error
+      for _, format := range [...]string{"15:04:05", "15:04", "15"} {
+        t, err = time.Parse(format, date_time[1])
+        if err == nil {
+          break
+        }
+      }
+      if err != nil {
+        return time.Time{}, fmt.Errorf("Invalid time %q. Time is a string with format HH:MM:SS, HH:MM or HH", date_time[1])
+      }
+    }
+  }
+  today := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), now.Location())
   weekday := now.Weekday()
   var target_weekday time.Weekday
 
-  switch strings.ToLower(date) {
+  switch strings.ToLower(date_time[0]) {
   case "today":
-    return today
+    return today, nil
   case "tomorrow":
-    return today.Add(24*time.Hour)
+    return today.Add(24*time.Hour), nil
   case "yesterday":
-    return today.Add(-24*time.Hour)
+    return today.Add(-24*time.Hour), nil
   case "sunday", "sun":
     target_weekday = time.Sunday
   case "monday", "mon":
@@ -101,54 +122,63 @@ func ParseDate(date string) time.Time {
     target_weekday = time.Friday
   case "saturday", "sat":
     target_weekday = time.Saturday
+  case "later":
+    // max YYYY-MM-DD date possible
+    return time.Date(9999, 12, 30, 0,0,0,0,now.Location()), nil
   default:
-    date, err := time.Parse("2006-01-02", date)
+    date, err := time.Parse("2006-01-02", date_time[0])
     if err != nil {
-      slog.Error("Due date specified is invalid. Use YYYY-MM-DD format, today, tomorrow or a week day")
-      os.Exit(1)
+      return date, fmt.Errorf("Invalid date %q. Date is a YY-MM-DD, weekday, yesterday, today, tomorrow or later", date_time[0])
     }
-    return date
+    return date, nil
   }
   day := 24*time.Hour
   count_days := (7 + target_weekday-weekday) % 7
   if count_days == 0 {
     count_days = 7
   }
-  return today.Add(time.Duration(count_days)*day)
+  return today.Add(time.Duration(count_days)*day), nil
 }
 
 const (
 SecondsInMinutes = 60
-SecondsInHour   = 3600
-SecondsInDay    = 86400
-SecondsInWeek   = 604800
 )
 
 func FormatDuration(diff time.Duration) string {
-rounded_seconds := int(math.Round(diff.Seconds()))
-rounded_minutes := rounded_seconds / SecondsInMinutes
-rounded_hours := rounded_minutes / SecondsInMinutes
-rounded_days := rounded_hours / 24
-rounded_weeks := rounded_days / 7
-if rounded_weeks > 0 {
-return strconv.Itoa(rounded_weeks) + "w"
-} else if rounded_days > 0 {
-return strconv.Itoa(rounded_days) + "d"
-} else if rounded_hours > 0 {
-    minutes := rounded_minutes%60
-    if minutes != 0 {
-      return strconv.Itoa(rounded_hours) + "h" + strconv.Itoa(minutes) + "m"
-    }
-    return strconv.Itoa(rounded_hours) + "h"
-} else if rounded_minutes > 0 {
-    seconds := rounded_seconds%SecondsInMinutes
-    if seconds != 0 {
-      return strconv.Itoa(rounded_minutes) + "m" + strconv.Itoa(seconds) + "s"
-    }
-    return strconv.Itoa(rounded_minutes) + "m"
-} else {
-return strconv.Itoa(rounded_seconds) + "s"
-}
+  rounded_seconds := int(math.Round(diff.Seconds()))
+  rounded_minutes := rounded_seconds / SecondsInMinutes
+  rounded_hours := rounded_minutes / SecondsInMinutes
+  rounded_days := rounded_hours / 24
+  rounded_weeks := rounded_days / 7
+  rounded_months := rounded_days / 30
+  rounded_years := rounded_days / 365
+  if rounded_years > 0 {
+    return strconv.Itoa(rounded_years) + "y"
+  }
+  if rounded_months > 0 {
+    return strconv.Itoa(rounded_months) + "m"
+  }
+  if rounded_weeks > 0 {
+    return strconv.Itoa(rounded_weeks) + "w"
+  }
+  if rounded_days > 0 {
+    return strconv.Itoa(rounded_days) + "d"
+  }
+  if rounded_hours > 0 {
+      minutes := rounded_minutes%60
+      if minutes != 0 {
+        return strconv.Itoa(rounded_hours) + "h" + strconv.Itoa(minutes) + "min"
+      }
+      return strconv.Itoa(rounded_hours) + "h"
+  }
+  if rounded_minutes > 0 {
+      seconds := rounded_seconds%SecondsInMinutes
+      if seconds != 0 {
+        return strconv.Itoa(rounded_minutes) + "min" + strconv.Itoa(seconds) + "s"
+      }
+      return strconv.Itoa(rounded_minutes) + "min"
+  }
+  return strconv.Itoa(rounded_seconds) + "s"
 }
 
 func DeepCopyMap[K comparable, V any](m map[K]V) (out map[K]V) {

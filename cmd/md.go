@@ -19,18 +19,19 @@ func init() {
 var mdCmd = &cobra.Command{
   Use: "md [tasks (optional)]",
   Short: "output tasks as markdown (run with no args so it'd output all tasks like `ydo` does)",
-  Run: func(cmd *cobra.Command, keys []string) {
+  RunE: func(cmd *cobra.Command, keys []string) error {
     var due_time time.Time
-    if due != "" {
-      due_time = utils.ParseDate(due)
+    due_time, err := utils.ParseDate(due)
+    if err != nil {
+      return err
     }
     if len(keys) == 0 {
       if due_time.IsZero() {
-        taskmap.PrintMarkdown(nil, config.Markdown)
+        taskmap.PrintMarkdown(nil, &config.Markdown)
       } else {
         for key, task := range taskmap {
           if task.Due == due_time {
-            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, nil, config.Markdown.Indent)
+            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, nil, &config.Markdown)
           }
         }
       }
@@ -43,9 +44,10 @@ var mdCmd = &cobra.Command{
             os.Exit(1)
           }
           if due_time.IsZero() != (task.Due == due_time) {
-            task.PrintMarkdown(taskmap, 0, seen_keys, key, nil, config.Markdown.Indent)
+            task.PrintMarkdown(taskmap, 0, seen_keys, key, nil, &config.Markdown)
           }
         }
     }
+    return nil
   },
 }

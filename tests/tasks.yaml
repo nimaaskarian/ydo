@@ -1,0 +1,108 @@
+better-md:
+    task: improve markdown output
+    done: true
+    created-at: 2025-03-14T17:04:28.346380724+03:30
+cli:
+    task: complete frictionless cli
+    deps: [markdown, polish, dry]
+    auto-complete: true
+    created-at: 2025-03-14T16:29:10.768608377+03:30
+core:
+    task: complete core
+    deps: [date-added, due, tfidf, tfidf-conf, print-mode]
+    auto-complete: true
+    created-at: 2025-03-14T17:08:45.437914813+03:30
+date-added:
+    task: add task "date added"
+    done: true
+    created-at: 2025-03-14T17:10:43.529415478+03:30
+day:
+    task: finish development in day 6th and chill in day 7th
+    deps: [ydo]
+    auto-complete: true
+    created-at: 2025-03-15T23:40:02.839592251+03:30
+    due: 2025-03-17T00:00:00+03:30
+dry:
+    task: add dry-run flag
+    done: true
+    created-at: 2025-03-16T11:40:30.10367031+03:30
+    done-at: 2025-03-16T12:53:43.510923145+03:30
+due:
+    task: add task due date
+    done: true
+    created-at: 2025-03-14T17:11:19.659795653+03:30
+due-enhanced:
+    task: add a start and end due date for tasks to do in a defined interval (this week, next week, next  year, etc)
+    created-at: 2025-03-19T18:44:07.801574565+03:30
+find:
+    task: find another name for undo (like the old undo)
+    created-at: 2025-03-18T03:23:15.398178952+03:30
+markdown:
+    task: fix markdown output
+    deps: [sort-date, markdown-key, better-md, md-circular]
+    done: true
+    auto-complete: true
+    created-at: 2025-03-14T17:02:13.776832216+03:30
+markdown-key:
+    task: add key to markdown output
+    done: true
+    created-at: 2025-03-14T17:03:58.705663369+03:30
+md-circular:
+    task: improve fix markdown circular output
+    done: true
+    created-at: 2025-03-14T17:04:50.975357064+03:30
+performance:
+    task: improve performance by adding a better file structure (maps copy data)
+    created-at: 2025-03-19T18:24:44.795017339+03:30
+polish:
+    task: fix minor issues and inconveniences
+    done: true
+    created-at: 2025-03-14T17:05:36.369742212+03:30
+print-mode:
+    task: add print mode config option
+    done: true
+    created-at: 2025-03-16T12:56:38.999617167+03:30
+    done-at: 2025-03-16T13:42:07.98252852+03:30
+refactor:
+    task: refactor and make the code clean
+    deps: [ydo, study-gh]
+    created-at: 2025-03-16T09:04:51.630768648+03:30
+sort-date:
+    task: sort markdown based on date added instead of path
+    deps: [date-added]
+    done: true
+    created-at: 2025-03-14T17:03:28.501359453+03:30
+study-gh:
+    task: study github cli's code
+    done: true
+    created-at: 2025-03-16T09:06:03.762083839+03:30
+svg-color:
+    task: fix check svg color
+    done: true
+    created-at: 2025-03-18T03:25:47.202755854+03:30
+    done-at: 2025-03-18T19:26:22.742265864+03:30
+tests:
+    task: add more tests
+    created-at: 2025-03-16T15:30:58.57412532+03:30
+tfidf:
+    task: add tfidf automatic key generation
+    done: true
+    created-at: 2025-03-15T15:28:06.977334058+03:30
+tfidf-conf:
+    task: add tfidf generation config option
+    done: true
+    created-at: 2025-03-15T15:31:35.346741874+03:30
+undo:
+    task: add undo to webgui (like real undo)
+    deps: [find]
+    created-at: 2025-03-18T03:22:15.397799013+03:30
+webgui:
+    task: add webgui
+    done: true
+    created-at: 2025-03-14T16:28:47.101184579+03:30
+    done-at: 2025-03-18T03:07:30.231366478+03:30
+ydo:
+    task: complete ydo development
+    deps: [webgui, cli, core]
+    auto-complete: true
+    created-at: 2025-03-14T16:28:20.755500724+03:30

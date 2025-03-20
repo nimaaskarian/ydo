@@ -181,3 +181,10 @@ func TestWipeDependenciesToKey(t *testing.T) {
   tm.WipeDependenciesToKey("t3")
   assert.Equal(t, []string{"t2"}, tm["t1"].Deps)
 }
+
+func BenchmarkPrintMarkdown(b *testing.B) {
+  tm := LoadTaskMap("../tests/tasks.yaml")
+  for b.Loop() {
+    tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4})
+  }
+}

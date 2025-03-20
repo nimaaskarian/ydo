@@ -1,4 +1,4 @@
-run: coverage.out ydo
+run: coverage.out bench ydo
 	./ydo ${ARGS}
 
 all: coverage.out ydo ydo.exe
@@ -28,6 +28,10 @@ else
 	tailwindcss -i ${TW_IN} -m | tail -n 1 > ${TW_OUT}
 endif
 
+bench:
+	mv new.bench last.bench
+	go test ./... -bench=. -benchtime=20s -benchmem > tee new.bench
+	benchstat last.bench new.bench
 
 clean:
 	rm coverage.out ydo ydo.exe

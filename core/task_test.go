@@ -1,6 +1,7 @@
 package core
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -36,15 +37,16 @@ func ExampleTask_PrintMarkdown() {
   task := Task{};
   ParseYaml(&task, []byte(DATA));
   task.Deps = []string{};
-  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
+  config := MarkdownConfig{Indent: 3, file: os.Stdout}
+  task.PrintMarkdown(nil, 0, nil, "", nil, &config)
   task.Done = false;
   task.DoneAt = time.Now().Add(-time.Hour*24)
-  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
+  task.PrintMarkdown(nil, 0, nil, "", nil, &config)
   task.Done = true;
-  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
+  task.PrintMarkdown(nil, 0, nil, "", nil, &config)
   task.Due = time.Now().Add(-time.Hour*24*2)
   task.Deps = []string{"2"};
-  task.PrintMarkdown(nil, 0, nil, "", nil, 3)
+  task.PrintMarkdown(nil, 0, nil, "", nil, &config)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries

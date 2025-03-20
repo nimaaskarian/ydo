@@ -66,11 +66,11 @@ func (task Task) IsNotDone(taskmap TaskMap) bool {
   return !task.IsDone(taskmap)
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, filter func(task Task, taskmap TaskMap) bool, indent uint) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, filter func(task Task, taskmap TaskMap) bool, config *MarkdownConfig) {
   if filter != nil && !filter(taskmap[key], taskmap) {
     return
   }
-  for range depth*indent {
+  for range depth*config.Indent {
     fmt.Print(" ")
   }
   var print_key string
@@ -84,9 +84,9 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
       if !task.Due.IsZero() && done_at.After(task.Due) {
         overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due)) + " overdue"
       }
-      fmt.Printf("- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
+      fmt.Fprintf(config.file, "- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
     } else {
-      fmt.Printf("- [x] %s%s\n", print_key,task.Task)
+      fmt.Fprintf(config.file, "- [x] %s%s\n", print_key,task.Task)
     }
   } else {
     due_print := ""
@@ -99,7 +99,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
       }
       due_print += utils.FormatDuration(diff) + ")"
     }
-    fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
+    fmt.Fprintf(config.file, "- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }
   if seen_keys != nil  {
     if value, ok := seen_keys[key]; ok && value {
@@ -108,6 +108,6 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     seen_keys[key] = true
   }
   for _, key := range task.Deps {
-    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, filter, indent)
+    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, filter, config)
   }
 }

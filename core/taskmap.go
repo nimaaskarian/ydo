@@ -2,6 +2,7 @@ package core
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -86,12 +87,15 @@ func PrintYaml(obj any) error {
 type MarkdownConfig struct {
   Indent uint `yaml:",omitempty"`
   Mode string `yaml:",omitempty"`
+  file *os.File
 }
 
-func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) bool, config MarkdownConfig) {
+func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) bool, config *MarkdownConfig) error {
   if len(taskmap) == 0 {
-    fmt.Println("No tasks found")
-    return
+    return errors.New("No tasks found")
+  }
+  if config.file == nil {
+    config.file = os.Stdout
   }
   keys := make([]string, 0 ,len(taskmap))
   for key := range taskmap {
@@ -104,9 +108,10 @@ func (taskmap TaskMap) PrintMarkdown(filter func(task Task, taskmap TaskMap) boo
   seen_keys := make(map[string]bool, len(taskmap))
   for _,key := range keys {
     if value, ok := seen_keys[key]; !ok || !value {
-      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, filter, config.Indent)
+      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, filter, config)
     }
   }
+  return nil
 }
 
 func (taskmap TaskMap) NextKey(current string) string {
