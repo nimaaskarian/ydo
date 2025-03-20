@@ -9,7 +9,6 @@ import (
 "os"
 "os/exec"
 "path/filepath"
-"strconv"
 "strings"
 "syscall"
 "time"
@@ -105,9 +104,9 @@ func ParseDate(date string) (time.Time, error) {
   case "today":
     return today, nil
   case "tomorrow":
-    return today.Add(24*time.Hour), nil
+    return today.AddDate(0, 0, 1), nil
   case "yesterday":
-    return today.Add(-24*time.Hour), nil
+    return today.AddDate(0, 0, -1), nil
   case "sunday", "sun":
     target_weekday = time.Sunday
   case "monday", "mon":
@@ -124,7 +123,11 @@ func ParseDate(date string) (time.Time, error) {
     target_weekday = time.Saturday
   case "later":
     // max YYYY-MM-DD date possible
-    return time.Date(9999, 12, 30, 0,0,0,0,now.Location()), nil
+    return now.AddDate(1000, 0, 0), nil
+  case "next-year":
+    return today.AddDate(0, 1, 0), nil
+  case "next-month":
+    return today.AddDate(0, 0, 1), nil
   default:
     date, err := time.Parse("2006-01-02", date_time[0])
     if err != nil {
@@ -140,45 +143,47 @@ func ParseDate(date string) (time.Time, error) {
   return today.Add(time.Duration(count_days)*day), nil
 }
 
-const (
-SecondsInMinutes = 60
-)
+func makeDatePartString(value uint64, indicator string) string {
+  if value > 0 {
+    return fmt.Sprintf("%d%s", value, indicator)
+  }
+  return ""
+}
 
 func FormatDuration(diff time.Duration) string {
-  rounded_seconds := int(math.Round(diff.Seconds()))
-  rounded_minutes := rounded_seconds / SecondsInMinutes
-  rounded_hours := rounded_minutes / SecondsInMinutes
+  rounded_seconds := uint64(math.Round(diff.Seconds()))
+  rounded_minutes := rounded_seconds / 60
+  rounded_hours := rounded_minutes / 60
   rounded_days := rounded_hours / 24
   rounded_weeks := rounded_days / 7
   rounded_months := rounded_days / 30
   rounded_years := rounded_days / 365
+  seconds := makeDatePartString(rounded_seconds%60, "s")
+  minutes := makeDatePartString(rounded_minutes%60, "min")
+  hours := makeDatePartString(rounded_hours%24, "h")
+  days := makeDatePartString(rounded_days%7, "d")
+  weeks := makeDatePartString(rounded_weeks%4, "w")
+  months := makeDatePartString(rounded_months%12, "m")
+  years := makeDatePartString(rounded_years, "y")
   if rounded_years > 0 {
-    return strconv.Itoa(rounded_years) + "y"
+    return years+months
   }
   if rounded_months > 0 {
-    return strconv.Itoa(rounded_months) + "m"
+    return months+weeks
   }
   if rounded_weeks > 0 {
-    return strconv.Itoa(rounded_weeks) + "w"
+    return weeks+days
   }
   if rounded_days > 0 {
-    return strconv.Itoa(rounded_days) + "d"
+    return days+hours
   }
   if rounded_hours > 0 {
-      minutes := rounded_minutes%60
-      if minutes != 0 {
-        return strconv.Itoa(rounded_hours) + "h" + strconv.Itoa(minutes) + "min"
-      }
-      return strconv.Itoa(rounded_hours) + "h"
+    return hours+minutes
   }
   if rounded_minutes > 0 {
-      seconds := rounded_seconds%SecondsInMinutes
-      if seconds != 0 {
-        return strconv.Itoa(rounded_minutes) + "min" + strconv.Itoa(seconds) + "s"
-      }
-      return strconv.Itoa(rounded_minutes) + "min"
+    return minutes+seconds
   }
-  return strconv.Itoa(rounded_seconds) + "s"
+  return fmt.Sprintf("%ds", rounded_seconds)
 }
 
 func DeepCopyMap[K comparable, V any](m map[K]V) (out map[K]V) {
