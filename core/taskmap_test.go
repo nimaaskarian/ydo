@@ -104,23 +104,31 @@ func ExamplePrintYaml() {
   // homework:
   //     task: do uni practice
   //     deps: [study, project]
+  //     created-at: 2024-01-01T00:00:00+03:30
   // milk:
   //     task: buy some milk
+  //     created-at: 2024-01-01T11:30:00+03:30
   // project:
   //     task: do the hobby project
+  //     created-at: 2024-01-01T11:00:00+03:30
   // study:
   //     task: study for the uni exam
+  //     created-at: 2024-01-01T10:00:00+03:30
 }
 
 const HOMEWORKS = `homework:
     task: do uni practice
     deps: [study, project]
+    created-at: 2024-01-01T00:00:00+03:30
 study:
     task: study for the uni exam
+    created-at: 2024-01-01T10:00:00+03:30
 project:
     task: do the hobby project
+    created-at: 2024-01-01T11:00:00+03:30
 milk:
     task: buy some milk
+    created-at: 2024-01-01T11:30:00+03:30
 `
 
 func TestHasTask(t *testing.T) {
@@ -153,9 +161,14 @@ func TestReplaceKeyInDeps(t *testing.T) {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES))
   fmt.Println(taskmap["t1"].Deps)
-  taskmap.ReplaceKeyInDeps("t2", "milk")
+  key := taskmap.ReplaceKeyInDeps("t2", "milk")
   expected := []string{"t3", "milk"}
   assert.Equal(t, expected, taskmap["t1"].Deps)
+  assert.Equal(t, "milk", key)
+
+  key = taskmap.ReplaceKeyInDeps("t3", "")
+  assert.Equal(t, expected, taskmap["t1"].Deps)
+  assert.Equal(t, "t3", key)
 }
 
 func TestWriteAndLoad(t *testing.T) {
@@ -196,4 +209,21 @@ func TestAddDep(t *testing.T) {
   assert.Error(t, task.AddDep(tm, "coco"))
   task.AddDep(tm, "milk")
   assert.Equal(t,[]string{"study", "project", "milk"}, task.Deps)
+}
+
+func TestEmptyTaskMapMarkdownError(t *testing.T) {
+  tm := make(TaskMap)
+  assert.Error(t, tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4}))
+}
+
+func ExampleTaskMap_PrintMarkdown() {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(HOMEWORKS))
+  tm.Do("study")
+  tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4})
+  // Output:
+  // - [ ] homework: do uni practice
+  //     - [x] study: study for the uni exam (0s ago)
+  //     - [ ] project: do the hobby project
+  // - [ ] milk: buy some milk
 }
