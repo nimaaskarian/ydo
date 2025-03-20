@@ -53,6 +53,7 @@ md-circular:
     created-at: 2025-03-14T17:04:50.975357064+03:30
 performance:
     task: improve performance by adding a better file structure (maps copy data)
+    deps: [refactor, tests]
     created-at: 2025-03-19T18:24:44.795017339+03:30
 polish:
     task: fix minor issues and inconveniences

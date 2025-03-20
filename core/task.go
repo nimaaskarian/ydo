@@ -39,7 +39,7 @@ func (task *Task) Undo() {
   task.DoneAt = time.Time{}
 }
 
-func (task Task) AddDep(tm TaskMap, key string) error {
+func (task *Task) AddDep(tm TaskMap, key string) error {
   if _, err := tm.GetTask(key); err != nil {
     return err
   }

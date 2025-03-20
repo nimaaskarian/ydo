@@ -188,3 +188,12 @@ func BenchmarkPrintMarkdown(b *testing.B) {
     tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4})
   }
 }
+
+func TestAddDep(t *testing.T) {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(HOMEWORKS))
+  task := tm["homework"]
+  assert.Error(t, task.AddDep(tm, "coco"))
+  task.AddDep(tm, "milk")
+  assert.Equal(t,[]string{"study", "project", "milk"}, task.Deps)
+}

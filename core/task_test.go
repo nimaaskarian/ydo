@@ -33,6 +33,15 @@ func TestIsDone(t *testing.T) {
   assert.False(t, task.IsDone(nil))
 }
 
+func TestIsNotDone(t *testing.T) {
+  task := Task{};
+  ParseYaml(&task, []byte(DATA));
+  assert.False(t, task.IsNotDone(nil))
+  task.Done = false
+  assert.True(t, task.IsNotDone(nil))
+}
+
+
 func ExampleTask_PrintMarkdown() {
   task := Task{};
   ParseYaml(&task, []byte(DATA));
@@ -45,6 +54,7 @@ func ExampleTask_PrintMarkdown() {
   task.Done = true;
   task.PrintMarkdown(nil, 0, nil, "", nil, &config)
   task.Due = time.Now().Add(-time.Hour*24*2)
+  task.PrintMarkdown(nil, 0, nil, "", Task.IsDone, &config)
   task.Deps = []string{"2"};
   task.PrintMarkdown(nil, 0, nil, "", nil, &config)
   // Output:
