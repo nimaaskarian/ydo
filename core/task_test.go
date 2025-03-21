@@ -47,23 +47,21 @@ func ExampleTask_PrintMarkdown() {
   ParseYaml(&task, []byte(DATA));
   task.Deps = []string{};
   config := MarkdownConfig{Indent: 3, file: os.Stdout}
-  var count uint
-  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
+  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
   task.Done = false;
   task.DoneAt = time.Now().Add(-time.Hour*24)
-  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
+  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
   task.Done = true;
-  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
+  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
   task.Due = time.Now().Add(-time.Hour*24*2)
   config_done := config
   config_done.Filter = Task.IsDone
-  task.PrintMarkdown(nil, 0, nil, "", &count, &config_done)
+  task.PrintMarkdown(nil, 0, nil, "",nil, &config_done)
   config_limit := config
   config_limit.Limit = 1
   task.Deps = []string{"2"};
-  count = 0
-  task.PrintMarkdown(nil, 0, nil, "", &count, &config_limit)
-  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
+  task.PrintMarkdown(nil, 0, map[string]bool{}, "",nil, &config_limit)
+  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries

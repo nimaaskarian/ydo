@@ -63,7 +63,7 @@ func MarkdownFilter(md_config *core.MarkdownConfig) core.MarkdownFilter {
   case "md":
     return nil
   default:
-    if uint(len(taskmap)) >= md_config.Limit {
+    if len(taskmap) >= md_config.Limit {
       return core.Task.IsNotDone
     } else {
       return nil

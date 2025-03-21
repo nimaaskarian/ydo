@@ -66,11 +66,14 @@ func (task Task) IsNotDone(taskmap TaskMap) bool {
   return !task.IsDone(taskmap)
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string,print_count *uint, config *MarkdownConfig) {
+func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string,filtered *int, config *MarkdownConfig) {
   if config.Filter != nil && !config.Filter(taskmap[key], taskmap) {
+    if filtered != nil {
+      *filtered += 1
+    }
     return
   }
-  if config.Limit != 0 && *print_count >= config.Limit {
+  if config.Limit != 0 && len(seen_keys) >= config.Limit {
     return
   }
   for range depth*config.Indent {
@@ -104,7 +107,6 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     }
     fmt.Fprintf(config.file, "- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }
-  *print_count += 1;
   if seen_keys != nil  {
     if value, ok := seen_keys[key]; ok && value {
       return
@@ -112,6 +114,6 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     seen_keys[key] = true
   }
   for _, key := range task.Deps {
-    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key, print_count, config)
+    taskmap[key].PrintMarkdown(taskmap, depth+1, seen_keys, key,filtered, config)
   }
 }

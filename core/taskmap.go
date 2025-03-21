@@ -89,7 +89,7 @@ type MarkdownFilter func(task Task, taskmap TaskMap) bool;
 type MarkdownConfig struct {
   Indent uint `yaml:",omitempty"`
   Mode string `yaml:",omitempty"`
-  Limit uint `yaml:",omitempty"`
+  Limit int `yaml:",omitempty"`
   Filter MarkdownFilter
   file *os.File
 }
@@ -111,11 +111,16 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   })
 
   seen_keys := make(map[string]bool, len(taskmap))
-  var print_count uint
+  filtered := 0
   for _,key := range keys {
     if value, ok := seen_keys[key]; !ok || !value {
-      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key,&print_count, config)
+      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, &filtered, config)
     }
+  }
+  tasks := len(taskmap)-filtered
+  shown := len(seen_keys)
+  if tasks > shown {
+    fmt.Fprintf(config.file, "%d tasks, %d shown\n", tasks, shown)
   }
   return nil
 }
