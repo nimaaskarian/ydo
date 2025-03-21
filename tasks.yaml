@@ -40,6 +40,9 @@ due-enhanced:
 find:
     task: find another name for undo (like the old undo)
     created-at: 2025-03-18T03:23:15.398178952+03:30
+jalali:
+    task: add jalali date
+    created-at: 2025-03-21T12:16:22.281575469+03:30
 list:
     task: list of done-ats
     created-at: 2025-03-20T17:32:50.900545158+03:30

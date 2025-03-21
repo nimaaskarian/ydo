@@ -198,7 +198,7 @@ func TestWipeDependenciesToKey(t *testing.T) {
 func BenchmarkPrintMarkdown(b *testing.B) {
   tm := LoadTaskMap("../tests/tasks.yaml")
   for b.Loop() {
-    tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4})
+    tm.PrintMarkdown(&MarkdownConfig{Indent: 4})
   }
 }
 
@@ -213,14 +213,14 @@ func TestAddDep(t *testing.T) {
 
 func TestEmptyTaskMapMarkdownError(t *testing.T) {
   tm := make(TaskMap)
-  assert.Error(t, tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4}))
+  assert.Error(t, tm.PrintMarkdown(&MarkdownConfig{Indent: 4}))
 }
 
 func ExampleTaskMap_PrintMarkdown() {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(HOMEWORKS))
   tm.Do("study")
-  tm.PrintMarkdown(nil, &MarkdownConfig{Indent: 4})
+  tm.PrintMarkdown(&MarkdownConfig{Indent: 4})
   // Output:
   // - [ ] homework: do uni practice
   //     - [x] study: study for the uni exam (0s ago)

@@ -25,13 +25,15 @@ var mdCmd = &cobra.Command{
     if err != nil {
       return err
     }
+    md_config := config.Markdown
+    md_config.Filter = nil
     if len(keys) == 0 {
       if due_time.IsZero() {
-        taskmap.PrintMarkdown(nil, &config.Markdown)
+        taskmap.PrintMarkdown(&md_config)
       } else {
         for key, task := range taskmap {
           if task.Due == due_time {
-            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, nil, &config.Markdown)
+            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, &md_config)
           }
         }
       }
@@ -44,7 +46,7 @@ var mdCmd = &cobra.Command{
             os.Exit(1)
           }
           if due_time.IsZero() != (task.Due == due_time) {
-            task.PrintMarkdown(taskmap, 0, seen_keys, key, nil, &config.Markdown)
+            task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config)
           }
         }
     }

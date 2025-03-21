@@ -24,13 +24,15 @@ var todoCmd = &cobra.Command{
     if err != nil {
       return err
     }
+    todo_config := config.Markdown
+    todo_config.Filter = core.Task.IsNotDone
+    taskmap.PrintMarkdown(&todo_config)
     if len(keys) == 0 {
       if due_time.IsZero() {
-        taskmap.PrintMarkdown(core.Task.IsNotDone, &config.Markdown)
       } else {
         for key, task := range taskmap {
           if task.Due == due_time {
-            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, core.Task.IsNotDone, &config.Markdown)
+            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, &todo_config)
           }
         }
       }
@@ -42,7 +44,7 @@ var todoCmd = &cobra.Command{
           return err
         }
         if due_time.IsZero() != (task.Due == due_time) {
-          task.PrintMarkdown(taskmap, 0, seen_keys, key, core.Task.IsNotDone, &config.Markdown)
+          task.PrintMarkdown(taskmap, 0, seen_keys, key, &todo_config)
         }
       }
     }
