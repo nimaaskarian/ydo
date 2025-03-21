@@ -230,7 +230,7 @@ func (taskmap TaskMap) DryWrite(path string) {
 
 func LoadTaskMap(path string) TaskMap {
   slog.Info("Task file loaded.", "path", path)
-  taskmap := make(TaskMap)
+  taskmap := TaskMap{}
   content, _ := os.ReadFile(path)
   ParseYaml(taskmap, content)
   return taskmap

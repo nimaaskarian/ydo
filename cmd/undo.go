@@ -21,11 +21,10 @@ var undoCmd = &cobra.Command{
         taskmap.Undo(key)
       }
     } else {
-      if !utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ")  {
-        return
-      }
-      for key := range taskmap {
-        taskmap.Undo(key)
+      if always_yes || utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ")  {
+        for key := range taskmap {
+          taskmap.Undo(key)
+        }
       }
     }
   },

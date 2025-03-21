@@ -51,10 +51,9 @@ var rmCmd = &cobra.Command{
         delete_task(taskmap, key)
       }
     } else {
-      if !utils.ReadYesNo("WARN This will DELETE ALL THE TASKS. ARE YOU REALLY SURE? (yes/no) ")  {
-        return
+      if always_yes || utils.ReadYesNo("WARN This will DELETE ALL THE TASKS. ARE YOU REALLY SURE? (yes/no) ")  {
+        taskmap = make(core.TaskMap)
       }
-      taskmap = make(core.TaskMap)
     }
   },
 }

@@ -20,11 +20,10 @@ var doCmd = &cobra.Command{
         taskmap.Do(key)
       }
     } else {
-      if !utils.ReadYesNo("This will set all tasks as completed. ARE YOU REALLY SURE? (yes/no) ")  {
-        return
-      }
-      for key := range taskmap {
-        taskmap.Do(key)
+      if always_yes || utils.ReadYesNo("This will set all tasks as completed. ARE YOU REALLY SURE? (yes/no) ")  {
+        for key := range taskmap {
+          taskmap.Do(key)
+        }
       }
     }
   },
