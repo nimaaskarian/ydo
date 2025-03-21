@@ -27,25 +27,20 @@ var todoCmd = &cobra.Command{
     todo_config := config.Markdown
     todo_config.Filter = core.Task.IsNotDone
     taskmap.PrintMarkdown(&todo_config)
+    todo_config.Filter = func(task core.Task, taskmap core.TaskMap) bool {
+      return due_time.IsZero() != (task.Due == due_time) && task.IsNotDone(taskmap)
+    }
     if len(keys) == 0 {
-      if due_time.IsZero() {
-      } else {
-        for key, task := range taskmap {
-          if task.Due == due_time {
-            task.PrintMarkdown(taskmap, 0, map[string]bool{}, key, &todo_config)
-          }
-        }
-      }
+      taskmap.PrintMarkdown(&todo_config)
     } else {
+      var count uint
       seen_keys := make(map[string]bool, len(keys))
       for _, key := range keys {
         task, err := taskmap.GetTask(key)
         if err != nil {
           return err
         }
-        if due_time.IsZero() != (task.Due == due_time) {
-          task.PrintMarkdown(taskmap, 0, seen_keys, key, &todo_config)
-        }
+        task.PrintMarkdown(taskmap, 0, seen_keys, key, &count, &todo_config)
       }
     }
     return nil

@@ -47,22 +47,28 @@ func ExampleTask_PrintMarkdown() {
   ParseYaml(&task, []byte(DATA));
   task.Deps = []string{};
   config := MarkdownConfig{Indent: 3, file: os.Stdout}
-  task.PrintMarkdown(nil, 0, nil, "", &config)
+  var count uint
+  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
   task.Done = false;
   task.DoneAt = time.Now().Add(-time.Hour*24)
-  task.PrintMarkdown(nil, 0, nil, "", &config)
+  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
   task.Done = true;
-  task.PrintMarkdown(nil, 0, nil, "", &config)
+  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
   task.Due = time.Now().Add(-time.Hour*24*2)
   config_done := config
   config_done.Filter = Task.IsDone
-  task.PrintMarkdown(nil, 0, nil, "", &config_done)
+  task.PrintMarkdown(nil, 0, nil, "", &count, &config_done)
+  config_limit := config
+  config_limit.Limit = 1
   task.Deps = []string{"2"};
-  task.PrintMarkdown(nil, 0, nil, "", &config)
+  count = 0
+  task.PrintMarkdown(nil, 0, nil, "", &count, &config_limit)
+  task.PrintMarkdown(nil, 0, nil, "", &count, &config)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries
   // - [x] buy groceries (1d ago)
+  // - [x] buy groceries (1d ago, 1d overdue)
   // - [x] buy groceries (1d ago, 1d overdue)
   //    - [ ] 2:
 }

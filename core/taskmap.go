@@ -89,6 +89,7 @@ type MarkdownFilter func(task Task, taskmap TaskMap) bool;
 type MarkdownConfig struct {
   Indent uint `yaml:",omitempty"`
   Mode string `yaml:",omitempty"`
+  Limit uint `yaml:",omitempty"`
   Filter MarkdownFilter
   file *os.File
 }
@@ -105,13 +106,15 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
     keys = append(keys, key)
   }
   slices.SortFunc(keys, func(k1, k2 string) int {
-    return taskmap[k1].CreatedAt.Compare(taskmap[k2].CreatedAt)
+    t1, t2 := taskmap[k1], taskmap[k2]
+    return 2*(t1.Due.Compare(t2.Due))+t1.CreatedAt.Compare(t2.CreatedAt)
   })
 
   seen_keys := make(map[string]bool, len(taskmap))
+  var print_count uint
   for _,key := range keys {
     if value, ok := seen_keys[key]; !ok || !value {
-      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, config)
+      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key,&print_count, config)
     }
   }
   return nil

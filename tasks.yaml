@@ -80,7 +80,9 @@ recuring:
 refactor:
     task: refactor and make the code clean
     deps: [ydo, study-gh]
+    done: true
     created-at: 2025-03-16T09:04:51.630768648+03:30
+    done-at: 2025-03-21T12:49:43.325140782+03:30
 sort-date:
     task: sort markdown based on date added instead of path
     deps: [date-added]

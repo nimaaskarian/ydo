@@ -50,6 +50,7 @@ var (
       taskmap = core.TaskMap{}
     }
     old_taskmap = utils.DeepCopyMap(taskmap)
+    config.Markdown.Filter = MarkdownFilter(&config.Markdown)
     return nil
   },
   RunE: func(cmd *cobra.Command, args []string) error {

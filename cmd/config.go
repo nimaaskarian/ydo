@@ -27,7 +27,6 @@ func (config *Config) ReadFile(path string) {
   if config.Markdown.Indent == 0 {
     config.Markdown.Indent = 3
   }
-  config.Markdown.Filter = MarkdownFilter(&config.Markdown)
 }
 
 func (config *Config) FirstFileAvailable() (string, error) {
@@ -64,7 +63,7 @@ func MarkdownFilter(md_config *core.MarkdownConfig) core.MarkdownFilter {
   case "md":
     return nil
   default:
-    if len(taskmap) >= 10 {
+    if uint(len(taskmap)) >= md_config.Limit {
       return core.Task.IsNotDone
     } else {
       return nil
