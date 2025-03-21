@@ -123,13 +123,13 @@ func ParseDate(s string, now time.Time) (time.Time, error) {
   case "saturday", "sat":
     target_weekday = time.Saturday
   case "later":
-    // max YYYY-MM-DD date possible
+    // yeah. like you gonna do that in a thousand years
     return now.AddDate(1000, 0, 0), nil
-  case "nyear":
+  case "next-year", "ny":
     return today_with_time.AddDate(1, 0, 0), nil
-  case "nmonth":
+  case "next-month","nm":
     return today_with_time.AddDate(0, 1, 0), nil
-  case "nweek":
+  case "next-week", "nw":
     return today_with_time.AddDate(0, 0, 7), nil
   default:
     date, err := time.Parse("2006-01-02", date_time[0])

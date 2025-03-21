@@ -210,6 +210,15 @@ func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) string {
   }
 }
 
+func (taskmap TaskMap) HasKeyInDeps(key string) bool {
+  for _, task := range taskmap {
+    if slices.Contains(task.Deps, key) {
+      return true
+    }
+  }
+  return false
+}
+
 func (taskmap TaskMap) Write(path string) error {
   content, err := yaml.Marshal(taskmap)
   if err != nil {
@@ -224,13 +233,14 @@ func (taskmap TaskMap) Write(path string) error {
   return nil
 }
 
-func (taskmap TaskMap) DryWrite(path string) {
+func (taskmap TaskMap) DryWrite(path string) error {
   _, err := yaml.Marshal(taskmap)
   if err != nil {
     slog.Error("Failed converting the tasks to yaml.")
-    os.Exit(1)
+    return err
   }
   slog.Info("(dry) Wrote to file", "path", path)
+  return nil
 }
 
 func LoadTaskMap(path string) TaskMap {

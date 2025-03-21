@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
@@ -97,13 +98,19 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
   } else {
     due_print := ""
     if !task.Due.IsZero() {
-      diff := task.Due.Sub(time.Now())
+      now := time.Now()
+      diff := task.Due.Sub(now)
       due_print = " ("
-      if diff < 0 {
-        due_print = " (-"
-        diff = - diff
+      if task.Due.Add(-diff).Compare(now) != 0 {
+        due_print += strconv.Itoa(task.Due.Year() - now.Year()) + "y"
+      } else {
+        if diff < 0 {
+          due_print = " (-"
+          diff = - diff
+        }
+        due_print += utils.FormatDuration(diff)
       }
-      due_print += utils.FormatDuration(diff) + ")"
+      due_print += ")"
     }
     fmt.Fprintf(config.file, "- [ ] %s%s%s\n", print_key,task.Task, due_print)
   }

@@ -54,9 +54,9 @@ func TestParseDateRelative(t *testing.T) {
     {"tue", "2025-03-25 00:00:00"},
     {"wed", "2025-03-26 00:00:00"},
     {"2025-12-19/now", "2025-12-19 17:00:00"},
-    {"nyear/8", "2026-03-20 8:00:00"},
-    {"nmonth/8", "2025-04-20 8:00:00"},
-    {"nweek/8", "2025-03-27 8:00:00"},
+    {"ny/8", "2026-03-20 8:00:00"},
+    {"nm/8", "2025-04-20 8:00:00"},
+    {"nw/now", "2025-03-27 17:00:00"},
     {"later", "3025-03-20 17:00:00"},
   }
   for _, test := range tests {
@@ -70,34 +70,34 @@ func TestParseDateRelative(t *testing.T) {
 }
 
 func TestFormatDuration(t *testing.T) {
-  expected := FormatDuration(time.Hour + time.Second * 59)
-  assert.Equal(t, "1h", expected)
-  expected = FormatDuration(time.Hour + time.Second*32 + time.Minute*12)
-  assert.Equal(t, "1h 12min", expected)
+  actual := FormatDuration(time.Hour + time.Second * 59)
+  assert.Equal(t, "1h", actual)
+  actual = FormatDuration(time.Hour + time.Second*32 + time.Minute*12)
+  assert.Equal(t, "1h 12min", actual)
 
-  expected = FormatDuration(time.Hour*49 + time.Second*32 + time.Minute*12)
-  assert.Equal(t, "2d 1h", expected)
+  actual = FormatDuration(time.Hour*49 + time.Second*32 + time.Minute*12)
+  assert.Equal(t, "2d 1h", actual)
 
-  expected = FormatDuration(time.Hour*72 + time.Second*32 + time.Minute*12)
-  assert.Equal(t, "3d", expected)
+  actual = FormatDuration(time.Hour*72 + time.Second*32 + time.Minute*12)
+  assert.Equal(t, "3d", actual)
 
-  expected = FormatDuration(time.Hour*245 + time.Second*32 + time.Minute*12)
-  assert.Equal(t, "1w 3d", expected)
-  expected = FormatDuration(time.Hour*3600)
-  assert.Equal(t, "5m", expected)
-  expected = FormatDuration(time.Hour*3600*2)
-  assert.Equal(t, "10m", expected)
-  expected = FormatDuration(time.Hour*7920)
-  assert.Equal(t, "11m", expected)
-  expected = FormatDuration(time.Hour*7944)
-  assert.Equal(t, "11m 1d", expected)
-  expected = FormatDuration(time.Hour*12360 + time.Second*32 + time.Minute*12 + 24*time.Hour)
-  assert.Equal(t, "1y 5m", expected)
-  expected = FormatDuration(time.Second*10)
-  assert.Equal(t, "10s", expected)
-  expected = FormatDuration(time.Minute*10 + time.Second*10)
-  assert.Equal(t, "10min 10s", expected)
-  expected = FormatDuration(0)
-  assert.Equal(t, "0s", expected)
+  actual = FormatDuration(time.Hour*245 + time.Second*32 + time.Minute*12)
+  assert.Equal(t, "1w 3d", actual)
+  actual = FormatDuration(time.Hour*3600)
+  assert.Equal(t, "5m", actual)
+  actual = FormatDuration(time.Hour*3600*2)
+  assert.Equal(t, "10m", actual)
+  actual = FormatDuration(time.Hour*7920)
+  assert.Equal(t, "11m", actual)
+  actual = FormatDuration(time.Hour*7944)
+  assert.Equal(t, "11m 1d", actual)
+  actual = FormatDuration(time.Hour*12360 + time.Second*32 + time.Minute*12 + 24*time.Hour)
+  assert.Equal(t, "1y 5m", actual)
+  actual = FormatDuration(time.Second*10)
+  assert.Equal(t, "10s", actual)
+  actual = FormatDuration(time.Minute*10 + time.Second*10)
+  assert.Equal(t, "10min 10s", actual)
+  actual = FormatDuration(0)
+  assert.Equal(t, "0s", actual)
 }
 

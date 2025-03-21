@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"log/slog"
-	"os"
-	"slices"
-
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
@@ -18,42 +14,32 @@ func init() {
   rmCmd.ValidArgsFunction = TaskKeyCompletionFilter(nil)
 }
 
-func delete_task(taskmap core.TaskMap, key string) {
-  if task, ok := taskmap[key]; ok{
-    delete(taskmap, key)
-    taskmap.WipeDependenciesToKey(key)
-    if cascade {
-      for _, dep := range task.Deps {
-        should_remove := true
-        for _, task := range taskmap {
-          if slices.Contains(task.Deps, dep) {
-            should_remove = false
-            break
-          }
-        }
-        if should_remove {
-          delete(taskmap, dep)
-        }
-      }
-    }
-  } else {
-    slog.Error("No such task", "key", key)
-    os.Exit(1)
-  }
-}
 var rmCmd = &cobra.Command{
   Aliases: []string{"del", "delete"},
   Use: "rm [tasks]",
   Short: "remove tasks completely from the data (also removes it from all the dependency lists)",
-  Run: func(cmd *cobra.Command, keys []string) {
+  RunE: func(cmd *cobra.Command, keys []string) error {
     if len(keys) > 0 {
       for _,key := range keys {
-        delete_task(taskmap, key)
+        task, err := taskmap.GetTask(key)
+        if err != nil {
+          return err
+        }
+        delete(taskmap, key)
+        taskmap.WipeDependenciesToKey(key)
+        if cascade {
+          for _, dep := range task.Deps {
+            if !taskmap.HasKeyInDeps(dep) {
+              delete(taskmap, dep)
+            }
+          }
+        }
       }
     } else {
       if always_yes || utils.ReadYesNo("WARN This will DELETE ALL THE TASKS. ARE YOU REALLY SURE? (yes/no) ")  {
         taskmap = make(core.TaskMap)
       }
     }
+    return nil
   },
 }
