@@ -47,26 +47,28 @@ func ExampleTask_PrintMarkdown() {
   ParseYaml(&task, []byte(DATA));
   task.Deps = []string{};
   config := MarkdownConfig{Indent: 3, file: os.Stdout}
-  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
+  task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Done = false;
   task.DoneAt = time.Now().Add(-time.Hour*24)
-  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
+  task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Done = true;
-  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
+  task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Due = time.Now().Add(-time.Hour*24*2)
   config_done := config
   config_done.Filter = Task.IsDone
-  task.PrintMarkdown(nil, 0, nil, "",nil, &config_done)
+  task.PrintMarkdown(nil, 0, nil, "", &config_done)
   config_limit := config
   config_limit.Limit = 1
   task.Deps = []string{"2"};
-  task.PrintMarkdown(nil, 0, map[string]bool{}, "",nil, &config_limit)
-  task.PrintMarkdown(nil, 0, nil, "",nil, &config)
+  task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit)
+  task.Undo()
+  task.Due = time.Now().AddDate(10000, 0, 0)
+  task.PrintMarkdown(nil, 0, nil, "", &config)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries
   // - [x] buy groceries (1d ago)
   // - [x] buy groceries (1d ago, 1d overdue)
-  // - [x] buy groceries (1d ago, 1d overdue)
+  // - [ ] buy groceries (10000y)
   //    - [ ] 2:
 }

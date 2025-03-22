@@ -37,7 +37,7 @@ var mdCmd = &cobra.Command{
           if err != nil {
             return err
           }
-          task.PrintMarkdown(taskmap, 0, seen_keys, key, nil, &md_config)
+          task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config)
         }
     }
     return nil

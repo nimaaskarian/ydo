@@ -21,18 +21,8 @@ var rmCmd = &cobra.Command{
   RunE: func(cmd *cobra.Command, keys []string) error {
     if len(keys) > 0 {
       for _,key := range keys {
-        task, err := taskmap.GetTask(key)
-        if err != nil {
+        if err := taskmap.Delete(key, cascade); err != nil {
           return err
-        }
-        delete(taskmap, key)
-        taskmap.WipeDependenciesToKey(key)
-        if cascade {
-          for _, dep := range task.Deps {
-            if !taskmap.HasKeyInDeps(dep) {
-              delete(taskmap, dep)
-            }
-          }
         }
       }
     } else {

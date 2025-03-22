@@ -216,6 +216,23 @@ func TestEmptyTaskMapMarkdownError(t *testing.T) {
   assert.Error(t, tm.PrintMarkdown(&MarkdownConfig{Indent: 4}))
 }
 
+func TestCascadeDeps(t *testing.T) {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(HOMEWORKS))
+
+  tm["homework"].CascadeOrphanDeps(tm)
+  assert.Equal(t, 4, len(tm))
+  task := tm["homework"]
+  delete(tm, "homework")
+  assert.Equal(t, 3, len(tm))
+  task.CascadeOrphanDeps(tm)
+  assert.Equal(t, 1, len(tm))
+  for key := range tm {
+    assert.Equal(t, "milk", key)
+  }
+}
+
+
 func ExampleTaskMap_PrintMarkdown() {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(HOMEWORKS))

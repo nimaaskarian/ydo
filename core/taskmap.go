@@ -24,14 +24,28 @@ func ParseYaml(obj any, input []byte) {
 
 type TaskMap map[string]Task;
 
-func (taskmap TaskMap) WipeDependenciesToKey(key string) {
-    for each_key, task := range taskmap {
+func (taskmap TaskMap) Delete(key string, cascade bool) error {
+  task, err := taskmap.GetTask(key)
+  if err != nil {
+    return err
+  }
+  delete(taskmap, key)
+  taskmap.WipeDependenciesToKey(key)
+  if cascade {
+    task.CascadeOrphanDeps(taskmap)
+  }
+  return nil
+}
+
+func (taskmap TaskMap) WipeDependenciesToKey(key string) error {
+  for each_key, task := range taskmap {
     index := slices.Index(task.Deps, key)
     if index != -1 {
       task.Deps = slices.Delete(task.Deps, index, index+1)
       taskmap[each_key] = task
     }
   }
+  return nil
 }
 
 type NoSuchTask struct {}
@@ -111,16 +125,15 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   })
 
   seen_keys := make(map[string]bool, len(taskmap))
-  filtered := 0
+  count := 0
   for _,key := range keys {
     if value, ok := seen_keys[key]; !ok || !value {
-      taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, &filtered, config)
+      count += taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, config)
     }
   }
-  tasks := len(taskmap)-filtered
   shown := len(seen_keys)
-  if tasks > shown {
-    fmt.Fprintf(config.file, "%d tasks, %d shown\n", tasks, shown)
+  if count > shown {
+    fmt.Fprintf(config.file, "%d tasks, %d shown\n", count, shown)
   }
   return nil
 }

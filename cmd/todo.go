@@ -38,7 +38,7 @@ var todoCmd = &cobra.Command{
         if err != nil {
           return err
         }
-        task.PrintMarkdown(taskmap, 0, seen_keys, key, nil, &todo_config)
+        task.PrintMarkdown(taskmap, 0, seen_keys, key, &todo_config)
       }
     }
     return nil

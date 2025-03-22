@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 	"strings"
 	"time"
 
@@ -19,6 +21,7 @@ key string
 due string
 auto_complete bool
 tfidf bool
+taskmsg string 
 )
 
 func init() {
@@ -38,18 +41,29 @@ var addCmd = &cobra.Command{
   Aliases: []string{"a"},
   Use: "add [your task here yay]",
   Short: "add a task",
-  Args: cobra.MinimumNArgs(1),
+  Args: func(cmd *cobra.Command, args []string) error {
+    if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
+      return err
+    }
+    has_non_empty := slices.ContainsFunc(args, func (arg string) bool {
+      return arg != ""
+    })
+    if !has_non_empty {
+      return errors.New("Task cannot be empty")
+    }
+    taskmsg = strings.Join(args, " ")
+    return nil
+  },
   RunE: func(cmd *cobra.Command, args []string) error {
-    task := strings.Join(args, " ")
     if tfidf {
-      key = taskmap.TfidfNextKey(task, core.TfidfConfig {Enabled: true}, "")
+      key = taskmap.TfidfNextKey(taskmsg, core.TfidfConfig {Enabled: true}, "")
     } else {
       if key == "" {
-        key = taskmap.TfidfNextKey(task, config.Tfidf, "")
+        key = taskmap.TfidfNextKey(taskmsg, config.Tfidf, "")
       }
     }
-    for _,key := range deps {
-      if _, err := taskmap.GetTask(key); err != nil {
+    for _,dep := range deps {
+      if _, err := taskmap.GetTask(dep); err != nil {
         return err
       }
     }
@@ -57,7 +71,7 @@ var addCmd = &cobra.Command{
     if err != nil {
       return err
     }
-    taskmap[key] = core.Task {Task: task, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
+    taskmap[key] = core.Task {Task: taskmsg, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
     for _, dep_to := range dep_tos {
       task, err := taskmap.GetTask(dep_to)
       if err != nil {

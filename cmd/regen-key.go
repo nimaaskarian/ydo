@@ -13,10 +13,13 @@ func init() {
 var regenKeyCmd = &cobra.Command{
   Use: "regen-key [tasks]",
   Short: "regen key with the automatic key generator (respects config file)",
-  Run: func(cmd *cobra.Command, keys []string) {
+  RunE: func(cmd *cobra.Command, keys []string) error {
     if len(keys) > 0 {
       for _,key := range keys {
-        task := taskmap[key]
+        task, err := taskmap.GetTask(key)
+        if err != nil {
+          return err
+        }
         new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, key)
         taskmap.ReplaceKeyInDeps(key, new_key)
         taskmap[new_key] = task
@@ -31,5 +34,6 @@ var regenKeyCmd = &cobra.Command{
         }
       }
     }
+    return nil
   },
 }
