@@ -28,4 +28,6 @@ var undoCmd = &cobra.Command{
       }
     }
   },
+  PostRunE: SaveChanges,
+  PreRun: UpdateOldTaskMap,
 }

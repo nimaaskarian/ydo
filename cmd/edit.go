@@ -91,4 +91,6 @@ var editCmd = &cobra.Command{
     slog.Info("Task edited", "task", task)
     return nil
   },
+  PostRunE: SaveChanges,
+  PreRun: UpdateOldTaskMap,
 }

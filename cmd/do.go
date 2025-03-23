@@ -27,4 +27,6 @@ var doCmd = &cobra.Command{
       }
     }
   },
+  PostRunE: SaveChanges,
+  PreRun: UpdateOldTaskMap,
 }

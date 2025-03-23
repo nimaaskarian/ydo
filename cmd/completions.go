@@ -30,7 +30,7 @@ func TaskKeyCompletionOnFirst(cmd *cobra.Command, args []string, toComplete stri
 }
 
 func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  date := []string{
+  date := [...]string{
   "saturday",
   "sunday",
   "monday",
@@ -50,21 +50,15 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
   "yesterday",
   "later",
   }
-  time := []string {
+  time := [...]string {
     "now",
-    "8:00",
-    "20:00",
+    "",
   }
-  var out []string
-  if strings.Contains(toComplete, "/") && !strings.HasPrefix(toComplete, "later/"){
-    out = make([]string, 0, len(time)*len(date))
-    for _, date := range date {
-      for _, time := range time {
-        out = append(out, date+"/"+time)
-      }
+  out := make([]string, 0, len(time)*len(date))
+  for _, date := range date {
+    for _, time := range time {
+      out = append(out, date+"/"+time)
     }
-  } else {
-    out = date
   }
   return out, cobra.ShellCompDirectiveDefault
 }

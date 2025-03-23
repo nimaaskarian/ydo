@@ -36,4 +36,6 @@ var regenKeyCmd = &cobra.Command{
     }
     return nil
   },
+  PostRunE: SaveChanges,
+  PreRun: UpdateOldTaskMap,
 }

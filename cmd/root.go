@@ -47,29 +47,33 @@ var (
       }
     }
     taskmap = core.LoadTaskMap(tasks_path)
-    old_taskmap = utils.DeepCopyMap(taskmap)
     config.Markdown.Filter = MarkdownFilter(&config.Markdown)
     return nil
   },
   RunE: func(cmd *cobra.Command, args []string) error {
       return taskmap.PrintMarkdown(&config.Markdown)
   },
-  PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-    if !reflect.DeepEqual(old_taskmap, taskmap) {
-      slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
-      if dry_run {
-        taskmap.DryWrite(tasks_path)
-      } else {
-        taskmap.Write(tasks_path)
-      }
-      if err := taskmap.PrintMarkdown(&config.Markdown); err != nil {
-        return err
-      }
-    }
-    return nil
-  },
 }
 )
+
+func SaveChanges(cmd *cobra.Command, args []string) error {
+  if !reflect.DeepEqual(old_taskmap, taskmap) {
+    slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
+    if dry_run {
+      taskmap.DryWrite(tasks_path)
+    } else {
+      taskmap.Write(tasks_path)
+    }
+    if err := taskmap.PrintMarkdown(&config.Markdown); err != nil {
+      return err
+    }
+  }
+  return nil
+}
+
+func UpdateOldTaskMap(cmd *cobra.Command, args []string) {
+  old_taskmap = utils.DeepCopyMap(taskmap)
+}
 
 func init() {
   config_dir = utils.ConfigDir()

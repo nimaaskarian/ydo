@@ -86,4 +86,6 @@ var addCmd = &cobra.Command{
     slog.Debug("Added a task", "task", taskmap[key])
     return nil
   },
+  PostRunE: SaveChanges,
+  PreRun: UpdateOldTaskMap,
 }

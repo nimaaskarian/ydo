@@ -42,7 +42,6 @@ func updateChanged() {
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-  updateChanged()
   err := tmpls.ExecuteTemplate(w, "index.html", map[string]any { "Taskmap": taskmap,
     "SeenKeys": make(map[string]bool, len(taskmap) ),
     "Keys": sorted_keys,
@@ -110,10 +109,10 @@ func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
     url = "/"
   }
   w.Header().Add("HX-Location", url)
+  updateChanged()
 }
 
 func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-  updateChanged()
     err := tmpls.ExecuteTemplate(w, "index.html", map[string]any { "Taskmap": taskmap,
     "SeenKeys": make(map[string]bool, len(taskmap) ),
     "Keys": sorted_keys,
@@ -129,7 +128,7 @@ func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func Write(cmd *cobra.Command) func (w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
     rootCmd.PersistentPostRun(cmd, []string{})
-    old_taskmap = utils.DeepCopyMap(taskmap)
+    UpdateOldTaskMap(nil, nil)
     changed = false
   }
 }
@@ -142,6 +141,7 @@ func UndoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
     url = "/"
   }
   w.Header().Add("HX-Location", url)
+  updateChanged()
 }
 
 var sorted_keys []string

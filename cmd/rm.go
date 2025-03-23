@@ -32,4 +32,6 @@ var rmCmd = &cobra.Command{
     }
     return nil
   },
+  PostRunE: SaveChanges,
+  PreRun: UpdateOldTaskMap,
 }
