@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -67,12 +66,9 @@ var editCmd = &cobra.Command{
       taskmap.WipeDependenciesToKey(edit_key)
     }
     for _, dep_key := range dep_tos {
-      task, err := taskmap.GetTask(dep_key)
+      task, err := taskmap.AddDep(dep_key, edit_key)
       if err != nil {
         return err
-      }
-      if !slices.Contains(task.Deps, edit_key) {
-        task.AddDep(taskmap, edit_key)
       }
       taskmap[dep_key] = task
     }

@@ -206,9 +206,10 @@ func BenchmarkPrintMarkdown(b *testing.B) {
 func TestAddDep(t *testing.T) {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(HOMEWORKS))
-  task := tm["homework"]
-  assert.Error(t, task.AddDep(tm, "coco"))
-  task.AddDep(tm, "milk")
+  task, err := tm.AddDep("homework", "coco")
+  assert.Error(t, err)
+  task, err = tm.AddDep("homework", "milk")
+  assert.Nil(t, err)
   assert.Equal(t,[]string{"study", "project", "milk"}, task.Deps)
 }
 
@@ -232,7 +233,15 @@ func TestCascadeDeps(t *testing.T) {
     assert.Equal(t, "milk", key)
   }
 }
+func TestSortedKeys(t *testing.T) {
+  tm := make(TaskMap)
+  tm["ydo"] = Task {Task: "make ydo usable"}
+  tm["milk"] = Task {Task: "buy milk", Due: time.Now().Add(time.Hour*2)}
+  tm["workout"] = Task {Task: "workout", Due: time.Now().AddDate(1000, 0, 0)}
+  tm["homework"] = Task {Task: "do homework", Due: time.Now().Add(time.Hour*12)}
 
+  assert.Equal(t, []string{"milk", "homework", "workout", "ydo"}, tm.SortedKeys())
+}
 
 func ExampleTaskMap_PrintMarkdown() {
   tm := make(TaskMap)

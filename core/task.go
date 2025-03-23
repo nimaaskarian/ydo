@@ -40,14 +40,6 @@ func (task *Task) Undo() {
   task.DoneAt = time.Time{}
 }
 
-func (task *Task) AddDep(tm TaskMap, key string) error {
-  if _, err := tm.GetTask(key); err != nil {
-    return err
-  }
-  task.Deps = append(task.Deps, key)
-  return nil
-}
-
 func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
   if task.AutoComplete {
     max_doneat := time.Time{}

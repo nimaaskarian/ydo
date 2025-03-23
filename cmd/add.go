@@ -73,11 +73,11 @@ var addCmd = &cobra.Command{
     }
     taskmap[key] = core.Task {Task: taskmsg, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time }
     for _, dep_to := range dep_tos {
-      task, err := taskmap.GetTask(dep_to)
+      task, err := taskmap.AddDep(dep_to, key)
       if err != nil {
         return err
       }
-      if err := task.AddDep(taskmap, key); err != nil {
+      if ; err != nil {
         return err
       }
       taskmap[dep_to] = task

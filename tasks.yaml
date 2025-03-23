@@ -9,7 +9,9 @@ cli:
     created-at: 2025-03-14T16:29:10.768608377+03:30
 compile:
     task: compile time directive for os specific builds (using go tags)
+    done: true
     created-at: 2025-03-20T15:18:42.962923763+03:30
+    done-at: 2025-03-23T19:10:05.50453866+03:30
 core:
     task: complete core
     deps: [date-added, due, tfidf, tfidf-conf, print-mode]
@@ -107,7 +109,9 @@ tests:
     created-at: 2025-03-16T15:30:58.57412532+03:30
 tests/cmd:
     task: add cmd tests
+    done: true
     created-at: 2025-03-20T11:34:48.932953873+03:30
+    done-at: 2025-03-23T20:09:58.595950554+03:30
 tests/core:
     task: add core tests
     done: true

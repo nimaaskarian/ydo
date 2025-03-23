@@ -8,17 +8,19 @@ import (
 
 func init() {
   rootCmd.AddCommand(undoCmd)
-  undoCmd.ValidArgsFunction = TaskKeyCompletionFilter(core.Task.IsDone)
 }
 
 var undoCmd = &cobra.Command{
   Aliases: []string{"u"},
   Use: "undo [keys]",
   Short: "set tasks as not completed",
-  Run: func(cmd *cobra.Command, keys []string) {
+  ValidArgsFunction: TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return t.Done && !t.AutoComplete }),
+  RunE: func(cmd *cobra.Command, keys []string) error {
     if len(keys) > 0 {
       for _,key := range keys {
-        taskmap.Undo(key)
+        if err := taskmap.Undo(key); err != nil {
+          return err
+        }
       }
     } else {
       if always_yes || utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ")  {
@@ -27,6 +29,7 @@ var undoCmd = &cobra.Command{
         }
       }
     }
+    return nil
   },
   PostRunE: SaveChanges,
   PreRun: UpdateOldTaskMap,

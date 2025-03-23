@@ -77,6 +77,22 @@ func (taskmap TaskMap) Do(key string) error {
   return nil
 }
 
+func (tm TaskMap) AddDep(key string, dep string) (Task, error) {
+  task, err := tm.GetTask(key)
+  if err != nil {
+    return Task{}, err
+  } else {
+    _, err := tm.GetTask(dep)
+    if err != nil {
+      return Task{}, err
+    }
+  }
+  if !slices.Contains(task.Deps, dep) {
+    task.Deps = append(task.Deps, dep)
+  }
+  return task, nil
+}
+
 func (taskmap TaskMap) Undo(key string) error {
   task, err := taskmap.GetTask(key)
   if err != nil{
@@ -108,14 +124,8 @@ type MarkdownConfig struct {
   file *os.File
 }
 
-func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
-  if len(taskmap) == 0 {
-    return errors.New("No tasks found")
-  }
-  if config.file == nil {
-    config.file = os.Stdout
-  }
-  keys := make([]string, 0 ,len(taskmap))
+func (taskmap TaskMap) SortedKeys() (keys []string) {
+  keys = make([]string, 0 ,len(taskmap))
   for key := range taskmap {
     keys = append(keys, key)
   }
@@ -131,7 +141,17 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
     }
     return 2*due_zero+t1.CreatedAt.Compare(t2.CreatedAt)
   })
+  return keys
+}
 
+func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
+  if len(taskmap) == 0 {
+    return errors.New("No tasks found")
+  }
+  if config.file == nil {
+    config.file = os.Stdout
+  }
+  keys := taskmap.SortedKeys()
   seen_keys := make(map[string]bool, len(taskmap))
   count := 0
   for _,key := range keys {

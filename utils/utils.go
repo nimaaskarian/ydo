@@ -1,3 +1,4 @@
+
 package utils
 
 import (
@@ -7,37 +8,13 @@ import (
 	"log/slog"
 	"math"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
-
-	"runtime"
 )
 
-const (
-  Windows = "windows"
-  Darwin = "darwin"
-)
-
-const (
-  IsWindows = runtime.GOOS == Windows
-  IsDarwin  = runtime.GOOS == Darwin
-)
-
-func ConfigDir() string {
-  var base string;
-  if IsWindows {
-    base = os.Getenv("APPDATA")
-  } else if IsDarwin {
-    base = filepath.Join(os.Getenv("HOME"), "Library", "Application Support")
-  } else {
-    if base=os.Getenv("XDG_CONFIG_HOME"); base == "" {
-      base = filepath.Join(os.Getenv("HOME"), ".config")
-    }
-  }
+func addYdoToDir(base string) string {
   dir := filepath.Join(base, "ydo")
   if err := os.Mkdir(dir, 0755); err != nil {
     if errors.Is(err, os.ErrExist)  {
@@ -238,20 +215,6 @@ func DeepCopyMap[K comparable, V any](m map[K]V) (out map[K]V) {
     out[key] = m[key]
   }
   return out
-}
-
-func OpenURL(url string) error {
-  if IsWindows {
-    return exec.Command("cmd.exe", "/C", "start "+url).Run()
-  }
-  if IsDarwin {
-    return exec.Command("open", url).Run()
-  }
-  cmd := exec.Command("xdg-open", url)
-  cmd.SysProcAttr = &syscall.SysProcAttr{
-    Setpgid: true,
-  }
-  return cmd.Run()
 }
 
 func Filter[T any] (arr[]T, test func(T) bool) (out []T) {

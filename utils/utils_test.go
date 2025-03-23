@@ -98,7 +98,6 @@ func TestFormatDuration(t *testing.T) {
   assert.Equal(t, "0s", actual)
 }
 
-
 func TestParseDuration(t *testing.T) {
   now := time.Now()
   actual, err := parseDuration("1h", now)

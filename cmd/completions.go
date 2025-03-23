@@ -11,15 +11,15 @@ import (
 func TaskKeyCompletionFilter(filter func(core.Task, core.TaskMap) bool) cobra.CompletionFunc {
   return func (cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     taskmap = core.LoadTaskMap(tasks_path)
-    keys := make([]string, len(taskmap))
+    keys := make([]string, 0, len(taskmap))
     i := 0
     for key := range taskmap {
-      if (filter == nil || filter(taskmap[key], taskmap)) && strings.HasPrefix(key, toComplete) {
-        keys[i] = key
+      if filter == nil || filter(taskmap[key], taskmap) {
+        keys = append(keys, key)
         i++
       }
     }
-    return keys, cobra.ShellCompDirectiveDefault
+    return keys, cobra.ShellCompDirectiveNoFileComp
   }
 }
 

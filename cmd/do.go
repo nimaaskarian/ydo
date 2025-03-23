@@ -8,16 +8,18 @@ import (
 
 func init() {
   rootCmd.AddCommand(doCmd)
-  doCmd.ValidArgsFunction = TaskKeyCompletionFilter(core.Task.IsNotDone)
+  doCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return !t.Done && !t.AutoComplete })
 }
 
 var doCmd = &cobra.Command{
   Use: "do [tasks]",
   Short: "set tasks as completed",
-  Run: func(cmd *cobra.Command, keys []string) {
+  RunE: func(cmd *cobra.Command, keys []string) error {
     if len(keys) > 0 {
       for _,key := range keys {
-        taskmap.Do(key)
+        if err := taskmap.Do(key); err != nil {
+          return err
+        }
       }
     } else {
       if always_yes || utils.ReadYesNo("This will set all tasks as completed. ARE YOU REALLY SURE? (yes/no) ")  {
@@ -26,6 +28,7 @@ var doCmd = &cobra.Command{
         }
       }
     }
+    return nil
   },
   PostRunE: SaveChanges,
   PreRun: UpdateOldTaskMap,

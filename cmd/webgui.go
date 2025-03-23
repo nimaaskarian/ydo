@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"reflect"
-	"slices"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
@@ -155,13 +154,7 @@ var webguiCmd = &cobra.Command{
       "add2map": add2map,
     }
     tmpls = template.Must(template.New("").Funcs(func_map).ParseFS(embed_fs, "webgui/templates/*"))
-    sorted_keys = make([]string, 0, len(taskmap))
-    for key := range taskmap {
-      sorted_keys = append(sorted_keys, key)
-    }
-    slices.SortFunc(sorted_keys, func(k1, k2 string) int {
-      return taskmap[k1].CreatedAt.Compare(taskmap[k2].CreatedAt)
-    })
+    sorted_keys = taskmap.SortedKeys()
     server_root, err := fs.Sub(embed_fs, "webgui/static")
     if err != nil {
       slog.Error("Error happend when subbing embed_fs", "err", err)
