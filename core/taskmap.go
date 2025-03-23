@@ -121,7 +121,6 @@ type MarkdownConfig struct {
   Mode string `yaml:",omitempty"`
   Limit int `yaml:",omitempty"`
   Filter MarkdownFilter
-  file *os.File
 }
 
 func (taskmap TaskMap) SortedKeys() (keys []string) {
@@ -148,9 +147,6 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   if len(taskmap) == 0 {
     return errors.New("No tasks found")
   }
-  if config.file == nil {
-    config.file = os.Stdout
-  }
   keys := taskmap.SortedKeys()
   seen_keys := make(map[string]bool, len(taskmap))
   count := 0
@@ -161,7 +157,7 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   }
   shown := len(seen_keys)
   if count > shown {
-    fmt.Fprintf(config.file, "%d tasks, %d shown\n", count, shown)
+    fmt.Printf("%d tasks, %d shown\n", count, shown)
   }
   return nil
 }
