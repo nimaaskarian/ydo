@@ -25,6 +25,9 @@ day:
     auto-complete: true
     created-at: 2025-03-15T23:40:02.839592251+03:30
     due: 2025-03-17T00:00:00+03:30
+description:
+    task: add description to tasks
+    created-at: 2025-03-23T14:57:14.873718071+03:30
 dry:
     task: add dry-run flag
     done: true

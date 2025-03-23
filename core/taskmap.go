@@ -121,7 +121,15 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   }
   slices.SortFunc(keys, func(k1, k2 string) int {
     t1, t2 := taskmap[k1], taskmap[k2]
-    return 2*(t1.Due.Compare(t2.Due))+t1.CreatedAt.Compare(t2.CreatedAt)
+    due_zero := 0
+    if t1.Due.IsZero() && !t2.Due.IsZero(){
+      due_zero = 1
+    }  else if !t1.Due.IsZero() && t2.Due.IsZero() {
+      due_zero = -1
+    } else {
+      due_zero = t1.Due.Compare(t2.Due)
+    }
+    return 2*due_zero+t1.CreatedAt.Compare(t2.CreatedAt)
   })
 
   seen_keys := make(map[string]bool, len(taskmap))

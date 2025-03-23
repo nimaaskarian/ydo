@@ -8,31 +8,31 @@ import (
 )
 
 func TestParseDateEmpty(t *testing.T) {
-  date, err := ParseDate("", time.Time{})
+  date, err := parseDate("", time.Time{})
   assert.Nil(t, err)
   assert.True(t, date.IsZero())
 }
 
 func TestParseDateInvalid(t *testing.T) {
-  date, err := ParseDate("tomorrow/invalid", time.Time{})
+  date, err := parseDate("tomorrow/invalid", time.Time{})
   assert.ErrorContains(t, err, "Invalid time")
   assert.True(t, date.IsZero())
 
-  date, err = ParseDate("2025/12/12/invalid", time.Time{})
+  date, err = parseDate("2025/12/12/invalid", time.Time{})
   assert.ErrorContains(t, err, "Invalid date")
   assert.True(t, date.IsZero())
 
-  date, err = ParseDate("2025/12/12/invalid", time.Time{})
+  date, err = parseDate("2025/12/12/invalid", time.Time{})
   assert.ErrorContains(t, err, "Invalid date")
   assert.True(t, date.IsZero())
 
-  date, err = ParseDate("invalid/invalid", time.Time{})
+  date, err = parseDate("invalid/invalid", time.Time{})
   assert.ErrorContains(t, err, "Invalid time")
   assert.True(t, date.IsZero())
 }
 
 func TestParseDateAbsolute(t *testing.T) {
-  actual, err := ParseDate("2025-12-19/8", time.Time{})
+  actual, err := parseDate("2025-12-19/8", time.Time{})
   assert.Nil(t, err)
   expected, _ := time.Parse("2006-01-02 15:04:05","2025-12-19 8:00:00")
   assert.Equal(t, expected, actual)
@@ -54,13 +54,10 @@ func TestParseDateRelative(t *testing.T) {
     {"tue", "2025-03-25 00:00:00"},
     {"wed", "2025-03-26 00:00:00"},
     {"2025-12-19/now", "2025-12-19 17:00:00"},
-    {"ny/8", "2026-03-20 8:00:00"},
-    {"nm/8", "2025-04-20 8:00:00"},
-    {"nw/now", "2025-03-27 17:00:00"},
     {"later", "3025-03-20 17:00:00"},
   }
   for _, test := range tests {
-    actual, err := ParseDate(test[0], now)
+    actual, err := parseDate(test[0], now)
     assert.Nil(t, err)
     expected, _ := time.Parse("2006-01-02 15:04:05", test[1])
     if !assert.Equal(t, expected, actual) {
@@ -101,3 +98,43 @@ func TestFormatDuration(t *testing.T) {
   assert.Equal(t, "0s", actual)
 }
 
+
+func TestParseDuration(t *testing.T) {
+  now := time.Now()
+  actual, err := parseDuration("1h", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.Add(time.Hour), actual)
+  actual, err = parseDuration("h", now)
+  assert.NotNil(t, err)
+
+  actual, err = parseDuration("8w", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.Add(time.Hour*24*7*8), actual)
+
+  actual, err = parseDuration("12m", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.AddDate(0,12,0), actual)
+
+  actual, err = parseDuration("1123y", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.AddDate(1123,0,0), actual)
+
+  actual, err = parseDuration("18s", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.Add(time.Second*18), actual)
+
+  actual, err = parseDuration("1809min", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.Add(time.Minute*1809), actual)
+
+  actual, err = parseDuration("500days", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  now.Add(time.Hour*24*500), actual)
+
+  actual, err = parseDuration("", now)
+  assert.Nil(t, err)
+  assert.Equal(t,  time.Time{}, actual)
+
+  actual, err = parseDuration("462softenthisoldarmor", now)
+  assert.ErrorContains(t, err, "Invalid duration")
+}

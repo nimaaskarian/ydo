@@ -1,7 +1,8 @@
 package cmd
 
 import (
-  "strings"
+	"strings"
+
 	"github.com/nimaaskarian/ydo/core"
 
 	"github.com/spf13/cobra"
@@ -31,14 +32,7 @@ func TaskKeyCompletionOnFirst(cmd *cobra.Command, args []string, toComplete stri
 
 func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
   date := [...]string{
-  "saturday",
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
+  "sat",
   "sun",
   "mon",
   "tue",
@@ -50,16 +44,41 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
   "yesterday",
   "later",
   }
+  durations := [...]string{
+    "months",
+    "yrs",
+    "wks",
+    "days",
+    "hrs",
+    "mins",
+    "scnds",
+  }
   time := [...]string {
     "now",
-    "",
   }
-  out := make([]string, 0, len(time)*len(date))
-  for _, date := range date {
-    for _, time := range time {
-      out = append(out, date+"/"+time)
+  out := make([]string, 0, len(time)*len(date)+len(durations))
+  index := strings.IndexFunc(toComplete, func(r rune) bool {
+    return r > '9' || r < '0'
+  })
+  if index != 0 && len(toComplete) != 0 {
+    if index == -1 {
+      index = len(toComplete)
+    }
+    for _,duration := range durations {
+      out = append(out, toComplete[:index]+duration)
     }
   }
-  return out, cobra.ShellCompDirectiveDefault
+  if strings.Contains(toComplete, "/") {
+    for _, date := range date {
+      for _, time := range time {
+        out = append(out, date+"/"+time)
+      }
+    }
+  } else {
+    for _, date := range date {
+      out = append(out, date)
+    }
+  }
+  return out, cobra.ShellCompDirectiveNoFileComp
 }
 

@@ -1,19 +1,20 @@
 package utils
 
 import (
-"bufio"
-"errors"
-"fmt"
-"log/slog"
-"math"
-"os"
-"os/exec"
-"path/filepath"
-"strings"
-"syscall"
-"time"
+	"bufio"
+	"errors"
+	"fmt"
+	"log/slog"
+	"math"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"syscall"
+	"time"
 
-"runtime"
+	"runtime"
 )
 
 const (
@@ -70,7 +71,46 @@ func ReadYesNo(format string, a ...any) bool {
   }
 }
 
-func ParseDate(s string, now time.Time) (time.Time, error) {
+func ParseDue(input string, now time.Time) (time.Time, error) {
+  time, err := parseDuration(input, now)
+  if err != nil {
+    time, err = parseDate(input, now)
+  }
+  return time, err
+}
+
+func parseDuration(input string, now time.Time) (time.Time, error) {
+  if input == "" {
+    return time.Time{}, nil
+  }
+  index := strings.IndexFunc(input, func(r rune) bool { return r > '9' || r < '0'})
+  num, err := strconv.Atoi(input[:index])
+  if err != nil {
+    return time.Time{}, err
+  }
+  var base time.Duration
+  switch input[index:] {
+    case "months", "mnths", "ms", "m":
+      return now.AddDate(0, num, 0), nil
+    case "year", "y", "ys", "yrs":
+      return now.AddDate(num, 0, 0), nil
+    case "weeks", "wks", "w", "ws":
+      base = time.Hour*24*7
+    case "day", "d", "days", "ds":
+      base = time.Hour*24
+    case "hrs", "hours", "h", "hs":
+      base = time.Hour
+    case "minutes", "min", "mins":
+      base = time.Minute
+    case "s", "seconds", "scnds":
+      base = time.Second
+    default:
+    return time.Time{}, errors.New("Invalid duration")
+  }
+  return now.Add(base*time.Duration(num)), nil
+}
+
+func parseDate(s string, now time.Time) (time.Time, error) {
   if s == "" {
     return time.Time{}, nil
   }
@@ -125,16 +165,10 @@ func ParseDate(s string, now time.Time) (time.Time, error) {
   case "later":
     // yeah. like you gonna do that in a thousand years
     return now.AddDate(1000, 0, 0), nil
-  case "next-year", "ny":
-    return today_with_time.AddDate(1, 0, 0), nil
-  case "next-month","nm":
-    return today_with_time.AddDate(0, 1, 0), nil
-  case "next-week", "nw":
-    return today_with_time.AddDate(0, 0, 7), nil
   default:
     date, err := time.Parse("2006-01-02", date_time[0])
     if err != nil {
-      return date, fmt.Errorf("Invalid date %q. Date is a YY-MM-DD, weekday, yesterday, today, tomorrow or later", date_time[0])
+      return date, fmt.Errorf("Invalid date %q. Date is a Y-M-D, weekday, yesterday, today, tomorrow or later", date_time[0])
     }
     return date.Add(time.Duration(time_duration)), nil
   }

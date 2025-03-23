@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -237,10 +238,16 @@ func ExampleTaskMap_PrintMarkdown() {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(HOMEWORKS))
   tm.Do("study")
+  task := tm["homework"]
+  task.Due = time.Now().Add(time.Hour*24)
+  tm["homework"] = task
+  task = tm["milk"]
+  task.Due = time.Now().Add(time.Minute*12)
+  tm["milk"] = task
   tm.PrintMarkdown(&MarkdownConfig{Indent: 4})
   // Output:
-  // - [ ] homework: do uni practice
+  // - [ ] milk: buy some milk (12min)
+  // - [ ] homework: do uni practice (1d)
   //     - [x] study: study for the uni exam (0s ago)
   //     - [ ] project: do the hobby project
-  // - [ ] milk: buy some milk
 }

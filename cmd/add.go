@@ -67,7 +67,7 @@ var addCmd = &cobra.Command{
         return err
       }
     }
-    due_time, err := utils.ParseDate(due, time.Now())
+    due_time, err := utils.ParseDue(due, time.Now())
     if err != nil {
       return err
     }

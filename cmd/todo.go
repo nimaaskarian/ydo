@@ -20,7 +20,7 @@ var todoCmd = &cobra.Command{
   Short: "output to-do (unfinished) tasks as markdown",
   ValidArgsFunction: TaskKeyCompletionFilter(core.Task.IsNotDone),
   RunE: func(cmd *cobra.Command, keys []string) error {
-    due_time, err := utils.ParseDate(due, time.Now())
+    due_time, err := utils.ParseDue(due, time.Now())
     if err != nil {
       return err
     }
