@@ -1,7 +1,6 @@
 package core
 
 import (
-	"os"
 	"testing"
 	"time"
 

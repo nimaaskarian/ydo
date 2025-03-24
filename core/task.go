@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
@@ -10,6 +11,7 @@ import (
 
 type Task struct {
   Task string           `yaml:",omitempty"`
+  Description string    `yaml:",omitempty"`
   Deps []string         `yaml:",omitempty,flow"`
   Done bool             `yaml:",omitempty"`
   AutoComplete bool     `yaml:"auto-complete,omitempty"`
@@ -112,6 +114,15 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
       due_print += ")"
     }
     fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
+  }
+  if task.Description != "" {
+    for line := range strings.Lines(task.Description) {
+      for range (depth+1)*config.Indent {
+        fmt.Print(" ")
+      }
+      fmt.Print(line)
+    }
+    fmt.Println()
   }
   if seen_keys != nil  {
     if value, ok := seen_keys[key]; ok && value {

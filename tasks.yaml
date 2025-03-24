@@ -29,7 +29,9 @@ day:
     due: 2025-03-17T00:00:00+03:30
 description:
     task: add description to tasks
+    done: true
     created-at: 2025-03-23T14:57:14.873718071+03:30
+    done-at: 2025-03-24T11:35:00.778736696+03:30
 dry:
     task: add dry-run flag
     done: true
@@ -44,6 +46,9 @@ due-enhanced:
     created-at: 2025-03-19T18:44:07.801574565+03:30
 find:
     task: find another name for undo (like the old undo)
+    description: |-
+        unmark and mark seem like the most reasonable ones
+        tho they have their own problem as well
     created-at: 2025-03-18T03:23:15.398178952+03:30
 jalali:
     task: add jalali date
@@ -136,6 +141,9 @@ tracking:
     created-at: 2025-03-20T11:49:04.724766521+03:30
 undo:
     task: add undo to webgui (like real undo)
+    description: |-
+        idk what to name the current undo command and thats the problem
+        this can be implemented using something like a stack allocated buffer of maps (wouldn't be really "stack allcated" but anyways)
     deps: [find]
     created-at: 2025-03-18T03:22:15.397799013+03:30
 webgui:

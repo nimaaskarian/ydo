@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"reflect"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -24,6 +23,7 @@ func init() {
   editCmd.Flags().StringArrayVarP(&dep_tos, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
   editCmd.Flags().BoolVarP(&remove_deps, "remove-deps", "r", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
   editCmd.Flags().BoolVarP(&key_regen, "key-regen", "K", false, "regen key using the automatic next key generator (respects the config file)")
+  editCmd.Flags().StringVarP(&description, "description", "e", "", "new description of the task")
   editCmd.Flags().BoolVarP(&remove_dep_to, "remove-dep-to", "R", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
   editCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task")
   editCmd.Flags().BoolVarP(&no_auto_complete, "no-auto-complete", "A", false, "disable auto complete for the task")
@@ -45,8 +45,11 @@ var editCmd = &cobra.Command{
     }
     edit_key := args[0]
     task := taskmap[edit_key]
-    if new_task := strings.Join(args[1:], " "); new_task != "" {
+    if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
       task.Task = new_task
+    }
+    if description != "" {
+      task.Description = description
     }
     if key_regen {
       new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, edit_key)

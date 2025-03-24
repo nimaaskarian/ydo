@@ -117,9 +117,10 @@ func PrintYaml(obj any) error {
 type MarkdownFilter func(task Task, taskmap TaskMap) bool;
 
 type MarkdownConfig struct {
-  Indent uint `yaml:",omitempty"`
-  Mode string `yaml:",omitempty"`
-  Limit int `yaml:",omitempty"`
+  Indent uint             `yaml:",omitempty"`
+  Mode string             `yaml:",omitempty"`
+  Description bool        `yaml:",omitempty"`
+  Limit int               `yaml:",omitempty"`
   Filter MarkdownFilter
 }
 
