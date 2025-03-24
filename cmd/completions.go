@@ -30,6 +30,31 @@ func TaskKeyCompletionOnFirst(cmd *cobra.Command, args []string, toComplete stri
   return TaskKeyCompletionFilter(nil)(cmd, args, toComplete)
 }
 
+func DurationCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  durations := [...]string{
+    "months",
+    "yrs",
+    "wks",
+    "days",
+    "hrs",
+    "mins",
+    "scnds",
+  }
+  out := make([]string, 0, len(durations))
+  index := strings.IndexFunc(toComplete, func(r rune) bool {
+    return r > '9' || r < '0'
+  })
+  if index != 0 && len(toComplete) != 0 {
+    if index == -1 {
+      index = len(toComplete)
+    }
+    for _,duration := range durations {
+      out = append(out, toComplete[:index]+duration)
+    }
+  }
+  return out, cobra.ShellCompDirectiveNoFileComp
+}
+
 func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
   date := [...]string{
   "sat",
@@ -44,30 +69,12 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
   "yesterday",
   "later",
   }
-  durations := [...]string{
-    "months",
-    "yrs",
-    "wks",
-    "days",
-    "hrs",
-    "mins",
-    "scnds",
-  }
   time := [...]string {
     "now",
   }
+  durations, _ := DurationCompletion(cmd, args, toComplete)
   out := make([]string, 0, len(time)*len(date)+len(durations))
-  index := strings.IndexFunc(toComplete, func(r rune) bool {
-    return r > '9' || r < '0'
-  })
-  if index != 0 && len(toComplete) != 0 {
-    if index == -1 {
-      index = len(toComplete)
-    }
-    for _,duration := range durations {
-      out = append(out, toComplete[:index]+duration)
-    }
-  }
+  out = append(out, durations...)
   if strings.Contains(toComplete, "/") {
     for _, date := range date {
       for _, time := range time {

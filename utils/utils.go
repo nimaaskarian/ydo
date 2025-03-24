@@ -49,14 +49,14 @@ func ReadYesNo(format string, a ...any) bool {
 }
 
 func ParseDue(input string, now time.Time) (time.Time, error) {
-  time, err := parseDuration(input, now)
+  time, err := ParseDuration(input, now)
   if err != nil {
     time, err = parseDate(input, now)
   }
   return time, err
 }
 
-func parseDuration(input string, now time.Time) (time.Time, error) {
+func ParseDuration(input string, now time.Time) (time.Time, error) {
   if input == "" {
     return time.Time{}, nil
   }

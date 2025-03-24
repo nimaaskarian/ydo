@@ -100,40 +100,40 @@ func TestFormatDuration(t *testing.T) {
 
 func TestParseDuration(t *testing.T) {
   now := time.Now()
-  actual, err := parseDuration("1h", now)
+  actual, err := ParseDuration("1h", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.Add(time.Hour), actual)
-  actual, err = parseDuration("h", now)
+  actual, err = ParseDuration("h", now)
   assert.NotNil(t, err)
 
-  actual, err = parseDuration("8w", now)
+  actual, err = ParseDuration("8w", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.Add(time.Hour*24*7*8), actual)
 
-  actual, err = parseDuration("12m", now)
+  actual, err = ParseDuration("12m", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.AddDate(0,12,0), actual)
 
-  actual, err = parseDuration("1123y", now)
+  actual, err = ParseDuration("1123y", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.AddDate(1123,0,0), actual)
 
-  actual, err = parseDuration("18s", now)
+  actual, err = ParseDuration("18s", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.Add(time.Second*18), actual)
 
-  actual, err = parseDuration("1809min", now)
+  actual, err = ParseDuration("1809min", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.Add(time.Minute*1809), actual)
 
-  actual, err = parseDuration("500days", now)
+  actual, err = ParseDuration("500days", now)
   assert.Nil(t, err)
   assert.Equal(t,  now.Add(time.Hour*24*500), actual)
 
-  actual, err = parseDuration("", now)
+  actual, err = ParseDuration("", now)
   assert.Nil(t, err)
   assert.Equal(t,  time.Time{}, actual)
 
-  actual, err = parseDuration("462softenthisoldarmor", now)
+  actual, err = ParseDuration("462softenthisoldarmor", now)
   assert.ErrorContains(t, err, "Invalid duration")
 }

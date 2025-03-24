@@ -18,6 +18,7 @@ type Task struct {
   CreatedAt time.Time   `yaml:"created-at,omitempty"`
   Due time.Time         `yaml:",omitempty"`
   DoneAt time.Time      `yaml:"done-at,omitempty"`
+  Recur string          `yaml:",omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap) bool {
@@ -29,6 +30,9 @@ func (task Task) IsDone(taskmap TaskMap) bool {
     }
     return true
   }
+  if t, err := utils.ParseDuration(task.Recur, task.DoneAt); err == nil && !t.IsZero() && time.Now().After(t) {
+    task.Done = false
+  } 
   return task.Done
 }
 
@@ -85,6 +89,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
   if key != "" {
     print_key = key+": "
   }
+  var recur string
   if task.IsDone(taskmap) {
     done_at := task.FindDoneAt(taskmap)
     if !done_at.IsZero() {
@@ -92,11 +97,20 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
       if !task.Due.IsZero() && done_at.After(task.Due) {
         overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due)) + " overdue"
       }
-      fmt.Printf("- [x] %s%s (%s ago%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue)
+      if task.Recur != "" {
+        recur = ", each "+task.Recur
+      }
+      fmt.Printf("- [x] %s%s (%s ago%s%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue, recur)
     } else {
-      fmt.Printf("- [x] %s%s\n", print_key,task.Task)
+      if task.Recur != "" {
+        recur = " (each "+task.Recur + ")"
+      }
+      fmt.Printf("- [x] %s%s%s\n", print_key,task.Task, recur)
     }
   } else {
+    if task.Recur != "" {
+      recur = " (each "+task.Recur + ")"
+    }
     due_print := ""
     if !task.Due.IsZero() {
       now := time.Now()
@@ -113,7 +127,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
       }
       due_print += ")"
     }
-    fmt.Printf("- [ ] %s%s%s\n", print_key,task.Task, due_print)
+    fmt.Printf("- [ ] %s%s%s%s\n", print_key,task.Task, due_print, recur)
   }
   if task.Description != "" {
     for line := range strings.Lines(task.Description) {

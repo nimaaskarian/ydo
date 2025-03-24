@@ -4,7 +4,9 @@ import (
 	"errors"
 	"log/slog"
 	"reflect"
+	"time"
 
+	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -19,19 +21,26 @@ var (
 
 func init() {
   rootCmd.AddCommand(editCmd)
-  editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
-  editCmd.Flags().StringArrayVarP(&dep_tos, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
-  editCmd.Flags().BoolVarP(&remove_deps, "remove-deps", "r", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
   editCmd.Flags().BoolVarP(&key_regen, "key-regen", "K", false, "regen key using the automatic next key generator (respects the config file)")
-  editCmd.Flags().StringVarP(&description, "description", "e", "", "new description of the task")
-  editCmd.Flags().BoolVarP(&remove_dep_to, "remove-dep-to", "R", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
   editCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task")
   editCmd.Flags().BoolVarP(&no_auto_complete, "no-auto-complete", "A", false, "disable auto complete for the task")
-  editCmd.MarkFlagsMutuallyExclusive("no-auto-complete", "auto-complete")
+  editCmd.Flags().BoolVar(&remove_dep_to, "clean-dep-to", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
+  editCmd.Flags().StringVarP(&description, "description", "e", "", "new description of the task")
+  editCmd.Flags().BoolVar(&remove_deps, "remove-deps", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
   editCmd.Flags().StringVarP(&new_key, "key", "k", "", "new key to the task")
+
+  editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
   editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
+
+  editCmd.Flags().StringArrayVarP(&dep_tos, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
   editCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletionFilter(nil))
+
+  editCmd.Flags().StringVarP(&recur, "recur", "r", "", "duration of in which the ask recurs")
+  editCmd.RegisterFlagCompletionFunc("recur", DurationCompletion)
+
+  editCmd.MarkFlagsMutuallyExclusive("no-auto-complete", "auto-complete")
   editCmd.ValidArgsFunction = TaskKeyCompletionOnFirst
+
 }
 
 var editCmd = &cobra.Command{
@@ -50,6 +59,13 @@ var editCmd = &cobra.Command{
     }
     if description != "" {
       task.Description = description
+    }
+    if recur != "" {
+        if _, err := utils.ParseDuration(recur, time.Now()); err != nil {
+        return err
+      }
+
+      task.Recur = recur
     }
     if key_regen {
       new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, edit_key)

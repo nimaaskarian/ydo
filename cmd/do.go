@@ -8,7 +8,7 @@ import (
 
 func init() {
   rootCmd.AddCommand(doCmd)
-  doCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return !t.Done && !t.AutoComplete })
+  doCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return !t.AutoComplete && !t.IsDone(tm) })
 }
 
 var doCmd = &cobra.Command{

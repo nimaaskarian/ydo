@@ -50,6 +50,9 @@ find:
         unmark and mark seem like the most reasonable ones
         tho they have their own problem as well
     created-at: 2025-03-18T03:23:15.398178952+03:30
+hide:
+    task: hide and show commands (with until flag)
+    created-at: 2025-03-24T17:39:52.285190133+03:30
 jalali:
     task: add jalali date
     created-at: 2025-03-21T12:16:22.281575469+03:30
@@ -86,7 +89,9 @@ print-mode:
 recuring:
     task: recuring tasks
     deps: [list]
+    done: true
     created-at: 2025-03-20T17:32:31.703837402+03:30
+    done-at: 2025-03-24T22:37:58.976105744+03:30
 refactor:
     task: refactor and make the code clean
     deps: [ydo, study-gh]
