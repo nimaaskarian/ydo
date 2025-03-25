@@ -91,16 +91,32 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
 
 func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
   taskmap = core.LoadTaskMap(tasks_path)
+  var words []string
   if cmd == editCmd {
     edit_key := args[0]
     if len(args)-1 > 0 {
-      return args[1:], cobra.ShellCompDirectiveDefault
+      words = args[1:]
     }
     task := taskmap[edit_key]
-    return strings.Fields(task.Task), cobra.ShellCompDirectiveDefault
+    words = strings.Fields(task.Task)
   }
   if cmd == addCmd {
-    return args, cobra.ShellCompDirectiveDefault
+    words = args
   }
-  return nil, cobra.ShellCompDirectiveError
+  if words == nil {
+    return nil, cobra.ShellCompDirectiveError
+  }
+  if depth := strings.Count(toComplete, "-"); depth != 0 {
+    words_copy := words
+    for range depth {
+      for _, word_i := range words {
+        for _, word_j := range words_copy {
+          if !strings.Contains(toComplete, word_j) {
+            words = append(words, word_i+"-"+word_j)
+          }
+        }
+      }
+    }
+  }
+  return words, cobra.ShellCompDirectiveDefault
 }
