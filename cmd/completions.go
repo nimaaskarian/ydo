@@ -107,16 +107,17 @@ func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
     return nil, cobra.ShellCompDirectiveError
   }
   if depth := strings.Count(toComplete, "-"); depth != 0 {
-    words_copy := words
+    init_words := words
     for range depth {
       for _, word_i := range words {
-        for _, word_j := range words_copy {
-          if !strings.Contains(toComplete, word_j) {
-            words = append(words, word_i+"-"+word_j)
-          }
+        for _, word_j := range init_words {
+          words = append(words, word_i+"-"+word_j)
         }
       }
     }
+  }
+  for _, word := range words {
+    words = append(words, word+"-")
   }
   return words, cobra.ShellCompDirectiveDefault
 }
