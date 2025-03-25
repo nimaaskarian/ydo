@@ -28,6 +28,7 @@ func init() {
   editCmd.Flags().StringVarP(&description, "description", "e", "", "new description of the task")
   editCmd.Flags().BoolVar(&remove_deps, "remove-deps", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
   editCmd.Flags().StringVarP(&new_key, "key", "k", "", "new key to the task")
+  editCmd.RegisterFlagCompletionFunc("key", KeyCompletion)
 
   editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
   editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))

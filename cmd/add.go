@@ -34,6 +34,8 @@ func init() {
   addCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
   addCmd.Flags().BoolVarP(&tfidf, "tfidf", "t", false, "use tfidf for automatic key generation (overrides config file and --key flag)")
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
+  addCmd.RegisterFlagCompletionFunc("key", KeyCompletion)
+
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
   addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletionFilter(nil))
 

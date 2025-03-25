@@ -129,7 +129,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     }
     fmt.Printf("- [ ] %s%s%s%s\n", print_key,task.Task, due_print, recur)
   }
-  if task.Description != "" {
+  if config.Description && task.Description != "" {
     for line := range strings.Lines(task.Description) {
       for range (depth+1)*config.Indent {
         fmt.Print(" ")

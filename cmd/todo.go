@@ -8,10 +8,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var show_description bool;
+
 func init() {
   rootCmd.AddCommand(todoCmd)
   todoCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
   todoCmd.RegisterFlagCompletionFunc("due", DueCompletion)
+
+  todoCmd.Flags().BoolVarP(&show_description, "description", "d", false, "show descriptions")
 }
 
 var todoCmd = &cobra.Command{
@@ -24,21 +28,22 @@ var todoCmd = &cobra.Command{
     if err != nil {
       return err
     }
-    todo_config := config.Markdown
-    todo_config.Limit = 0
-    todo_config.Filter = func(task core.Task, taskmap core.TaskMap) bool {
+    md_config := config.Markdown
+    md_config.Limit = 0
+    md_config.Filter = func(task core.Task, taskmap core.TaskMap) bool {
       return (due_time.IsZero() || (task.Due.Sub(due_time).Abs() < time.Hour*24)) && task.IsNotDone(taskmap)
     }
     if len(keys) == 0 {
-      taskmap.PrintMarkdown(&todo_config)
+      taskmap.PrintMarkdown(&md_config)
     } else {
+      md_config.Description = true
       seen_keys := make(map[string]bool, len(keys))
       for _, key := range keys {
         task, err := taskmap.GetTask(key)
         if err != nil {
           return err
         }
-        task.PrintMarkdown(taskmap, 0, seen_keys, key, &todo_config)
+        task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config)
       }
     }
     return nil

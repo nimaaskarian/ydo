@@ -31,6 +31,7 @@ var mdCmd = &cobra.Command{
     if len(keys) == 0 {
       taskmap.PrintMarkdown(&md_config)
     } else {
+        md_config.Description = true
         seen_keys := make(map[string]bool, len(keys))
         for _, key := range keys {
           task, err := taskmap.GetTask(key)
