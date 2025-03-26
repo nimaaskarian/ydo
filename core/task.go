@@ -10,15 +10,16 @@ import (
 )
 
 type Task struct {
-  Task string           `yaml:",omitempty"`
-  Description string    `yaml:",omitempty"`
-  Deps []string         `yaml:",omitempty,flow"`
-  Done bool             `yaml:",omitempty"`
-  AutoComplete bool     `yaml:"auto-complete,omitempty"`
-  CreatedAt time.Time   `yaml:"created-at,omitempty"`
-  Due time.Time         `yaml:",omitempty"`
-  DoneAt time.Time      `yaml:"done-at,omitempty"`
-  Recur string          `yaml:",omitempty"`
+  Task string                   `yaml:",omitempty"`
+  Description string            `yaml:",omitempty"`
+  Deps []string                 `yaml:",omitempty,flow"`
+  Done bool                     `yaml:",omitempty"`
+  AutoComplete bool             `yaml:"auto-complete,omitempty"`
+  CreatedAt time.Time           `yaml:"created-at,omitempty"`
+  Due time.Time                 `yaml:",omitempty"`
+  DoneAt time.Time              `yaml:"done-at,omitempty"`
+  OldDoneAtList []time.Time     `yaml:"old-done-at-list,omitempty"`
+  Recur string                  `yaml:",omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap) bool {
@@ -37,13 +38,20 @@ func (task Task) IsDone(taskmap TaskMap) bool {
 }
 
 func (task *Task) Do() {
-  task.Done = true
-  task.DoneAt = time.Now()
+  if !task.Done && !task.AutoComplete {
+    task.Done = true
+    if task.Recur != "" {
+      task.OldDoneAtList = append(task.OldDoneAtList, task.DoneAt)
+    }
+    task.DoneAt = time.Now()
+  }
 }
 
 func (task *Task) Undo() {
-  task.Done = false
-  task.DoneAt = time.Time{}
+  if task.Done && !task.AutoComplete {
+    task.Done = false
+    task.DoneAt = time.Time{}
+  }
 }
 
 func (task Task) FindDoneAt(taskmap TaskMap) time.Time {

@@ -58,7 +58,9 @@ jalali:
     created-at: 2025-03-21T12:16:22.281575469+03:30
 list:
     task: list of done-ats
+    done: true
     created-at: 2025-03-20T17:32:50.900545158+03:30
+    done-at: 2025-03-26T12:44:00.145281864+03:30
 markdown:
     task: fix markdown output
     deps: [sort-date, markdown-key, better-md, md-circular]
