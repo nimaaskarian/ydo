@@ -50,7 +50,13 @@ func (task *Task) Do(taskmap TaskMap) {
 func (task *Task) Undo(taskmap TaskMap) {
   if task.IsDone(taskmap) && !task.AutoComplete {
     task.Done = false
-    task.DoneAt = time.Time{}
+    if task.Recur != "" && len(task.OldDoneAtList) > 0 {
+      length := len(task.OldDoneAtList)
+      task.DoneAt = task.OldDoneAtList[length-1]
+      task.OldDoneAtList = task.OldDoneAtList[:length-1]
+    } else {
+      task.DoneAt = time.Time{}
+    }
   }
 }
 
