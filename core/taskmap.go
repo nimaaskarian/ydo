@@ -318,7 +318,7 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
   }
   discipline_arr := make([]float64, 0, len(total_done_map))
   sorted_keys := utils.Keys(total_done_map)
-  slices.SortFunc(sorted_keys, func(a, b time.Time) int { return b.Compare(a) })
+  slices.SortFunc(sorted_keys, time.Time.Compare)
   for _,key := range sorted_keys {
     item := total_done_map[key]
     discipline := float64(item[1])/float64(item[0])
