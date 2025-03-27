@@ -34,12 +34,12 @@ func TestParseDateInvalid(t *testing.T) {
 func TestParseDateAbsolute(t *testing.T) {
   actual, err := parseDate("2025-12-19/8", time.Time{})
   assert.Nil(t, err)
-  expected, _ := time.Parse("2006-01-02 15:04:05","2025-12-19 8:00:00")
+  expected, _ := time.ParseInLocation("2006-01-02 15:04:05","2025-12-19 8:00:00", time.Local)
   assert.Equal(t, expected, actual)
 }
 
 func TestParseDateRelative(t *testing.T) {
-  now, _ := time.Parse("2006-01-02 15:04:05","2025-03-20 17:00:00")
+  now, _ := time.ParseInLocation("2006-01-02 15:04:05","2025-03-20 17:00:00", time.Local)
   tests := [...][3]string{
     {"tomorrow/8", "2025-03-21 8:00:00"},
     {"today/8", "2025-03-20 8:00:00"},
@@ -59,7 +59,7 @@ func TestParseDateRelative(t *testing.T) {
   for _, test := range tests {
     actual, err := parseDate(test[0], now)
     assert.Nil(t, err)
-    expected, _ := time.Parse("2006-01-02 15:04:05", test[1])
+    expected, _ := time.ParseInLocation("2006-01-02 15:04:05", test[1], time.Local)
     if !assert.Equal(t, expected, actual) {
       break
     }

@@ -262,7 +262,7 @@ func as_days(d time.Duration) int {
 }
 
 // start and end are included
-func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) {
+func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
   end = utils.NaiveDate(end)
   start = utils.NaiveDate(start)
   days := as_days(end.Sub(start))
@@ -280,7 +280,6 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) {
     // add task existence
     for i := range as_days(end.Sub(naive_created_at))+1 {
       current_date := naive_created_at.AddDate(0, 0, i)
-      fmt.Println(current_date)
       discipline, ok := total_done_map[current_date]
       if ok {
         discipline[0] += 1
@@ -319,13 +318,13 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) {
   }
   discipline_arr := make([]float64, 0, len(total_done_map))
   sorted_keys := utils.Keys(total_done_map)
-  slices.SortFunc(sorted_keys, time.Time.Compare)
+  slices.SortFunc(sorted_keys, func(a, b time.Time) int { return b.Compare(a) })
   for _,key := range sorted_keys {
     item := total_done_map[key]
     discipline := float64(item[1])/float64(item[0])
     discipline_arr = append(discipline_arr, discipline)
   }
-  fmt.Println(discipline_arr)
+  return discipline_arr
 }
 
 func (taskmap TaskMap) Write(path string) error {

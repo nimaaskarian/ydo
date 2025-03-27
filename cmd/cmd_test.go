@@ -186,7 +186,10 @@ func TestCmdUndo(t *testing.T) {
   rootCmd.SetArgs(append(base,"-Y", "undo"))
   assert.Nil(t, rootCmd.Execute())
   for _, task := range taskmap {
-    assert.False(t, task.Done)
+    if !assert.False(t, task.IsDone(taskmap)) {
+      fmt.Printf("task %q failed\n", task.Task)
+      break
+    }
   }
   taskmap = nil
 }
@@ -202,7 +205,10 @@ func TestCmdDo(t *testing.T) {
   rootCmd.SetArgs(append(base,"-Y", "do"))
   assert.Nil(t, rootCmd.Execute())
   for _, task := range taskmap {
-    assert.True(t, task.Done)
+    if !assert.True(t, task.IsDone(taskmap)) {
+      fmt.Printf("task %q failed\n", task.Task)
+      break
+    }
   }
   taskmap = nil
 }
