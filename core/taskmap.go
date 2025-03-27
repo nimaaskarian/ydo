@@ -285,6 +285,10 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
   }
 
   for _, task := range taskmap {
+    // ignore legeacy tasks
+    if task.IsDone(taskmap) && task.DoneAt.IsZero() {
+      continue
+    }
     created_date := utils.NaiveDate(task.CreatedAt)
     if task.Recur == "" {
       if !task.DoneAt.IsZero() {

@@ -11,8 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var height int
+
 func init() {
   rootCmd.AddCommand(disciplineCmd)
+  disciplineCmd.Flags().IntVarP(&height, "height", "H", 10, "specify height for the discipline graph")
+
   disciplineCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return !t.AutoComplete && !t.IsDone(tm) })
 }
 
@@ -45,7 +49,7 @@ var disciplineCmd = &cobra.Command{
     
     graph := asciigraph.Plot(
       data, asciigraph.Precision(3),
-      asciigraph.Height(10),
+      asciigraph.Height(height),
       asciigraph.SeriesLegends("Discipline"),
       asciigraph.SeriesColors(asciigraph.Blue),
       )
