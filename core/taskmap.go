@@ -321,7 +321,11 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
         created_dates = append(created_dates, t)
       }
       for i, created := range created_dates {
-        for j := range as_days(done_dates[i].Sub(created))+1 {
+        upper_bound := done_dates[i]
+        if done_dates[i].IsZero() {
+          upper_bound = end
+        }
+        for j := range as_days(upper_bound.Sub(created))+1 {
           exists_date := created.AddDate(0, 0, j)
           if addToIndexIfKeyOk(total_done_map, start, end, 0, exists_date) {
             break

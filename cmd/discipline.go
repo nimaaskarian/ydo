@@ -15,7 +15,7 @@ var height int
 
 func init() {
   rootCmd.AddCommand(disciplineCmd)
-  disciplineCmd.Flags().IntVarP(&height, "height", "H", 10, "specify height for the discipline graph")
+  disciplineCmd.Flags().IntVarP(&height, "height", "H", 5, "specify height for the discipline graph")
 
   disciplineCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return !t.AutoComplete && !t.IsDone(tm) })
 }
