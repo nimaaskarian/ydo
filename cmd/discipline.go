@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/guptarohit/asciigraph"
 	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,15 +17,22 @@ func init() {
 }
 
 var disciplineCmd = &cobra.Command{
-  Use: "discipline start [end]",
-  Short: "get a discipline graph from start to end (defaults to today)",
-  Args: cobra.MinimumNArgs(1),
+  Use: "discipline [start] [end]",
+  Short: "get a discipline graph from start (defaults to first task created) to end (defaults to today)",
   RunE: func(cmd *cobra.Command, args []string) error {
-    start, err := time.ParseInLocation("2006-01-02", args[0], time.Local)
-    if err != nil {
-      return err
+    var start, end time.Time
+    var err error
+    if len(args) >= 1 {
+      start, err = time.ParseInLocation("2006-01-02", args[0], time.Local)
+      if err != nil {
+        return err
+      }
+    } else {
+      min_created_at_key := slices.MinFunc(utils.Keys(taskmap), func(a, b string) int {
+        return taskmap[a].CreatedAt.Compare(taskmap[b].CreatedAt)
+      })
+      start = taskmap[min_created_at_key].CreatedAt
     }
-    var end time.Time
     if len(args) == 2 {
       end, err = time.ParseInLocation("2006-01-02", args[1], time.Local)
       if err != nil {
