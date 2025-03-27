@@ -37,8 +37,8 @@ func (task Task) IsDone(taskmap TaskMap) bool {
   return task.Done
 }
 
-func (task *Task) Do() {
-  if !task.Done && !task.AutoComplete {
+func (task *Task) Do(taskmap TaskMap) {
+  if !task.IsDone(taskmap) && !task.AutoComplete {
     task.Done = true
     if task.Recur != "" && !task.DoneAt.IsZero() {
       task.OldDoneAtList = append(task.OldDoneAtList, task.DoneAt)
@@ -47,8 +47,8 @@ func (task *Task) Do() {
   }
 }
 
-func (task *Task) Undo() {
-  if task.Done && !task.AutoComplete {
+func (task *Task) Undo(taskmap TaskMap) {
+  if task.IsDone(taskmap) && !task.AutoComplete {
     task.Done = false
     task.DoneAt = time.Time{}
   }

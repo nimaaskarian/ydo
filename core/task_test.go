@@ -60,7 +60,7 @@ func ExampleTask_PrintMarkdown() {
   config_limit.Limit = 1
   task.Deps = []string{"2"};
   task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit)
-  task.Undo()
+  task.Undo(nil)
   task.Due = time.Now().AddDate(10000, 0, 0)
   task.PrintMarkdown(nil, 0, nil, "", &config)
   // Output:

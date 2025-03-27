@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"testing"
@@ -259,4 +260,85 @@ func ExampleTaskMap_PrintMarkdown() {
   // - [ ] homework: do uni practice (1d)
   //     - [x] study: study for the uni exam (0s ago)
   //     - [ ] project: do the hobby project
+}
+
+const SINGLE_DISCIPLINE = `workout:
+  task: workout
+  created-at: 2025-03-20T00:20:52.625601175+03:30
+  done-at: 2025-03-26T08:46:50.967817015+03:30
+  old-done-at-list: 
+    - 2025-03-23T08:46:50.967817015+03:30
+    - 2025-03-25T08:46:50.967817015+03:30
+  recur: 1d
+`
+
+func TestTrackDisciplineDailySingle(t *testing.T) {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(SINGLE_DISCIPLINE))
+  start, _ := time.ParseInLocation("2006-01-02", "2025-03-20", time.Local)
+  end, _ := time.ParseInLocation("2006-01-02", "2025-03-27", time.Local)
+  assert.Equal(t, []float64{0, 0, 0, 1, 0, 1, 1, 0}, tm.TrackDisciplineDaily(start, end))
+}
+
+const MULTIPLE_DISCIPLINE = `clean:
+    task: clean room
+    done: true
+    done-at: 2025-03-25T11:12:53.584720168+03:30
+    created-at: 2025-03-21T08:00:00.587348085+03:30
+    recur: 1w
+library:
+    task: call library to renew book
+    done: true
+    done-at: 2025-03-23T00:49:08.587348085+03:30
+    created-at: 2025-03-21T08:00:00.587348085+03:30
+    recur: 2w
+plants-water:
+    task: change plants water
+    done: true
+    created-at: 2025-03-26T12:27:19.204076503+03:30
+    done-at: 2025-03-27T08:38:13.019924716+03:30
+    recur: 3d
+wax:
+    task: wax the shoe
+    done: true
+    done-at: 2025-03-22T11:12:36.228830075+03:30
+    created-at: 2025-03-21T08:00:00.587348085+03:30
+    recur: 1m
+workout:
+    task: workout
+    done: true
+    created-at: 2025-03-26T00:20:52.625601175+03:30
+    done-at: 2025-03-27T08:46:50.967817015+03:30
+    recur: 1d
+`
+
+func TestTrackDisciplineDailyMultiple(t *testing.T) {
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(MULTIPLE_DISCIPLINE))
+  start, _ := time.ParseInLocation("2006-01-02", "2025-03-21", time.Local)
+  end, _ := time.ParseInLocation("2006-01-02", "2025-03-27", time.Local)
+  assert.Equal(t, []float64{0,1./3.,1./2., 0, 1, 0, 1}, tm.TrackDisciplineDaily(start, end))
+}
+
+
+const COMPLEX_DISCIPLINE = `t1:
+  created-at: 2025-03-20T00:20:52.625601175+03:30
+  done-at: 2025-03-21T00:20:52.625601175+03:30
+  done: true
+t2:
+  created-at: 2025-03-21T00:20:52.625601175+03:30
+  done-at: 2025-03-22T00:20:52.625601175+03:30
+  done: true
+t3:
+  created-at: 2025-03-24T00:20:52.625601175+03:30
+`
+
+func TestTrackDisciplineDailyNoRecur(t *testing.T) {
+ expected := []float64{0, 0.5, 1, math.NaN(), 0, 0}
+  
+  tm := make(TaskMap)
+  ParseYaml(tm, []byte(COMPLEX_DISCIPLINE))
+  start, _ := time.ParseInLocation("2006-01-02", "2025-03-20", time.Local)
+  end, _ := time.ParseInLocation("2006-01-02", "2025-03-25", time.Local)
+  assert.Equal(t, fmt.Sprint(expected), fmt.Sprint(tm.TrackDisciplineDaily(start, end)))
 }

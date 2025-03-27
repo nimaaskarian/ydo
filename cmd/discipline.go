@@ -34,7 +34,13 @@ var disciplineCmd = &cobra.Command{
     }
     data := taskmap.TrackDisciplineDaily(start, end)
     fmt.Println(data)
-    graph := asciigraph.Plot(data, asciigraph.Precision(3))
+    
+    graph := asciigraph.Plot(
+      data, asciigraph.Precision(3),
+      asciigraph.Height(10),
+      asciigraph.SeriesLegends("Discipline"),
+      asciigraph.SeriesColors(asciigraph.Blue),
+      )
 
     fmt.Println(graph)
     return nil
