@@ -114,7 +114,7 @@ func parseDate(s string, now time.Time) (time.Time, error) {
     }
     time_duration = time.Hour*time.Duration(t.Hour()) + time.Minute*time.Duration(t.Minute()) + time.Second*time.Duration(t.Second()) + time.Nanosecond*time.Duration(t.Nanosecond())
   }
-  today_with_time := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time_duration)
+  today_with_time := NaiveDate(now).Add(time_duration)
   weekday := now.Weekday()
   var target_weekday time.Weekday
 
@@ -155,6 +155,10 @@ func parseDate(s string, now time.Time) (time.Time, error) {
     count_days = 7
   }
   return today_with_time.Add(time.Duration(count_days)*day), nil
+}
+
+func NaiveDate(t time.Time) time.Time {
+  return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
 func makeDatePartString(value uint64, indicator string) string {
@@ -224,4 +228,12 @@ func Filter[T any] (arr[]T, test func(T) bool) (out []T) {
     }
   }
   return out
+}
+
+func Keys[K comparable, V any] (m map[K]V) []K {
+  keys := make([]K, 0 ,len(m))
+  for key := range m {
+    keys = append(keys, key)
+  }
+  return keys
 }

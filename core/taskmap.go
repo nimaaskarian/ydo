@@ -10,7 +10,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -124,11 +126,8 @@ type MarkdownConfig struct {
   Filter MarkdownFilter
 }
 
-func (taskmap TaskMap) SortedKeys() (keys []string) {
-  keys = make([]string, 0 ,len(taskmap))
-  for key := range taskmap {
-    keys = append(keys, key)
-  }
+func (taskmap TaskMap) SortedKeys() []string {
+  keys := utils.Keys(taskmap)
   slices.SortFunc(keys, func(k1, k2 string) int {
     t1, t2 := taskmap[k1], taskmap[k2]
     due_zero := 0
@@ -145,6 +144,7 @@ func (taskmap TaskMap) SortedKeys() (keys []string) {
 }
 
 func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
+  taskmap.TrackDisciplineDaily(utils.NaiveDate(time.Now()).AddDate(0, 0, -4),utils.NaiveDate(time.Now()))
   if len(taskmap) == 0 {
     return errors.New("No tasks found")
   }
@@ -255,6 +255,77 @@ func (taskmap TaskMap) HasKeyInDeps(key string) bool {
     }
   }
   return false
+}
+
+func as_days(d time.Duration) int {
+  return int(d.Hours())/24
+}
+
+// start and end are included
+func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) {
+  end = utils.NaiveDate(end)
+  start = utils.NaiveDate(start)
+  days := as_days(end.Sub(start))
+  total_done_map := make(map[time.Time][2]int)
+  for i := range days+1 {
+    d := utils.NaiveDate(start).AddDate(0, 0, i)
+    total_done_map[d] = [2]int{0, 0}
+  }
+  for _, task := range taskmap {
+    // legacy tasks with no DoneAt date should be ignored
+    if task.Done && task.DoneAt.IsZero() {
+      continue
+    }
+    naive_created_at := utils.NaiveDate(task.CreatedAt)
+    // add task existence
+    for i := range as_days(end.Sub(naive_created_at))+1 {
+      current_date := naive_created_at.AddDate(0, 0, i)
+      fmt.Println(current_date)
+      discipline, ok := total_done_map[current_date]
+      if ok {
+        discipline[0] += 1
+        total_done_map[current_date] = discipline
+      }
+    }
+    // add to task not done
+    all_done_at_list := append(task.OldDoneAtList, task.DoneAt)
+    // if the task is not done, toggle all days from task.created to end as not done
+    if !all_done_at_list[0].IsZero() {
+      all_done_at_list[0] = end
+    }
+    for i := range as_days(all_done_at_list[0].Sub(naive_created_at))+1 {
+      current_date := naive_created_at.AddDate(0, 0, i)
+      discipline, ok := total_done_map[current_date]
+      if ok {
+        discipline[1] += 1
+        total_done_map[current_date] = discipline
+      }
+    }
+    // if len bigger than one, iterate through
+    for i := 1; i < len(all_done_at_list); i++ {
+      expected_date, err := utils.ParseDuration(task.Recur, utils.NaiveDate(all_done_at_list[i-1]))
+      if err != nil {
+        continue
+      }
+      for i := range as_days(all_done_at_list[i].Sub(expected_date))+1 {
+        current_date := expected_date.AddDate(0, 0, i)
+        discipline, ok := total_done_map[current_date]
+        if ok {
+          discipline[1] += 1
+          total_done_map[current_date] = discipline
+        }
+      }
+    }
+  }
+  discipline_arr := make([]float64, 0, len(total_done_map))
+  sorted_keys := utils.Keys(total_done_map)
+  slices.SortFunc(sorted_keys, time.Time.Compare)
+  for _,key := range sorted_keys {
+    item := total_done_map[key]
+    discipline := float64(item[1])/float64(item[0])
+    discipline_arr = append(discipline_arr, discipline)
+  }
+  fmt.Println(discipline_arr)
 }
 
 func (taskmap TaskMap) Write(path string) error {

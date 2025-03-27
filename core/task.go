@@ -40,7 +40,7 @@ func (task Task) IsDone(taskmap TaskMap) bool {
 func (task *Task) Do() {
   if !task.Done && !task.AutoComplete {
     task.Done = true
-    if task.Recur != "" {
+    if task.Recur != "" && !task.DoneAt.IsZero() {
       task.OldDoneAtList = append(task.OldDoneAtList, task.DoneAt)
     }
     task.DoneAt = time.Now()
