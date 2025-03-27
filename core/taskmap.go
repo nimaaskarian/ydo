@@ -327,7 +327,6 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
       last_created, _ := utils.ParseDuration(task.Recur, utils.NaiveDate(task.DoneAt))
       for i := range as_days(end.Sub(last_created))+1 {
         exists_date := last_created.AddDate(0, 0, i)
-        fmt.Println(exists_date)
         if addToIndexIfKeyOk(total_done_map, start, end, 0, exists_date) {
           break
         }
@@ -339,7 +338,6 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
       }
     }
   }
-  fmt.Println(total_done_map)
   discipline_arr := make([]float64, 0, len(total_done_map))
   sorted_keys := utils.Keys(total_done_map)
   slices.SortFunc(sorted_keys, time.Time.Compare)

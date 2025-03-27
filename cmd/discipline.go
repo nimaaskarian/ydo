@@ -33,7 +33,6 @@ var disciplineCmd = &cobra.Command{
       end = time.Now()
     }
     data := taskmap.TrackDisciplineDaily(start, end)
-    fmt.Println(data)
     
     graph := asciigraph.Plot(
       data, asciigraph.Precision(3),
