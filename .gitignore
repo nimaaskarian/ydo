@@ -6,3 +6,4 @@ node_modules/
 tw-out.*
 cmd/webgui/contrast-check.csv
 *.bench
+ydo.termux
