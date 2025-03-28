@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -14,7 +15,7 @@ func TaskKeyCompletionFilter(filter func(core.Task, core.TaskMap) bool) cobra.Co
     keys := make([]string, 0, len(taskmap))
     i := 0
     for key := range taskmap {
-      if filter == nil || filter(taskmap[key], taskmap) {
+      if (filter == nil || filter(taskmap[key], taskmap)) && !slices.Contains(args, key) {
         keys = append(keys, key)
         i++
       }
