@@ -1,3 +1,5 @@
+// +build webgui
+
 package cmd
 
 import (
