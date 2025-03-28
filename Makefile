@@ -34,9 +34,13 @@ else
 endif
 
 bench:
+ifneq (,$(wildcard new.bench))
 	mv new.bench last.bench
-	go test ./... -bench=. -benchtime=20s -benchmem > tee new.bench
+endif
+	go test ./... -bench=. -benchtime=20s -benchmem > new.bench
+ifneq (,$(wildcard last.bench))
 	benchstat last.bench new.bench
+endif
 
 clean:
 	rm coverage.out ydo ydo.exe
