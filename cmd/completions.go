@@ -122,8 +122,11 @@ func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
     init_words := words
     for range depth {
       for _, word_i := range words {
+        included_words := strings.Split(word_i, "-")
         for _, word_j := range init_words {
-          words = append(words, word_i+"-"+word_j)
+          if !slices.Contains(included_words, word_j) {
+            words = append(words, word_i+"-"+word_j)
+          }
         }
       }
     }
