@@ -3,19 +3,30 @@ package cmd
 import (
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/utils"
 
 	"github.com/spf13/cobra"
 )
 
-func TaskKeyCompletionFilter(filter func(core.Task, core.TaskMap) bool) cobra.CompletionFunc {
+func TaskKeyCompletionFilter(filter func(core.Task, core.TaskMap, time.Time) bool) cobra.CompletionFunc {
   return func (cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     taskmap = core.LoadTaskMap(tasks_path)
+    now = time.Now()
+    if now_str != "" {
+      var err error
+      now, err = utils.ParseDue(now_str, now)
+      if err != nil {
+        return []string{}, cobra.ShellCompDirectiveError
+      }
+    }
+
     keys := make([]string, 0, len(taskmap))
     i := 0
     for key := range taskmap {
-      if (filter == nil || filter(taskmap[key], taskmap)) && !slices.Contains(args, key) {
+      if (filter == nil || filter(taskmap[key], taskmap, now)) && !slices.Contains(args, key) {
         keys = append(keys, key)
         i++
       }

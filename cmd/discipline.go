@@ -17,7 +17,7 @@ func init() {
   rootCmd.AddCommand(disciplineCmd)
   disciplineCmd.Flags().IntVarP(&height, "height", "H", 5, "specify height for the discipline graph")
 
-  disciplineCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap) bool {return !t.AutoComplete && !t.IsDone(tm) })
+  disciplineCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t core.Task, tm core.TaskMap, now time.Time) bool {return !t.AutoComplete && !t.IsDone(tm, now) })
 }
 
 var disciplineCmd = &cobra.Command{
@@ -43,9 +43,9 @@ var disciplineCmd = &cobra.Command{
         return err
       }
     } else {
-      end = time.Now()
+      end = now
     }
-    data := taskmap.TrackDisciplineDaily(start, end)
+    data := taskmap.TrackDisciplineDaily(start, end, now)
     
     graph := asciigraph.Plot(
       data, asciigraph.Precision(3),

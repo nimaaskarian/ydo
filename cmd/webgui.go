@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/nimaaskarian/ydo/core"
@@ -102,7 +103,7 @@ func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   key := ps.ByName("key")
   task := taskmap[key]
   if !task.AutoComplete {
-    taskmap.Do(key)
+    taskmap.Do(key, time.Now())
   }
 
   url := r.URL.Query().Get("redirect")

@@ -161,6 +161,10 @@ func NaiveDate(t time.Time) time.Time {
   return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
+func NaiveDateEqual(a,b time.Time) bool {
+  return a.Year() == b.Year() && a.Month() == b.Month() && a.Day() == b.Year()
+}
+
 func makeDatePartString(value uint64, indicator string) string {
   if value > 0 {
     return fmt.Sprintf("%d%s", value, indicator)

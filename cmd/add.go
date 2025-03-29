@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
@@ -70,14 +69,14 @@ var addCmd = &cobra.Command{
         return err
       }
     }
-    due_time, err := utils.ParseDue(due, time.Now())
+    due_time, err := utils.ParseDue(due, now)
     if err != nil {
       return err
     }
-    if _, err := utils.ParseDuration(recur, time.Now()); err != nil {
+    if _, err := utils.ParseDuration(recur, now); err != nil {
       return err
     }
-    taskmap[key] = core.Task {Task: taskmsg, Deps: deps, AutoComplete: auto_complete, CreatedAt: time.Now(), Due: due_time, Description: description, Recur: recur }
+    taskmap[key] = core.Task {Task: taskmsg, Deps: deps, AutoComplete: auto_complete, CreatedAt: now, Due: due_time, Description: description, Recur: recur }
     for _, dep_to := range dep_tos {
       task, err := taskmap.AddDep(dep_to, key)
       if err != nil {

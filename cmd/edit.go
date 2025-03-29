@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"reflect"
-	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
@@ -62,7 +61,7 @@ var editCmd = &cobra.Command{
       task.Description = description
     }
     if recur != "" {
-        if _, err := utils.ParseDuration(recur, time.Now()); err != nil {
+        if _, err := utils.ParseDuration(recur, now); err != nil {
         return err
       }
 

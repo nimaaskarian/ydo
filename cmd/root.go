@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"time"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
@@ -19,6 +20,8 @@ var (
   config_path string
   dry_run bool
   always_yes bool
+  now time.Time
+  now_str string
   // global state
   old_taskmap, taskmap core.TaskMap
   
@@ -32,7 +35,16 @@ var (
   Short: "ydo is a frictionless and fast to-do app",
   Long: `Fast, featurefull and frictionless to-do app with a graph structure`,
   PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-    config = Config{};
+    now = time.Now()
+    if now_str != "" {
+      var err error
+      now, err = utils.ParseDue(now_str, now)
+      if err != nil {
+        return err
+      }
+    }
+    config = Config{}
+    config.Markdown.Now = now
     config.ReadFile(config_path)
     loglevel := config.SlogLevel()
     slog.SetLogLoggerLevel(loglevel)
@@ -81,6 +93,9 @@ func init() {
   rootCmd.PersistentFlags().StringVarP(&config_path, "config","c",filepath.Join(config_dir, "config.yaml"), "path to config file")
   rootCmd.PersistentFlags().BoolVarP(&dry_run, "dry-run","n", false, "perform a trial run with no changes made")
   rootCmd.PersistentFlags().BoolVarP(&always_yes, "always-yes","Y", false, "answer yes to all the yes/no questions")
+  
+  rootCmd.PersistentFlags().StringVarP(&now_str, "now","N", "", "current time of operations (defaults to current system time)")
+  rootCmd.RegisterFlagCompletionFunc("now", DueCompletion)
 }
 
 func Execute() {

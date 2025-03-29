@@ -22,33 +22,33 @@ type Task struct {
   Recur string                  `yaml:",omitempty"`
 }
 
-func (task Task) IsDone(taskmap TaskMap) bool {
+func (task Task) IsDone(taskmap TaskMap, now time.Time) bool {
   if task.AutoComplete {
     for _,key := range task.Deps {
-      if !taskmap[key].IsDone(taskmap) {
+      if !taskmap[key].IsDone(taskmap, now) {
         return false
       }
     }
     return true
   }
-  if t, err := utils.ParseDuration(task.Recur, task.DoneAt); err == nil && !t.IsZero() && time.Now().After(t) {
+  if t, err := utils.ParseDuration(task.Recur, task.DoneAt); err == nil && !t.IsZero() && now.After(t) {
     task.Done = false
   } 
   return task.Done
 }
 
-func (task *Task) Do(taskmap TaskMap) {
-  if !task.IsDone(taskmap) && !task.AutoComplete {
+func (task *Task) Do(taskmap TaskMap, now time.Time) {
+  if !task.IsDone(taskmap, now) && !task.AutoComplete {
     task.Done = true
     if task.Recur != "" && !task.DoneAt.IsZero() {
       task.OldDoneAtList = append(task.OldDoneAtList, task.DoneAt)
     }
-    task.DoneAt = time.Now()
+    task.DoneAt = now
   }
 }
 
-func (task *Task) Undo(taskmap TaskMap) {
-  if task.IsDone(taskmap) && !task.AutoComplete {
+func (task *Task) Undo(taskmap TaskMap, now time.Time) {
+  if task.IsDone(taskmap, now) && !task.AutoComplete {
     task.Done = false
     if task.Recur != "" && len(task.OldDoneAtList) > 0 {
       length := len(task.OldDoneAtList)
@@ -75,8 +75,8 @@ func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
   return task.DoneAt
 }
 
-func (task Task) IsNotDone(taskmap TaskMap) bool {
-  return !task.IsDone(taskmap)
+func (task Task) IsNotDone(taskmap TaskMap, now time.Time) bool {
+  return !task.IsDone(taskmap, now)
 }
 
 // copy a task, delete() the key, run this.
@@ -90,7 +90,7 @@ func (task Task) CascadeOrphanDeps(taskmap TaskMap) {
 }
 
 func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig) (count int) {
-  if config.Filter != nil && !config.Filter(taskmap[key], taskmap) {
+  if config.Filter != nil && !config.Filter(taskmap[key], taskmap, config.Now) {
     return 0
   }
   if config.Limit != 0 && len(seen_keys) >= config.Limit {
@@ -104,7 +104,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     print_key = key+": "
   }
   var recur string
-  if task.IsDone(taskmap) {
+  if task.IsDone(taskmap, config.Now) {
     done_at := task.FindDoneAt(taskmap)
     if !done_at.IsZero() {
       overdue := ""
@@ -114,7 +114,7 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
       if task.Recur != "" {
         recur = ", each "+task.Recur
       }
-      fmt.Printf("- [x] %s%s (%s ago%s%s)\n", print_key,task.Task, utils.FormatDuration(time.Now().Sub(done_at)), overdue, recur)
+      fmt.Printf("- [x] %s%s (%s ago%s%s)\n", print_key,task.Task, utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
     } else {
       if task.Recur != "" {
         recur = " (each "+task.Recur + ")"
@@ -127,11 +127,10 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
     }
     due_print := ""
     if !task.Due.IsZero() {
-      now := time.Now()
-      diff := task.Due.Sub(now)
+      diff := task.Due.Sub(config.Now)
       due_print = " ("
-      if task.Due.Add(-diff).Compare(now) != 0 {
-        due_print += strconv.Itoa(task.Due.Year() - now.Year()) + "y"
+      if task.Due.Add(-diff).Compare(config.Now) != 0 {
+        due_print += strconv.Itoa(task.Due.Year() - config.Now.Year()) + "y"
       } else {
         if diff < 0 {
           due_print = " (-"

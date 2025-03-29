@@ -44,6 +44,9 @@ due:
 due-enhanced:
     task: add a start and end due date for tasks to do in a defined interval (this week, next week, next  year, etc)
     created-at: 2025-03-19T18:44:07.801574565+03:30
+editor:
+    task: add task editor command
+    created-at: 2025-03-29T09:19:08.772741504+03:30
 find:
     task: find another name for undo (like the old undo)
     description: |-
@@ -75,6 +78,9 @@ md-circular:
     task: improve fix markdown circular output
     done: true
     created-at: 2025-03-14T17:04:50.975357064+03:30
+percentage:
+    task: add percentage for autocompleted tasks
+    created-at: 2025-03-29T09:19:24.536171782+03:30
 performance:
     task: improve performance by adding a better file structure (maps copy data)
     deps: [refactor, tests]
@@ -114,6 +120,9 @@ svg-color:
     done: true
     created-at: 2025-03-18T03:25:47.202755854+03:30
     done-at: 2025-03-18T19:26:22.742265864+03:30
+tags:
+    task: add tags to task
+    created-at: 2025-03-29T09:18:55.678001557+03:30
 tests:
     task: add more tests
     deps: [tests/core, tests/utils, tests/cmd]

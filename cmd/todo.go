@@ -24,14 +24,14 @@ var todoCmd = &cobra.Command{
   Short: "output to-do (unfinished) tasks as markdown",
   ValidArgsFunction: TaskKeyCompletionFilter(core.Task.IsNotDone),
   RunE: func(cmd *cobra.Command, keys []string) error {
-    due_time, err := utils.ParseDue(due, time.Now())
+    due_time, err := utils.ParseDue(due, now)
     if err != nil {
       return err
     }
     md_config := config.Markdown
     md_config.Limit = 0
-    md_config.Filter = func(task core.Task, taskmap core.TaskMap) bool {
-      return (due_time.IsZero() || (task.Due.Sub(due_time).Abs() < time.Hour*24)) && task.IsNotDone(taskmap)
+    md_config.Filter = func(task core.Task, taskmap core.TaskMap, now time.Time) bool {
+      return (due_time.IsZero() || utils.NaiveDateEqual(due_time, task.Due)) && task.IsNotDone(taskmap, now)
     }
     if len(keys) == 0 {
       taskmap.PrintMarkdown(&md_config)

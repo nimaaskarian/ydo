@@ -68,12 +68,12 @@ func (taskmap TaskMap) HasTask(key string) bool {
   return ok
 }
 
-func (taskmap TaskMap) Do(key string) error {
+func (taskmap TaskMap) Do(key string, now time.Time) error {
   task, err := taskmap.GetTask(key)
   if err != nil{
     return err
   }
-  task.Do(taskmap)
+  task.Do(taskmap, now)
   taskmap[key] = task
   slog.Info("Completed task","key" ,key)
   return nil
@@ -95,12 +95,12 @@ func (tm TaskMap) AddDep(key string, dep string) (Task, error) {
   return task, nil
 }
 
-func (taskmap TaskMap) Undo(key string) error {
+func (taskmap TaskMap) Undo(key string, now time.Time) error {
   task, err := taskmap.GetTask(key)
   if err != nil{
     return err
   }
-  task.Undo(taskmap)
+  task.Undo(taskmap, now)
   taskmap[key] = task
   slog.Info("Un-completed task","key" ,key)
   return nil
@@ -116,7 +116,7 @@ func PrintYaml(obj any) error {
   return nil
 }
 
-type MarkdownFilter func(task Task, taskmap TaskMap) bool;
+type MarkdownFilter func(task Task, taskmap TaskMap, now time.Time) bool;
 
 type MarkdownConfig struct {
   Indent uint             `yaml:",omitempty"`
@@ -124,6 +124,7 @@ type MarkdownConfig struct {
   Description bool        `yaml:",omitempty"`
   Limit int               `yaml:",omitempty"`
   Filter MarkdownFilter
+  Now time.Time
 }
 
 func (taskmap TaskMap) SortedKeys() []string {
@@ -274,7 +275,7 @@ func addToIndexIfKeyOk(m map[time.Time][2]int, start, end time.Time, index int, 
 }
 
 // start and end are included
-func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
+func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64 {
   end = utils.NaiveDate(end)
   start = utils.NaiveDate(start)
   days := as_days(end.Sub(start))
@@ -286,7 +287,7 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end time.Time) []float64 {
 
   for _, task := range taskmap {
     // ignore legeacy tasks
-    if task.IsDone(taskmap) && task.DoneAt.IsZero() {
+    if task.IsDone(taskmap, now) && task.DoneAt.IsZero() {
       continue
     }
     created_date := utils.NaiveDate(task.CreatedAt)

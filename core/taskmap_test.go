@@ -53,24 +53,24 @@ func TestNextKey(t *testing.T) {
 func TestDo(t *testing.T) {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES))
-  assert.True(t, taskmap["t2"].IsDone(taskmap))
-  assert.False(t, taskmap["t3"].IsDone(taskmap))
-  taskmap.Do("t3")
-  assert.True(t, taskmap["t3"].IsDone(taskmap))
+  assert.True(t, taskmap["t2"].IsDone(taskmap, time.Now()))
+  assert.False(t, taskmap["t3"].IsDone(taskmap, time.Now()))
+  taskmap.Do("t3", time.Now())
+  assert.True(t, taskmap["t3"].IsDone(taskmap, time.Now()))
 }
 
 func TestUndo(t *testing.T) {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(GROCERIES))
-  assert.True(t, tm["t2"].IsDone(tm))
-  tm.Undo("t2")
-  assert.False(t, tm["t2"].IsDone(tm))
+  assert.True(t, tm["t2"].IsDone(tm, time.Now()))
+  tm.Undo("t2", time.Now())
+  assert.False(t, tm["t2"].IsDone(tm, time.Now()))
 }
 
 func TestUndoDoneAt(t *testing.T) {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(GROCERIES))
-  tm.Undo("t2")
+  tm.Undo("t2", time.Now())
   fmt.Println(tm["t2"].DoneAt)
   assert.True(t, tm["t2"].DoneAt.IsZero())
 }
@@ -78,11 +78,11 @@ func TestUndoDoneAt(t *testing.T) {
 func TestDepIsDone(t *testing.T) {
   taskmap := make(TaskMap)
   ParseYaml(taskmap, []byte(GROCERIES))
-  assert.False(t, taskmap["t1"].IsDone(taskmap))
-  taskmap.Do("t2")
-  assert.False(t, taskmap["t1"].IsDone(taskmap))
-  taskmap.Do("t3")
-  assert.True(t, taskmap["t1"].IsDone(taskmap))
+  assert.False(t, taskmap["t1"].IsDone(taskmap, time.Now()))
+  taskmap.Do("t2", time.Now())
+  assert.False(t, taskmap["t1"].IsDone(taskmap, time.Now()))
+  taskmap.Do("t3", time.Now())
+  assert.True(t, taskmap["t1"].IsDone(taskmap, time.Now()))
 }
 
 func ExamplePrintYaml() {
@@ -186,7 +186,7 @@ func TestWriteAndLoad(t *testing.T) {
 func TestFindDoneAt(t *testing.T) {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(GROCERIES))
-  tm.Do("t3")
+  tm.Do("t3", time.Now())
   assert.Equal(t, tm["t3"].DoneAt, tm["t1"].FindDoneAt(tm))
 }
 
@@ -247,7 +247,7 @@ func TestSortedKeys(t *testing.T) {
 func ExampleTaskMap_PrintMarkdown() {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(HOMEWORKS))
-  tm.Do("study")
+  tm.Do("study", time.Now())
   task := tm["homework"]
   task.Due = time.Now().Add(time.Hour*24)
   tm["homework"] = task
@@ -277,7 +277,7 @@ func TestTrackDisciplineDailySingle(t *testing.T) {
   ParseYaml(tm, []byte(SINGLE_DISCIPLINE))
   start, _ := time.ParseInLocation("2006-01-02", "2025-03-20", time.Local)
   end, _ := time.ParseInLocation("2006-01-02", "2025-03-27", time.Local)
-  assert.Equal(t, []float64{0, 0, 0, 1, 0, 1, 1, 0}, tm.TrackDisciplineDaily(start, end))
+  assert.Equal(t, []float64{0, 0, 0, 1, 0, 1, 1, 0}, tm.TrackDisciplineDaily(start, end, time.Now()))
 }
 
 const MULTIPLE_DISCIPLINE = `clean:
@@ -317,7 +317,7 @@ func TestTrackDisciplineDailyMultiple(t *testing.T) {
   ParseYaml(tm, []byte(MULTIPLE_DISCIPLINE))
   start, _ := time.ParseInLocation("2006-01-02", "2025-03-21", time.Local)
   end, _ := time.ParseInLocation("2006-01-02", "2025-03-27", time.Local)
-  assert.Equal(t, []float64{0,1./3.,1./2., 0, 1, 0, 1}, tm.TrackDisciplineDaily(start, end))
+  assert.Equal(t, []float64{0,1./3.,1./2., 0, 1, 0, 1}, tm.TrackDisciplineDaily(start, end, time.Now()))
 }
 
 
@@ -340,5 +340,5 @@ func TestTrackDisciplineDailyNoRecur(t *testing.T) {
   ParseYaml(tm, []byte(COMPLEX_DISCIPLINE))
   start, _ := time.ParseInLocation("2006-01-02", "2025-03-20", time.Local)
   end, _ := time.ParseInLocation("2006-01-02", "2025-03-25", time.Local)
-  assert.Equal(t, fmt.Sprint(expected), fmt.Sprint(tm.TrackDisciplineDaily(start, end)))
+  assert.Equal(t, fmt.Sprint(expected), fmt.Sprint(tm.TrackDisciplineDaily(start, end, time.Now())))
 }
