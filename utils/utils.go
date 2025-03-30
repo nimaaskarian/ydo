@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -59,8 +60,14 @@ func ParseDuration(input string, now time.Time) (time.Time, error) {
   if input == "" {
     return time.Time{}, nil
   }
+  coefficient := 1
+  if strings.HasPrefix(input, "-") {
+    coefficient = -1
+    input = input[1:]
+  }
   index := strings.IndexFunc(input, func(r rune) bool { return r > '9' || r < '0'})
   num, err := strconv.Atoi(input[:index])
+  num*=coefficient
   if err != nil {
     return time.Time{}, err
   }
@@ -224,19 +231,43 @@ func DeepCopyMap[K comparable, V any](m map[K]*V) (out map[K]V) {
   return out
 }
 
-func Filter[T any] (arr[]T, test func(T) bool) (out []T) {
-  for _, item := range arr {
-    if test(item) {
-      out = append(out, item)
-    }
-  }
-  return out
-}
-
 func Keys[K comparable, V any] (m map[K]V) []K {
   keys := make([]K, 0 ,len(m))
   for key := range m {
     keys = append(keys, key)
   }
   return keys
+}
+
+// kinda copied from github.com/charmbracelet/x/editor's Cmd function, and
+// debloated for my usecase
+func EditorCmd(path string) (*exec.Cmd, error) {
+	if os.Getenv("SNAP_REVISION") != "" {
+		return nil, fmt.Errorf("Did you install with Snap? ydo is sandboxed and unable to open an editor. Please install ydo with Go or another package manager to enable editing.")
+	}
+	editor, args := getEditor()
+  args = append(args, path)
+	return exec.Command(editor, args...), nil
+}
+
+func getEditor() (string, []string) {
+	editor := strings.Fields(os.Getenv("EDITOR"))
+	if len(editor) > 1 {
+		return editor[0], editor[1:]
+	}
+	if len(editor) == 1 {
+		return editor[0], []string{}
+	}
+	return DEFAULT_EDITOR, []string{}
+}
+
+// set the command's stdout, stderr and stdin to os's
+func CmdStdOs(c *exec.Cmd) {
+  c.Stdout = os.Stdout
+  c.Stdin = os.Stdin
+  c.Stderr = os.Stderr
+}
+
+func IsDigit(r rune) bool {
+  return r > '9' || r < '0'
 }

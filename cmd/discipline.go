@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/guptarohit/asciigraph"
-	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
   "github.com/fatih/color"
@@ -17,13 +16,12 @@ var height int
 func init() {
   rootCmd.AddCommand(disciplineCmd)
   disciplineCmd.Flags().IntVarP(&height, "height", "H", 5, "specify height for the discipline graph")
-
-  disciplineCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool {return !t.AutoComplete && !t.IsDone(tm, now) })
 }
 
 var disciplineCmd = &cobra.Command{
   Use: "discipline [start] [end]",
-  Short: "get a discipline graph from start (defaults to first task created) to end (defaults to today)",
+  Short: "get a discipline graph",
+  Long: " get a graph of discipline from the start (which defaults to first task created) to end (which defaults to today)",
   RunE: func(cmd *cobra.Command, args []string) error {
     var start, end time.Time
     var err error

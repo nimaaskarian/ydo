@@ -24,7 +24,8 @@ func init() {
 var todoCmd = &cobra.Command{
   Aliases: []string{"t"},
   Use: "todo [tasks (optional)]",
-  Short: "output to-do (unfinished) tasks as markdown",
+  Short: "output to-do as markdown",
+  Long: "output all unfinished tasks (to-dos) as markdown",
   ValidArgsFunction: TaskKeyCompletionFilter((*core.Task).IsNotDone),
   RunE: func(cmd *cobra.Command, keys []string) error {
     due_time, err := utils.ParseDue(due, now)

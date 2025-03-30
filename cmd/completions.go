@@ -53,9 +53,7 @@ func DurationCompletion(cmd *cobra.Command, args []string, toComplete string) ([
     "scnds",
   }
   out := make([]string, 0, len(durations))
-  index := strings.IndexFunc(toComplete, func(r rune) bool {
-    return r > '9' || r < '0'
-  })
+  index := strings.IndexFunc(toComplete, utils.IsDigit)
   if index != 0 && len(toComplete) != 0 {
     if index == -1 {
       index = len(toComplete)

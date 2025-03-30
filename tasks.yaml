@@ -14,7 +14,9 @@ compile:
     done-at: 2025-03-23T19:10:05.50453866+03:30
 config:
     task: add config command that opens config with the editor (like in glow)
+    done: true
     created-at: 2025-03-30T14:28:24.183370299+03:30
+    done-at: 2025-03-30T17:28:07.239072042+03:30
 core:
     task: complete core
     deps: [date-added, due, tfidf, tfidf-conf, print-mode]

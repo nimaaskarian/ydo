@@ -48,10 +48,18 @@ func init() {
 
 var editCmd = &cobra.Command{
   Aliases: []string{"e"},
-  Use: "edit [key] [new task message (optional)]",
-  Short: "edit a task",
-  Args: cobra.MinimumNArgs(1),
+  Use: "edit [key (optional)] [new task message (optional)]",
+  Short: "edit a task, or open the data file in favorite editor",
+  Long: "edit a task provided a key. give no keys to open the yaml file in your favorite editor",
   RunE: func(cmd *cobra.Command, args []string) error {
+    if len(args) == 0 {
+      c, err := utils.EditorCmd(tasks_path)
+      if err != nil {
+        return err
+      }
+      utils.CmdStdOs(c)
+      return c.Run()
+    }
     if _, err := taskmap.GetTask(args[0]); err != nil {
       return err
     }
