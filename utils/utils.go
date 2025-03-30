@@ -1,4 +1,3 @@
-
 package utils
 
 import (
@@ -143,7 +142,7 @@ func parseDate(s string, now time.Time) (time.Time, error) {
     // yeah. like you gonna do that in a thousand years
     return now.AddDate(1000, 0, 0), nil
   default:
-    date, err := time.ParseInLocation("2006-01-02", date_time[0], time.Local)
+    date, err := parseYmd(date_time[0], time.Local)
     if err != nil {
       return date, fmt.Errorf("Invalid date %q. Date is a Y-M-D, weekday, yesterday, today, tomorrow or later", date_time[0])
     }

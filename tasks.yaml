@@ -58,7 +58,9 @@ hide:
     created-at: 2025-03-24T17:39:52.285190133+03:30
 jalali:
     task: add jalali date
+    done: true
     created-at: 2025-03-21T12:16:22.281575469+03:30
+    done-at: 2025-03-30T11:44:51.915846751+03:30
 list:
     task: list of done-ats
     done: true
