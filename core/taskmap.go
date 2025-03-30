@@ -25,7 +25,6 @@ func ParseYaml(obj any, input []byte) {
 }
 
 type TaskMap map[string]*Task;
-type TaskMapValue map[string]Task;
 
 func (taskmap TaskMap) Delete(key string, cascade bool) error {
   task, err := taskmap.GetTask(key)

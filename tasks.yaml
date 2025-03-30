@@ -126,7 +126,9 @@ svg-color:
     done-at: 2025-03-18T19:26:22.742265864+03:30
 tags:
     task: add tags to task
+    done: true
     created-at: 2025-03-29T09:18:55.678001557+03:30
+    done-at: 2025-03-30T11:45:50.694481703+03:30
 tests:
     task: add more tests
     deps: [tests/core, tests/utils, tests/cmd]

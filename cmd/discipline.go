@@ -57,6 +57,4 @@ var disciplineCmd = &cobra.Command{
     fmt.Println(graph)
     return nil
   },
-  PostRunE: SaveChanges,
-  PreRun: UpdateOldTaskMap,
 }

@@ -23,7 +23,7 @@ var (
   now time.Time
   now_str string
   // global state
-  old_taskmap core.TaskMapValue
+  old_taskmap map[string]core.Task;
   taskmap core.TaskMap
   
   config_dir string
@@ -70,7 +70,7 @@ var (
 )
 
 func SaveChanges(cmd *cobra.Command, args []string) error {
-  if !reflect.DeepEqual(old_taskmap, taskmap) {
+  if !reflect.DeepEqual(old_taskmap, utils.DeepCopyMap(taskmap)) {
     slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
     if dry_run {
       taskmap.DryWrite(tasks_path)
