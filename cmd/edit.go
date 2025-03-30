@@ -35,6 +35,9 @@ func init() {
   editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
   editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
 
+  editCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
+  editCmd.RegisterFlagCompletionFunc("due", DueCompletion)
+
   editCmd.Flags().StringArrayVarP(&dep_tos, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
   editCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletionFilter(nil))
 
@@ -60,11 +63,16 @@ var editCmd = &cobra.Command{
       utils.CmdStdOs(c)
       return c.Run()
     }
-    if _, err := taskmap.GetTask(args[0]); err != nil {
+    task, err := taskmap.GetTask(args[0]);
+    if err != nil {
       return err
     }
+    if due != "" {
+      if due_date, err := utils.ParseDue(due, now); err == nil {
+        task.Due = due_date
+      }
+    }
     edit_key := args[0]
-    task := taskmap[edit_key]
     if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
       task.Task = new_task
     }
