@@ -29,13 +29,14 @@ func (config *Config) ReadFile(path string) {
 }
 
 func (config *Config) Init() {
-  config.Markdown.Init()
   switch config.Color {
   case "always": 
     color.NoColor = false
   case "never": 
     color.NoColor = true
   }
+  config.Markdown.Beautify = !color.NoColor
+  config.Markdown.Init()
 }
 
 func (config *Config) FirstFileAvailable() (string, error) {

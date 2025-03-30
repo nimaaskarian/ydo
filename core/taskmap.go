@@ -121,6 +121,7 @@ type MarkdownConfig struct {
   Mode string             `yaml:",omitempty"`
   Description bool        `yaml:",omitempty"`
   Limit int               `yaml:",omitempty"`
+  Beautify bool           `yaml:",omitempty"`
   Filter TaskFilter
   Now time.Time
 }

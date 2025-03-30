@@ -106,11 +106,18 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
   }
   printIndent(depth, config)
   if task.IsDone(taskmap, config.Now) {
-    fmt.Print("- [x] ")
+    if config.Beautify {
+      fmt.Print(" [✓] ")
+    } else {
+      fmt.Print("- [x] ")
+    }
     printKey(key)
     printDoneTask(task, taskmap, config)
   } else {
-    fmt.Print("- [ ] ")
+    if !config.Beautify {
+      fmt.Print("-")
+    }
+    fmt.Print(" [ ] ")
     printKey(key)
     printPendingTask(task, config)
   }
@@ -172,18 +179,18 @@ func printPendingTask(task *Task, config *MarkdownConfig) {
   fmt.Printf("%s%s%s", task.Task, due_print, recur)
 }
 
+var bold = color.New(color.Bold)
 func printKey(key string) {
   if key != "" {
-    d := color.New(color.Bold)
-    fmt.Printf("%s: ", d.Sprint(key))
+    fmt.Printf("%s: ", bold.Sprint(key))
   }
 }
 
+var underline = color.New(color.Underline)
 func printTags(task * Task) {
   for _, tag := range task.Tags {
-    d := color.New(color.Underline)
     fmt.Print(" ")
-    d.Printf("#%s", tag)
+    underline.Printf("#%s", tag)
   }
 }
 
