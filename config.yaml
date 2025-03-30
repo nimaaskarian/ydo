@@ -5,6 +5,8 @@ loglevel: error
 markdown: 
   # number of spaces on each indent. 0 is replaced with 3 (default)
   indent: 2
+  color: true
+  description: true
   # possible values: todo, md, smart (default)
   mode: todo
 tfidf:

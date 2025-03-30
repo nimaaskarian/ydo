@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
+  "github.com/fatih/color"
 )
 
 type Task struct {
@@ -104,12 +105,17 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
     return 1
   }
   printIndent(depth, config)
-  print_key := formatKeyForPrint(key)
   if task.IsDone(taskmap, config.Now) {
-    printDoneTask(task, taskmap, config, print_key)
+    fmt.Print("- [x] ")
+    printKey(key, config)
+    printDoneTask(task, taskmap, config)
   } else {
-    printPendingTask(task, config, print_key)
+    fmt.Print("- [ ] ")
+    printKey(key, config)
+    printPendingTask(task, config)
   }
+  printTags(task, config)
+  fmt.Println()
   printDescription(depth, task, config)
   if seen_keys != nil  {
     if _, ok := seen_keys[key]; ok {
@@ -123,7 +129,7 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
   return 1+count
 }
 
-func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig, print_key string) {
+func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
   var recur string
   done_at := task.FindDoneAt(taskmap)
   if !done_at.IsZero() {
@@ -134,16 +140,16 @@ func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig, print_ke
     if task.Recur != "" {
       recur = ", each "+task.Recur
     }
-    fmt.Printf("- [x] %s%s (%s ago%s%s)\n", print_key,task.Task, utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
+    fmt.Printf("%s (%s ago%s%s)", task.Task, utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
   } else {
     if task.Recur != "" {
       recur = " (each "+task.Recur + ")"
     }
-    fmt.Printf("- [x] %s%s%s\n", print_key,task.Task, recur)
+    fmt.Printf("%s%s", task.Task, recur)
   }
 }
 
-func printPendingTask(task *Task, config *MarkdownConfig, print_key string) {
+func printPendingTask(task *Task, config *MarkdownConfig) {
   var recur string
   if task.Recur != "" {
     recur = " (each "+task.Recur + ")"
@@ -163,14 +169,30 @@ func printPendingTask(task *Task, config *MarkdownConfig, print_key string) {
     }
     due_print += ")"
   }
-  fmt.Printf("- [ ] %s%s%s%s\n", print_key,task.Task, due_print, recur)
+  fmt.Printf("%s%s%s", task.Task, due_print, recur)
 }
 
-func formatKeyForPrint(key string) string {
+func printKey(key string, config *MarkdownConfig) {
   if key != "" {
-    return key+": "
+    if config.HasColor(){
+      d := color.New(color.Bold)
+      fmt.Printf("%s: ", d.Sprint(key))
+    } else {
+      fmt.Printf("%s: ", key)
+    }
   }
-  return ""
+}
+
+func printTags(task * Task, config *MarkdownConfig) {
+  for _, tag := range task.Tags {
+    if config.HasColor() {
+      d := color.New(color.Underline)
+      fmt.Print(" ")
+      d.Printf("#%s", tag)
+    } else {
+      fmt.Printf(" #%s", tag)
+    }
+  }
 }
 
 func printIndent(depth uint, config *MarkdownConfig) {

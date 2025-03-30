@@ -22,6 +22,7 @@ var (
   always_yes bool
   now time.Time
   now_str string
+  color string
   // global state
   old_taskmap map[string]core.Task;
   taskmap core.TaskMap
@@ -45,8 +46,12 @@ var (
       }
     }
     config = Config{}
-    config.Markdown.Now = now
     config.ReadFile(config_path)
+    config.Markdown.Now = now
+    if color != "" {
+      config.Markdown.Color = color
+    }
+    config.Markdown.Init()
     loglevel := config.SlogLevel()
     slog.SetLogLoggerLevel(loglevel)
     log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
@@ -97,6 +102,8 @@ func init() {
   
   rootCmd.PersistentFlags().StringVarP(&now_str, "now","N", "", "current time of operations (defaults to current system time)")
   rootCmd.RegisterFlagCompletionFunc("now", DueCompletion)
+  rootCmd.PersistentFlags().StringVar(&color, "color", "", "color to print (defaults to auto, overrides config's markdown.color option)")
+  rootCmd.RegisterFlagCompletionFunc("color", cobra.FixedCompletions([]string{"always", "never", "auto"},cobra.ShellCompDirectiveNoFileComp))
 }
 
 func Execute() {

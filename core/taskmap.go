@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -121,8 +122,30 @@ type MarkdownConfig struct {
   Mode string             `yaml:",omitempty"`
   Description bool        `yaml:",omitempty"`
   Limit int               `yaml:",omitempty"`
+  Color string            `yaml:",omitempty"`
+  color bool              `yaml:",omitempty"`
   Filter TaskFilter
   Now time.Time
+}
+
+func (config *MarkdownConfig) Init() {
+  if config.Indent == 0 {
+    config.Indent = 3
+  }
+  switch config.Color {
+  case "always": 
+    config.color = true
+  case "never": 
+    config.color = false
+  default: 
+    fi, _ := os.Stdout.Stat()
+    config.color = (fi.Mode() & os.ModeCharDevice) != 0
+  }
+  color.NoColor = !config.color
+}
+
+func (config *MarkdownConfig) HasColor() bool {
+  return config.color
 }
 
 func (taskmap TaskMap) SortedKeys() []string {

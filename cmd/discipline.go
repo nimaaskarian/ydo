@@ -46,12 +46,16 @@ var disciplineCmd = &cobra.Command{
       end = now
     }
     data := taskmap.TrackDisciplineDaily(start, end, now)
+    color := asciigraph.Default
+    if config.Markdown.HasColor() {
+      color = asciigraph.Blue
+    }
     
     graph := asciigraph.Plot(
       data, asciigraph.Precision(3),
       asciigraph.Height(height),
       asciigraph.SeriesLegends("Discipline"),
-      asciigraph.SeriesColors(asciigraph.Blue),
+      asciigraph.SeriesColors(color),
       )
 
     fmt.Println(graph)

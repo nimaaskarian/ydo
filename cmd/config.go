@@ -24,9 +24,6 @@ func (config *Config) ReadFile(path string) {
   if err != nil {
     slog.Error("Error reading config file", "err", err)
   }
-  if config.Markdown.Indent == 0 {
-    config.Markdown.Indent = 3
-  }
 }
 
 func (config *Config) FirstFileAvailable() (string, error) {
