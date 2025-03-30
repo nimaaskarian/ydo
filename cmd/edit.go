@@ -29,6 +29,9 @@ func init() {
   editCmd.Flags().StringVarP(&new_key, "key", "k", "", "new key to the task")
   editCmd.RegisterFlagCompletionFunc("key", KeyCompletion)
 
+	editCmd.Flags().StringArrayVarP(&tags, "tag", "T", []string{}, "tag(s) for the task")
+  editCmd.RegisterFlagCompletionFunc("tag", TagCompletion)
+
   editCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "append dependencies for the task")
   editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
 
@@ -81,6 +84,9 @@ var editCmd = &cobra.Command{
     if remove_deps {
       task.Deps = make([]string, 0, len(deps))
     }
+		if len(tags) > 0 {
+			task.Tags = tags
+		}
     if remove_dep_to {
       taskmap.WipeDependenciesToKey(edit_key)
     }

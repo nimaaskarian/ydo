@@ -23,6 +23,7 @@ description string
 tfidf bool
 taskmsg string 
 recur string
+tags []string
 )
 
 func init() {
@@ -34,6 +35,9 @@ func init() {
   addCmd.Flags().BoolVarP(&tfidf, "tfidf", "t", false, "use tfidf for automatic key generation (overrides config file and --key flag)")
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
   addCmd.RegisterFlagCompletionFunc("key", KeyCompletion)
+
+	addCmd.Flags().StringArrayVarP(&tags, "tag", "T", []string{}, "tag(s) for the task")
+  addCmd.RegisterFlagCompletionFunc("tag", TagCompletion)
 
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
   addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletionFilter(nil))
@@ -76,7 +80,7 @@ var addCmd = &cobra.Command{
     if _, err := utils.ParseDuration(recur, now); err != nil {
       return err
     }
-    taskmap[key] = core.Task {Task: taskmsg, Deps: deps, AutoComplete: auto_complete, CreatedAt: now, Due: due_time, Description: description, Recur: recur }
+		taskmap[key] = core.Task {Task: taskmsg, Deps: deps, AutoComplete: auto_complete, CreatedAt: now, Due: due_time, Description: description, Recur: recur, Tags: tags }
     for _, dep_to := range dep_tos {
       task, err := taskmap.AddDep(dep_to, key)
       if err != nil {

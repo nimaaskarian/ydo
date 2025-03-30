@@ -40,7 +40,7 @@ func TestParseDateAbsolute(t *testing.T) {
 
 func TestParseDateRelative(t *testing.T) {
   now, _ := time.ParseInLocation("2006-01-02 15:04:05","2025-03-20 17:00:00", time.Local)
-  tests := [...][3]string{
+  tests := [...][2]string{
     {"tomorrow/8", "2025-03-21 8:00:00"},
     {"today/8", "2025-03-20 8:00:00"},
     {"yesterday/", "2025-03-19 00:00:00"},

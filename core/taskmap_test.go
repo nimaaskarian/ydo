@@ -254,7 +254,7 @@ func ExampleTaskMap_PrintMarkdown() {
   task = tm["milk"]
   task.Due = time.Now().Add(time.Minute*12)
   tm["milk"] = task
-  tm.PrintMarkdown(&MarkdownConfig{Indent: 4})
+	tm.PrintMarkdown(&MarkdownConfig{Indent: 4, Now: time.Now()})
   // Output:
   // - [ ] milk: buy some milk (12min)
   // - [ ] homework: do uni practice (1d)
@@ -266,7 +266,7 @@ const SINGLE_DISCIPLINE = `workout:
   task: workout
   created-at: 2025-03-20T00:20:52.625601175+03:30
   done-at: 2025-03-26T08:46:50.967817015+03:30
-  old-done-at-list: 
+  done-at-archive:
     - 2025-03-23T08:46:50.967817015+03:30
     - 2025-03-25T08:46:50.967817015+03:30
   recur: 1d

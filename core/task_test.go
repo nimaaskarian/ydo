@@ -45,7 +45,7 @@ func ExampleTask_PrintMarkdown() {
   task := Task{};
   ParseYaml(&task, []byte(DATA));
   task.Deps = []string{};
-  config := MarkdownConfig{Indent: 3}
+	config := MarkdownConfig{Indent: 3, Now: time.Now()}
   task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Done = false;
   task.DoneAt = time.Now().Add(-time.Hour*24)

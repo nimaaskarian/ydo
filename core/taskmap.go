@@ -144,6 +144,13 @@ func (taskmap TaskMap) SortedKeys() []string {
   return keys
 }
 
+func (taskmap TaskMap) Tags() (tags []string) {
+	for _,task := range taskmap {
+		tags = append(tags, task.Tags...)
+	}
+	return tags
+}
+
 func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   if len(taskmap) == 0 {
     return errors.New("No tasks found")
@@ -314,10 +321,10 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64
         }
       }
     } else {
-      done_dates := append(task.OldDoneAtList, task.DoneAt)
+      done_dates := append(task.DoneAtArchive, task.DoneAt)
       created_dates := make([]time.Time, 1, len(done_dates))
       created_dates[0] = created_date
-      for _, done_at := range task.OldDoneAtList {
+      for _, done_at := range task.DoneAtArchive {
         t, _ := utils.ParseDuration(task.Recur, utils.NaiveDate(done_at))
         created_dates = append(created_dates, t)
       }

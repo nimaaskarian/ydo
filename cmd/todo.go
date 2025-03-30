@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"slices"
 	"time"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -16,6 +17,8 @@ func init() {
   todoCmd.RegisterFlagCompletionFunc("due", DueCompletion)
 
   todoCmd.Flags().BoolVarP(&show_description, "description", "d", false, "show descriptions")
+	todoCmd.Flags().StringArrayVarP(&tags, "tag", "T", []string{}, "tag(s) for the task")
+  todoCmd.RegisterFlagCompletionFunc("tag", TagCompletion)
 }
 
 var todoCmd = &cobra.Command{
@@ -31,7 +34,9 @@ var todoCmd = &cobra.Command{
     md_config := config.Markdown
     md_config.Limit = 0
     md_config.Filter = func(task core.Task, taskmap core.TaskMap, now time.Time) bool {
-      return (due_time.IsZero() || utils.NaiveDateEqual(due_time, task.Due)) && task.IsNotDone(taskmap, now)
+      return (due_time.IsZero() || utils.NaiveDateEqual(due_time, task.Due)) && task.IsNotDone(taskmap, now) && (len(tags) == 0 || slices.ContainsFunc(tags, func(tag string) bool {
+				return slices.Contains(task.Tags, tag)
+			}))
     }
     if len(keys) == 0 {
       taskmap.PrintMarkdown(&md_config)

@@ -136,3 +136,8 @@ func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
   }
   return words, cobra.ShellCompDirectiveDefault
 }
+
+func TagCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	taskmap = core.LoadTaskMap(tasks_path)
+	return taskmap.Tags(), cobra.ShellCompDirectiveDefault
+}

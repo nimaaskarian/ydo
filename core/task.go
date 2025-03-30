@@ -18,8 +18,9 @@ type Task struct {
   CreatedAt time.Time           `yaml:"created-at,omitempty"`
   Due time.Time                 `yaml:",omitempty"`
   DoneAt time.Time              `yaml:"done-at,omitempty"`
-  OldDoneAtList []time.Time     `yaml:"old-done-at-list,omitempty"`
+  DoneAtArchive []time.Time     `yaml:"done-at-archive,omitempty"`
   Recur string                  `yaml:",omitempty"`
+  Tags []string                 `yaml:",omitempty"`
 }
 
 func (task Task) IsDone(taskmap TaskMap, now time.Time) bool {
@@ -34,14 +35,14 @@ func (task Task) IsDone(taskmap TaskMap, now time.Time) bool {
   if t, err := utils.ParseDuration(task.Recur, task.DoneAt); err == nil && !t.IsZero() && now.After(t) {
     task.Done = false
   } 
-  return task.Done
+  return task.Done && (task.DoneAt.IsZero() || now.After(task.DoneAt))
 }
 
 func (task *Task) Do(taskmap TaskMap, now time.Time) {
   if !task.IsDone(taskmap, now) && !task.AutoComplete {
     task.Done = true
     if task.Recur != "" && !task.DoneAt.IsZero() {
-      task.OldDoneAtList = append(task.OldDoneAtList, task.DoneAt)
+      task.DoneAtArchive = append(task.DoneAtArchive, task.DoneAt)
     }
     task.DoneAt = now
   }
@@ -50,10 +51,10 @@ func (task *Task) Do(taskmap TaskMap, now time.Time) {
 func (task *Task) Undo(taskmap TaskMap, now time.Time) {
   if task.IsDone(taskmap, now) && !task.AutoComplete {
     task.Done = false
-    if task.Recur != "" && len(task.OldDoneAtList) > 0 {
-      length := len(task.OldDoneAtList)
-      task.DoneAt = task.OldDoneAtList[length-1]
-      task.OldDoneAtList = task.OldDoneAtList[:length-1]
+    if task.Recur != "" && len(task.DoneAtArchive) > 0 {
+      length := len(task.DoneAtArchive)
+      task.DoneAt = task.DoneAtArchive[length-1]
+      task.DoneAtArchive = task.DoneAtArchive[:length-1]
     } else {
       task.DoneAt = time.Time{}
     }
@@ -93,6 +94,9 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
   if config.Filter != nil && !config.Filter(taskmap[key], taskmap, config.Now) {
     return 0
   }
+	if config.Now.Before(task.CreatedAt) {
+		return 0
+	}
   if config.Limit != 0 && len(seen_keys) >= config.Limit {
     return 1
   }
