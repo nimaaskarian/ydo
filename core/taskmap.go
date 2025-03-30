@@ -159,7 +159,7 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
   seen_keys := make(map[string]bool, len(taskmap))
   count := 0
   for _,key := range keys {
-    if value, ok := seen_keys[key]; !ok || !value {
+    if _, ok := seen_keys[key]; !ok {
       count += taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, config)
     }
   }
