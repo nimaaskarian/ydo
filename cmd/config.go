@@ -56,15 +56,15 @@ func (config *Config) SlogLevel() slog.Level {
   }
 }
 
-func MarkdownFilter(md_config *core.MarkdownConfig) core.MarkdownFilter {
+func MarkdownFilter(md_config *core.MarkdownConfig) core.TaskFilter {
   switch md_config.Mode {
   case "todo":
-    return core.Task.IsNotDone
+    return (*core.Task).IsNotDone
   case "md":
     return nil
   default:
     if len(taskmap) >= md_config.Limit {
-      return core.Task.IsNotDone
+      return (*core.Task).IsNotDone
     } else {
       return nil
     }

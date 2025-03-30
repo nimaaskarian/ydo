@@ -216,11 +216,11 @@ func FormatDuration(diff time.Duration) string {
   return fmt.Sprintf("%ds", rounded_seconds)
 }
 
-func DeepCopyMap[K comparable, V any](m map[K]V) (out map[K]V) {
+func DeepCopyMap[K comparable, V any](m map[K]*V) (out map[K]V) {
   out = make(map[K]V, len(m))
   var key K
   for key = range m {
-    out[key] = m[key]
+    out[key] = *m[key]
   }
   return out
 }

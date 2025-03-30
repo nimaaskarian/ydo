@@ -42,11 +42,11 @@ func TestNextKey(t *testing.T) {
   ParseYaml(taskmap, []byte(GROCERIES));
   for i:=range 20 {
     assert.Equal(t, taskmap.NextKey(""), "t"+strconv.Itoa(4+i))
-    taskmap["t"+strconv.Itoa(4+i)] = Task{};
+    taskmap["t"+strconv.Itoa(4+i)] = &Task{};
   }
-  taskmap["t25"] = Task{};
+  taskmap["t25"] = &Task{};
   assert.Equal(t, "t24", taskmap.NextKey(""))
-  taskmap["t24"] = Task{};
+  taskmap["t24"] = &Task{};
   assert.Equal(t, "t26", taskmap.NextKey(""))
 }
 
@@ -150,7 +150,7 @@ func  TestTfidfNextKey(t *testing.T) {
   ParseYaml(tm, []byte(HOMEWORKS))
   msg := "buy some laptop for uni"
   key := tm.TfidfNextKey(msg, config, "")
-  tm[key] = Task { Task: msg}
+  tm[key] = &Task { Task: msg}
   assert.Equal(t, "laptop", key)
   key = tm.TfidfNextKey("buy some milk (fresh)", config, "milk")
   assert.Equal(t, "milk", key)
@@ -236,10 +236,10 @@ func TestCascadeDeps(t *testing.T) {
 }
 func TestSortedKeys(t *testing.T) {
   tm := make(TaskMap)
-  tm["ydo"] = Task {Task: "make ydo usable"}
-  tm["milk"] = Task {Task: "buy milk", Due: time.Now().Add(time.Hour*2)}
-  tm["workout"] = Task {Task: "workout", Due: time.Now().AddDate(1000, 0, 0)}
-  tm["homework"] = Task {Task: "do homework", Due: time.Now().Add(time.Hour*12)}
+  tm["ydo"] = &Task {Task: "make ydo usable"}
+  tm["milk"] = &Task {Task: "buy milk", Due: time.Now().Add(time.Hour*2)}
+  tm["workout"] = &Task {Task: "workout", Due: time.Now().AddDate(1000, 0, 0)}
+  tm["homework"] = &Task {Task: "do homework", Due: time.Now().Add(time.Hour*12)}
 
   assert.Equal(t, []string{"milk", "homework", "workout", "ydo"}, tm.SortedKeys())
 }

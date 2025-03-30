@@ -42,8 +42,8 @@ func TestIsNotDone(t *testing.T) {
 
 
 func ExampleTask_PrintMarkdown() {
-  task := Task{};
-  ParseYaml(&task, []byte(DATA));
+  task := &Task{};
+  ParseYaml(task, []byte(DATA));
   task.Deps = []string{};
 	config := MarkdownConfig{Indent: 3, Now: time.Now()}
   task.PrintMarkdown(nil, 0, nil, "", &config)
@@ -54,7 +54,7 @@ func ExampleTask_PrintMarkdown() {
   task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Due = time.Now().Add(-time.Hour*24*2)
   config_done := config
-  config_done.Filter = Task.IsDone
+  config_done.Filter = (*Task).IsNotDone
   task.PrintMarkdown(nil, 0, nil, "", &config_done)
   config_limit := config
   config_limit.Limit = 1
@@ -63,11 +63,15 @@ func ExampleTask_PrintMarkdown() {
   task.Undo(nil, time.Now())
   task.Due = time.Now().AddDate(10000, 0, 0)
   task.PrintMarkdown(nil, 0, nil, "", &config)
+  taskmap := TaskMap{}
+  taskmap["2"] = &Task{}
+  task.PrintMarkdown(taskmap, 0, nil, "", &config)
   // Output:
   // - [x] buy groceries
   // - [ ] buy groceries
   // - [x] buy groceries (1d ago)
   // - [x] buy groceries (1d ago, 1d overdue)
+  // - [ ] buy groceries (10000y)
   // - [ ] buy groceries (10000y)
   //    - [ ] 2:
 }

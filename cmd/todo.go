@@ -25,7 +25,7 @@ var todoCmd = &cobra.Command{
   Aliases: []string{"t"},
   Use: "todo [tasks (optional)]",
   Short: "output to-do (unfinished) tasks as markdown",
-  ValidArgsFunction: TaskKeyCompletionFilter(core.Task.IsNotDone),
+  ValidArgsFunction: TaskKeyCompletionFilter((*core.Task).IsNotDone),
   RunE: func(cmd *cobra.Command, keys []string) error {
     due_time, err := utils.ParseDue(due, now)
     if err != nil {
@@ -33,7 +33,7 @@ var todoCmd = &cobra.Command{
     }
     md_config := config.Markdown
     md_config.Limit = 0
-    md_config.Filter = func(task core.Task, taskmap core.TaskMap, now time.Time) bool {
+    md_config.Filter = func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
       return (due_time.IsZero() || utils.NaiveDateEqual(due_time, task.Due)) && task.IsNotDone(taskmap, now) && (len(tags) == 0 || slices.ContainsFunc(tags, func(tag string) bool {
 				return slices.Contains(task.Tags, tag)
 			}))

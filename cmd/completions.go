@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func TaskKeyCompletionFilter(filter func(core.Task, core.TaskMap, time.Time) bool) cobra.CompletionFunc {
+func TaskKeyCompletionFilter(filter core.TaskFilter) cobra.CompletionFunc {
   return func (cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     taskmap = core.LoadTaskMap(tasks_path)
     now = time.Now()

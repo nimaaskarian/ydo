@@ -24,7 +24,8 @@ func ParseYaml(obj any, input []byte) {
   }
 }
 
-type TaskMap map[string]Task;
+type TaskMap map[string]*Task;
+type TaskMapValue map[string]Task;
 
 func (taskmap TaskMap) Delete(key string, cascade bool) error {
   task, err := taskmap.GetTask(key)
@@ -55,7 +56,7 @@ func (e NoSuchTask) Error() string {
   return "No such task"
 }
 
-func (taskmap TaskMap) GetTask(key string) (Task, error) {
+func (taskmap TaskMap) GetTask(key string) (*Task, error) {
   task, ok := taskmap[key]
   if !ok {
     return task, NoSuchTask{}
@@ -74,19 +75,18 @@ func (taskmap TaskMap) Do(key string, now time.Time) error {
     return err
   }
   task.Do(taskmap, now)
-  taskmap[key] = task
   slog.Info("Completed task","key" ,key)
   return nil
 }
 
-func (tm TaskMap) AddDep(key string, dep string) (Task, error) {
+func (tm TaskMap) AddDep(key string, dep string) (*Task, error) {
   task, err := tm.GetTask(key)
   if err != nil {
-    return Task{}, err
+    return nil, err
   } else {
     _, err := tm.GetTask(dep)
     if err != nil {
-      return Task{}, err
+      return nil, err
     }
   }
   if !slices.Contains(task.Deps, dep) {
@@ -101,7 +101,6 @@ func (taskmap TaskMap) Undo(key string, now time.Time) error {
     return err
   }
   task.Undo(taskmap, now)
-  taskmap[key] = task
   slog.Info("Un-completed task","key" ,key)
   return nil
 }
@@ -116,14 +115,14 @@ func PrintYaml(obj any) error {
   return nil
 }
 
-type MarkdownFilter func(task Task, taskmap TaskMap, now time.Time) bool;
+type TaskFilter func(task *Task, taskmap TaskMap, now time.Time) bool;
 
 type MarkdownConfig struct {
   Indent uint             `yaml:",omitempty"`
   Mode string             `yaml:",omitempty"`
   Description bool        `yaml:",omitempty"`
   Limit int               `yaml:",omitempty"`
-  Filter MarkdownFilter
+  Filter TaskFilter
   Now time.Time
 }
 

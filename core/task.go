@@ -23,7 +23,7 @@ type Task struct {
   Tags []string                 `yaml:",omitempty"`
 }
 
-func (task Task) IsDone(taskmap TaskMap, now time.Time) bool {
+func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
   if task.AutoComplete {
     for _,key := range task.Deps {
       if !taskmap[key].IsDone(taskmap, now) {
@@ -61,7 +61,7 @@ func (task *Task) Undo(taskmap TaskMap, now time.Time) {
   }
 }
 
-func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
+func (task *Task) FindDoneAt(taskmap TaskMap) time.Time {
   if task.AutoComplete {
     max_doneat := time.Time{}
     for _,key := range task.Deps {
@@ -76,13 +76,13 @@ func (task Task) FindDoneAt(taskmap TaskMap) time.Time {
   return task.DoneAt
 }
 
-func (task Task) IsNotDone(taskmap TaskMap, now time.Time) bool {
+func (task *Task) IsNotDone(taskmap TaskMap, now time.Time) bool {
   return !task.IsDone(taskmap, now)
 }
 
 // copy a task, delete() the key, run this.
 // runs over dependencies listed within the task itself.
-func (task Task) CascadeOrphanDeps(taskmap TaskMap) {
+func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
   for _, dep := range task.Deps {
     if !taskmap.HasKeyInDeps(dep) {
       delete(taskmap, dep)
@@ -90,8 +90,11 @@ func (task Task) CascadeOrphanDeps(taskmap TaskMap) {
   }
 }
 
-func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig) (count int) {
-  if config.Filter != nil && !config.Filter(taskmap[key], taskmap, config.Now) {
+func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig) (count int) {
+  if task == nil {
+    return 0
+  }
+  if config.Filter != nil && !config.Filter(task, taskmap, config.Now) {
     return 0
   }
 	if config.Now.Before(task.CreatedAt) {
@@ -103,11 +106,11 @@ func (task Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string
   printIndent(depth, config)
   print_key := formatKeyForPrint(key)
   if task.IsDone(taskmap, config.Now) {
-    printDoneTask(&task, taskmap, config, print_key)
+    printDoneTask(task, taskmap, config, print_key)
   } else {
-    printPendingTask(&task, config, print_key)
+    printPendingTask(task, config, print_key)
   }
-  printDescription(depth, &task, config)
+  printDescription(depth, task, config)
   if seen_keys != nil  {
     if _, ok := seen_keys[key]; ok {
       return 0

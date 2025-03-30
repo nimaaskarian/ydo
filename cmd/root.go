@@ -23,7 +23,8 @@ var (
   now time.Time
   now_str string
   // global state
-  old_taskmap, taskmap core.TaskMap
+  old_taskmap core.TaskMapValue
+  taskmap core.TaskMap
   
   config_dir string
   config Config
