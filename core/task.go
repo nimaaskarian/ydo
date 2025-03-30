@@ -35,7 +35,7 @@ func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
   if t, err := utils.ParseDuration(task.Recur, task.DoneAt); err == nil && !t.IsZero() && now.After(t) {
     task.Done = false
   } 
-  return task.Done && (task.DoneAt.IsZero() || now.After(task.DoneAt))
+  return task.Done && (task.DoneAt.IsZero() || !task.DoneAt.Before(task.DoneAt))
 }
 
 func (task *Task) Do(taskmap TaskMap, now time.Time) {
