@@ -9,6 +9,7 @@ import (
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
+  "github.com/fatih/color"
 )
 
 var height int
@@ -46,16 +47,16 @@ var disciplineCmd = &cobra.Command{
       end = now
     }
     data := taskmap.TrackDisciplineDaily(start, end, now)
-    color := asciigraph.Default
-    if config.color {
-      color = asciigraph.Blue
+    discipline_color := asciigraph.Blue
+    if color.NoColor {
+      discipline_color = asciigraph.Default
     }
     
     graph := asciigraph.Plot(
       data, asciigraph.Precision(3),
       asciigraph.Height(height),
       asciigraph.SeriesLegends("Discipline"),
-      asciigraph.SeriesColors(color),
+      asciigraph.SeriesColors(discipline_color),
       )
 
     fmt.Println(graph)

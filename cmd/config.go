@@ -18,7 +18,6 @@ type Config struct  {
   Tfidf core.TfidfConfig `yaml:",omitempty"`
   Markdown core.MarkdownConfig `yaml:",omitempty"`
   Color string `yaml:",omitempty"`
-  color bool `yaml:",omitempty"`
 }
 
 func (config *Config) ReadFile(path string) {
@@ -33,13 +32,9 @@ func (config *Config) Init() {
   config.Markdown.Init()
   switch config.Color {
   case "always": 
-    config.color = true
     color.NoColor = false
   case "never": 
-    config.color = false
     color.NoColor = true
-  default: 
-    config.color = !color.NoColor
   }
 }
 
