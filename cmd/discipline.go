@@ -47,7 +47,7 @@ var disciplineCmd = &cobra.Command{
     }
     data := taskmap.TrackDisciplineDaily(start, end, now)
     color := asciigraph.Default
-    if config.Markdown.HasColor() {
+    if config.color {
       color = asciigraph.Blue
     }
     

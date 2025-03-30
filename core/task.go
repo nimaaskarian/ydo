@@ -107,14 +107,14 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
   printIndent(depth, config)
   if task.IsDone(taskmap, config.Now) {
     fmt.Print("- [x] ")
-    printKey(key, config)
+    printKey(key)
     printDoneTask(task, taskmap, config)
   } else {
     fmt.Print("- [ ] ")
-    printKey(key, config)
+    printKey(key)
     printPendingTask(task, config)
   }
-  printTags(task, config)
+  printTags(task)
   fmt.Println()
   printDescription(depth, task, config)
   if seen_keys != nil  {
@@ -172,26 +172,18 @@ func printPendingTask(task *Task, config *MarkdownConfig) {
   fmt.Printf("%s%s%s", task.Task, due_print, recur)
 }
 
-func printKey(key string, config *MarkdownConfig) {
+func printKey(key string) {
   if key != "" {
-    if config.HasColor(){
-      d := color.New(color.Bold)
-      fmt.Printf("%s: ", d.Sprint(key))
-    } else {
-      fmt.Printf("%s: ", key)
-    }
+    d := color.New(color.Bold)
+    fmt.Printf("%s: ", d.Sprint(key))
   }
 }
 
-func printTags(task * Task, config *MarkdownConfig) {
+func printTags(task * Task) {
   for _, tag := range task.Tags {
-    if config.HasColor() {
-      d := color.New(color.Underline)
-      fmt.Print(" ")
-      d.Printf("#%s", tag)
-    } else {
-      fmt.Printf(" #%s", tag)
-    }
+    d := color.New(color.Underline)
+    fmt.Print(" ")
+    d.Printf("#%s", tag)
   }
 }
 
