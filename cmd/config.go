@@ -28,6 +28,7 @@ func (config *Config) ReadFile(path string) {
     slog.Error("Error reading config file", "err", err)
   }
 }
+
 func (config *Config) Init() {
   config.Markdown.Init()
   switch config.Color {
@@ -38,7 +39,7 @@ func (config *Config) Init() {
     config.color = false
     color.NoColor = true
   default: 
-    config.color = color.NoColor
+    config.color = !color.NoColor
   }
 }
 
