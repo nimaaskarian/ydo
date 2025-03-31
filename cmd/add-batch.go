@@ -4,8 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-
-	// "os/signal"
+	"strings"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/spf13/cobra"
@@ -15,8 +14,8 @@ func init() {
   rootCmd.AddCommand(addBatchCmd)
 }
 var addBatchCmd = &cobra.Command{
-  Aliases: []string{"ab"},
-  Use: "add-batch [path to file (optional)]",
+  Aliases: []string{"b"},
+  Use: "batch [path to file (optional)]",
   Short: "add a list of tasks from file or stdin",
   Long: "read each line of stdin (or the given file) as a series of key: task (key defaults to auto), and add them",
   Args: cobra.MaximumNArgs(1),
@@ -42,9 +41,16 @@ var addBatchCmd = &cobra.Command{
         break
       }
       if len(line) != 0 {
-        task := string(line)
-        key := taskmap.TfidfNextKey(task, config.Tfidf, "")
-        taskmap[key] = &core.Task{Task: task}
+        key_task := strings.Split(string(line), ":")
+        var key, task string
+        if len(key_task) >= 2 {
+          task = strings.TrimSpace(strings.Join(key_task[1:], " "))
+          key = key_task[0]
+        } else {
+          key = taskmap.TfidfNextKey(task, config.Tfidf, "")
+          task = key_task[0]
+        }
+        taskmap[strings.TrimSpace(key)] = &core.Task{Task: task}
       }
     }
     return nil

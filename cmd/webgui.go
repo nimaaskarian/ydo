@@ -91,10 +91,10 @@ func Task(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   }
 }
 
-func makeFilter(f func (t core.Task, tm core.TaskMap) bool) map[string]bool {
+func makeFilter(f core.TaskFilter) map[string]bool {
   filter := make(map[string]bool, len(taskmap))
   for key, task := range taskmap {
-    filter[key] = f(task, taskmap)
+    filter[key] = f(task, taskmap, time.Now())
   }
   return filter
 }
@@ -120,7 +120,7 @@ func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
     "Keys": sorted_keys,
     "Url": r.URL.String(),
     "Changed": changed,
-    "Filter": makeFilter(core.Task.IsNotDone),
+    "Filter": makeFilter((*core.Task).IsNotDone),
   })
   if err != nil {
     slog.Error("Error in executing the template", "err", err)
@@ -137,7 +137,7 @@ func Write(cmd *cobra.Command) func (w http.ResponseWriter, r *http.Request, ps 
 
 func UndoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
   key := ps.ByName("key")
-  taskmap.Undo(key)
+  taskmap.Undo(key, time.Now())
   url := r.URL.Query().Get("redirect")
   if url == "" {
     url = "/"

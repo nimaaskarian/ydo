@@ -3,5 +3,22 @@ git tag "$1" || {
   last_tag=$(git tag | tail -n 2 | head -n 1)
   git checkout "$1"
 }
-make all && \
-gh release create "$1" ydo ydo.exe  --title "$1" --notes "**Full Changelog**: https://github.com/nimaaskarian/ydo/compare/$last_tag...$1" --repo nimaaskarian/ydo
+go test ./... -coverprofile=coverage.out || {
+  exit 1
+}
+go run build_release.go "$1"
+files=($(go run build_release.go "$1" list))
+zip_files=()
+for file in "${files[@]}"; do
+  if [[ $file = *.exe ]]; then
+    out="${file%.*}.zip"
+    zip "$out" "$file"
+  else
+    out="$file.bz2"
+    bzip2 -c "$file" > "$out"
+  fi
+  zip_files+=("$out")
+done
+gh release create "$1" "${zip_files[@]}"  --title "$1" --notes "**Full Changelog**: https://github.com/nimaaskarian/ydo/compare/$last_tag...$1" --repo nimaaskarian/ydo
+rm "${files[@]}" "${zip_files[@]}"
+git checkout develop
