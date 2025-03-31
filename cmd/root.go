@@ -102,7 +102,7 @@ func init() {
   
   rootCmd.PersistentFlags().StringVarP(&now_str, "now","N", "", "current time of operations (defaults to current system time)")
   rootCmd.RegisterFlagCompletionFunc("now", DueCompletion)
-  rootCmd.PersistentFlags().StringVar(&color_option, "color", "", "color to print (defaults to auto, overrides config's markdown.color option)")
+  rootCmd.PersistentFlags().StringVar(&color_option, "color", "", "when to print in color (defaults to auto, overrides config's markdown.color option)")
   rootCmd.RegisterFlagCompletionFunc("color", cobra.FixedCompletions([]string{"always", "never", "auto"},cobra.ShellCompDirectiveNoFileComp))
 }
 

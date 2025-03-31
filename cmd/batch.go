@@ -12,9 +12,10 @@ import (
 )
 
 func init() {
-  rootCmd.AddCommand(addBatchCmd)
+  rootCmd.AddCommand(batchCmd)
 }
-var addBatchCmd = &cobra.Command{
+
+var batchCmd = &cobra.Command{
   Aliases: []string{"b"},
   Use: "batch [path to file (optional)]",
   Short: "add a list of tasks from file or stdin",
@@ -55,8 +56,9 @@ var addBatchCmd = &cobra.Command{
         err := taskmap.Add(strings.TrimSpace(key), &core.Task{Task: task, CreatedAt: now.Add(time.Duration(count))})
         if err != nil {
           fmt.Println(err)
+        } else {
+          count+=1
         }
-        count+=1
       }
     }
     return nil

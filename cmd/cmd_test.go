@@ -94,6 +94,7 @@ func TestMutatingCmdGotRightFuncs(t *testing.T) {
     doCmd,
     undoCmd,
     regenKeyCmd,
+    batchCmd,
   }
   save_changes := reflect.ValueOf(SaveChanges)
   save_old_map := reflect.ValueOf(UpdateOldTaskMap)

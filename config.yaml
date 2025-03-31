@@ -8,6 +8,8 @@ markdown:
   # number of spaces on each indent. 0 is replaced with 3 (default)
   indent: 2
   description: true
+  # true or false. default is when color is active
+  beautify: true
   # possible values: todo, md, smart (default)
   mode: todo
 tfidf:
