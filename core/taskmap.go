@@ -63,6 +63,17 @@ func (taskmap TaskMap) GetTask(key string) (*Task, error) {
   return task, nil
 }
 
+func (taskmap TaskMap) Add(key string, task *Task) error {
+  if _, ok := taskmap[key]; ok {
+    return errors.New("Task already exists")
+  }
+  if task == nil {
+    panic("Task is nil")
+  }
+  taskmap[key] = task
+  return nil
+}
+
 func (taskmap TaskMap) HasTask(key string) bool {
   _, ok := taskmap[key]
   return ok
