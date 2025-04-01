@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/nimaaskarian/ydo/lexer/token"
+	"github.com/nimaaskarian/ydo/parser/token"
 )
 
 func TestNextToken(t *testing.T) {
-  input := `(due+ 5d) - dickwhitman + 5dondraper - 2025-12-12/now + 2025-12-30/8:12:12==5d != 2025-12-30`
+  input := `(due+ 5d) - dickwhitman + 5dondraper - 2025-12-12/now + 2025-12-30/8:12:12==5d != 2025-12-30 = !due #`
   tests := []struct {
     expected_type token.Type
     expected_literal string
@@ -30,6 +30,10 @@ func TestNextToken(t *testing.T) {
     {token.DUE, "5d"},
     {token.NOT_EQ, "!="},
     {token.DUE, "2025-12-30"},
+    {token.ASSIGN, "="},
+    {token.BANG, "!"},
+    {token.FIELD, "due"},
+    {token.ILLEGAL, "#"},
     {token.EOF, ""},
   }
   l := New(input)

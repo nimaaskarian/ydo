@@ -1,8 +1,7 @@
 package lexer
 
 import (
-	"fmt"
-	"github.com/nimaaskarian/ydo/lexer/token"
+	"github.com/nimaaskarian/ydo/parser/token"
 )
 
 type Lexer struct {
@@ -33,7 +32,6 @@ func (l *Lexer) readChar() {
 
 func (l *Lexer) NextToken() token.Token {
   var tok token.Token
-  fmt.Println(string(l.ch), l.ch)
   l.skipWhitespace()
   switch l.ch {
   case '-':
@@ -43,7 +41,6 @@ func (l *Lexer) NextToken() token.Token {
   case '(':
     tok = newToken(token.LPAREN, l.ch)
   case ')':
-    fmt.Println("is token.RPAREN")
     tok = newToken(token.RPAREN, l.ch)
   case ';':
     tok = newToken(token.SEMICOLON, l.ch)
@@ -104,20 +101,16 @@ func (l *Lexer) skipWhitespace() {
 func (l *Lexer) readField() string {
   position := l.position
   for isField(l.ch) {
-    fmt.Println(string(l.ch))
     l.readChar()
   }
-  fmt.Printf("finished read field %q\n", string(l.ch))
   return l.input[position:l.position]
 }
 
 func (l *Lexer) readDue() string {
   position := l.position
   for isDue(l.ch) {
-    fmt.Println(string(l.ch))
     l.readChar()
   }
-  fmt.Println("finished read due", string(l.ch))
   return l.input[position:l.position]
 }
 
