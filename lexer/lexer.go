@@ -1,38 +1,8 @@
-package core
+package lexer
 
 import (
 	"fmt"
-	"time"
-
-	"github.com/nimaaskarian/ydo/utils"
-)
-
-type TokenType string
-type Token struct {
-  Type TokenType
-  Literal string
-}
-
-const (
-  // special
-  ILLEGAL      = "ILLEGAL"
-  EOF          = "EOF"
-  // ident/literal
-  FIELD        = "FIELD"
-  DUE          = "DUE"
-  // delimitares
-  COMMA        = ","
-  SEMICOLON    = ";"
-  // operators
-  EQ           = "=="
-  NOT_EQ       = "!="
-  BANG         = "!"
-  ASSIGN       = "="
-  MINUS        = "-"
-  PLUS         = "+"
-
-  LPAREN       = "("
-  RPAREN       = ")"
+	"github.com/nimaaskarian/ydo/lexer/token"
 )
 
 type Lexer struct {
@@ -61,56 +31,56 @@ func (l *Lexer) readChar() {
   l.read_position += 1
 }
 
-func (l *Lexer) NextToken() Token {
-  var tok Token
+func (l *Lexer) NextToken() token.Token {
+  var tok token.Token
   fmt.Println(string(l.ch), l.ch)
   l.skipWhitespace()
   switch l.ch {
   case '-':
-    tok = newToken(MINUS, l.ch)
+    tok = newToken(token.MINUS, l.ch)
   case '+':
-    tok = newToken(PLUS, l.ch)
+    tok = newToken(token.PLUS, l.ch)
   case '(':
-    tok = newToken(LPAREN, l.ch)
+    tok = newToken(token.LPAREN, l.ch)
   case ')':
-    fmt.Println("is RPAREN")
-    tok = newToken(RPAREN, l.ch)
+    fmt.Println("is token.RPAREN")
+    tok = newToken(token.RPAREN, l.ch)
   case ';':
-    tok = newToken(SEMICOLON, l.ch)
+    tok = newToken(token.SEMICOLON, l.ch)
   case ',':
-    tok = newToken(COMMA, l.ch)
+    tok = newToken(token.COMMA, l.ch)
   case '=':
     if l.peekChar() == '=' {
       ch := l.ch
       l.readChar()
       literal := string(ch) + string(l.ch)
-      tok = Token {Type: EQ, Literal: literal}
+      tok = token.Token {Type: token.EQ, Literal: literal}
     } else {
-      tok = newToken(ASSIGN, l.ch)
+      tok = newToken(token.ASSIGN, l.ch)
     }
   case '!':
     if l.peekChar() == '=' {
       ch := l.ch
       l.readChar()
       literal := string(ch) + string(l.ch)
-      tok = Token {Type: NOT_EQ, Literal: literal}
+      tok = token.Token {Type: token.NOT_EQ, Literal: literal}
     } else {
-      tok = newToken(BANG, l.ch)
+      tok = newToken(token.BANG, l.ch)
     }
   case 0:
     tok.Literal = ""
-    tok.Type = EOF
+    tok.Type = token.EOF
   default:
     if isLetter(l.ch) {
       tok.Literal = l.readField()
-      tok.Type = FIELD
+      tok.Type = token.FIELD
       return tok
     } else if isDigit(l.ch) {
-      tok.Type = DUE
+      tok.Type = token.DUE
       tok.Literal = l.readDue()
       return tok
     } else {
-      tok = newToken(ILLEGAL, l.ch)
+      tok = newToken(token.ILLEGAL, l.ch)
     }
   }
   l.readChar()
@@ -129,22 +99,6 @@ func (l *Lexer) skipWhitespace() {
   for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
     l.readChar()
   }
-}
-func (l *Lexer) lookUpField(field string) TokenType {
-  task := &Task{}
-  _, err := task.ReflectAccessField(field)
-  if err != nil {
-    return ILLEGAL
-  }
-  return FIELD
-}
-
-func (l *Lexer) lookUpDuration(duration string) TokenType {
-  _, err := utils.ParseDuration(duration, time.Time{});
-  if err != nil {
-    return ILLEGAL
-  }
-  return DUE
 }
 
 func (l *Lexer) readField() string {
@@ -183,7 +137,7 @@ func isDue(ch byte) bool {
   return isDigit(ch) || isField(ch) || ch == '/' || ch == ':'
 }
 
-func newToken(token_type TokenType, ch byte) Token {
-  return Token {Type: token_type, Literal: string(ch)}
+func newToken(token_type token.Type, ch byte) token.Token {
+  return token.Token {Type: token_type, Literal: string(ch)}
 }
 
