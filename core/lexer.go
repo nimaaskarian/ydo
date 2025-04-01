@@ -24,7 +24,10 @@ const (
   COMMA        = ","
   SEMICOLON    = ";"
   // operators
-  EQUAL        = "=="
+  EQ           = "=="
+  NOT_EQ       = "!="
+  BANG         = "!"
+  ASSIGN       = "="
   MINUS        = "-"
   PLUS         = "+"
 
@@ -76,6 +79,24 @@ func (l *Lexer) NextToken() Token {
     tok = newToken(SEMICOLON, l.ch)
   case ',':
     tok = newToken(COMMA, l.ch)
+  case '=':
+    if l.peekChar() == '=' {
+      ch := l.ch
+      l.readChar()
+      literal := string(ch) + string(l.ch)
+      tok = Token {Type: EQ, Literal: literal}
+    } else {
+      tok = newToken(ASSIGN, l.ch)
+    }
+  case '!':
+    if l.peekChar() == '=' {
+      ch := l.ch
+      l.readChar()
+      literal := string(ch) + string(l.ch)
+      tok = Token {Type: NOT_EQ, Literal: literal}
+    } else {
+      tok = newToken(BANG, l.ch)
+    }
   case 0:
     tok.Literal = ""
     tok.Type = EOF
@@ -94,6 +115,14 @@ func (l *Lexer) NextToken() Token {
   }
   l.readChar()
   return tok
+}
+
+func (l *Lexer) peekChar() byte {
+  if l.read_position >= len(l.input) {
+    return 0
+  } else {
+    return l.input[l.read_position]
+  }
 }
 
 func (l *Lexer) skipWhitespace() {
