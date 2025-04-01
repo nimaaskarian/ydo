@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
+	"github.com/fatih/color"
 	"gopkg.in/yaml.v3"
 )
 
@@ -132,12 +133,16 @@ type MarkdownConfig struct {
   Mode string             `yaml:",omitempty"`
   Description bool        `yaml:",omitempty"`
   Limit int               `yaml:",omitempty"`
-  Beautify bool           `yaml:",omitempty"`
+  Beautify *bool          `yaml:",omitempty"`
   Filter TaskFilter
   Now time.Time
 }
 
 func (config *MarkdownConfig) Init() {
+  if config.Beautify == nil {
+    beautify := !color.NoColor
+    config.Beautify = &beautify
+  }
   if config.Indent == 0 {
     config.Indent = 3
   }

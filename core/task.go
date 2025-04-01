@@ -129,7 +129,7 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
   }
   printIndent(depth, config)
   if task.IsDone(taskmap, config.Now) {
-    if config.Beautify {
+    if *config.Beautify {
       fmt.Print(" [✓] ")
     } else {
       fmt.Print("- [x] ")
@@ -137,7 +137,7 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
     printKey(key)
     printDoneTask(task, taskmap, config)
   } else {
-    if !config.Beautify {
+    if !*config.Beautify {
       fmt.Print("-")
     }
     fmt.Print(" [ ] ")

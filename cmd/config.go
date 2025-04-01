@@ -35,7 +35,6 @@ func (config *Config) Init() {
   case "never": 
     color.NoColor = true
   }
-  config.Markdown.Beautify = !color.NoColor
   config.Markdown.Init()
 }
 

@@ -254,7 +254,9 @@ func ExampleTaskMap_PrintMarkdown() {
   task = tm["milk"]
   task.Due = time.Now().Add(time.Minute*12)
   tm["milk"] = task
-	tm.PrintMarkdown(&MarkdownConfig{Indent: 4, Now: time.Now()})
+  config := MarkdownConfig{Indent: 4, Now: time.Now()}
+  config.Init()
+	tm.PrintMarkdown(&config)
   // Output:
   // - [ ] milk: buy some milk (12min)
   // - [ ] homework: do uni practice (1d)
