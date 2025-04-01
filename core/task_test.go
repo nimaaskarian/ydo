@@ -75,3 +75,20 @@ func ExampleTask_PrintMarkdown() {
   // - [ ] buy groceries (10000y)
   //    - [ ] 2:
 }
+
+func TestAccessField(t *testing.T) {
+  task := Task{};
+  ParseYaml(&task, []byte(DATA));
+  data, err := task.ReflectAccessField("Task")
+  assert.Nil(t, err)
+  assert.Equal(t, "buy groceries", data)
+  data, err = task.ReflectAccessField("task")
+  assert.Nil(t, err)
+  assert.Equal(t, "buy groceries", data)
+  data, err = task.ReflectAccessField("Due")
+  assert.Nil(t, err)
+  assert.Equal(t, time.Time{}, data)
+  data, err = task.ReflectAccessField("idk")
+  assert.Nil(t, data)
+  assert.ErrorContains(t, err, "No such field")
+}

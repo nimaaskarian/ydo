@@ -1,14 +1,18 @@
 package core
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/nimaaskarian/ydo/utils"
-  "github.com/fatih/color"
 )
+
+type Until string;
 
 type Task struct {
   Task string                   `yaml:",omitempty"`
@@ -18,10 +22,29 @@ type Task struct {
   AutoComplete bool             `yaml:"auto-complete,omitempty"`
   CreatedAt time.Time           `yaml:"created-at,omitempty"`
   Due time.Time                 `yaml:",omitempty"`
+  Until string                  `yaml:",omitempty"`
   DoneAt time.Time              `yaml:"done-at,omitempty"`
   DoneAtArchive []time.Time     `yaml:"done-at-archive,omitempty"`
   Recur string                  `yaml:",omitempty"`
   Tags []string                 `yaml:",omitempty"`
+}
+
+// very computationally expensive function. don't just call it for fun.
+// with this we try to imitate taskwarrior's DOM in our simple file based
+// database.
+// it also automatically converts the first letter of field to uppercase.
+// for example "task" would be a valid field
+func (task *Task) ReflectAccessField(field string) (any, error) {
+  if field[0] > 'a' && field[0] < 'z' {
+    field = strings.ToUpper(field[:1])+field[1:]
+  }
+  model := reflect.Indirect(reflect.ValueOf(*task))
+  value := model.FieldByName(field)
+  
+  if !value.IsValid() {
+    return nil, errors.New("No such field")
+  }
+  return value.Interface(), nil
 }
 
 func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
