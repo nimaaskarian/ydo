@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/nimaaskarian/ydo/utils"
@@ -18,7 +19,7 @@ const (
   EOF          = "EOF"
   // ident/literal
   FIELD        = "FIELD"
-  DURATION     = "DURATION"
+  DUE          = "DUE"
   // delimitares
   COMMA        = ","
   SEMICOLON    = ";"
@@ -59,6 +60,7 @@ func (l *Lexer) readChar() {
 
 func (l *Lexer) NextToken() Token {
   var tok Token
+  fmt.Println(string(l.ch), l.ch)
   l.skipWhitespace()
   switch l.ch {
   case '-':
@@ -68,6 +70,7 @@ func (l *Lexer) NextToken() Token {
   case '(':
     tok = newToken(LPAREN, l.ch)
   case ')':
+    fmt.Println("is RPAREN")
     tok = newToken(RPAREN, l.ch)
   case ';':
     tok = newToken(SEMICOLON, l.ch)
@@ -77,13 +80,14 @@ func (l *Lexer) NextToken() Token {
     tok.Literal = ""
     tok.Type = EOF
   default:
-    if isField(l.ch) {
+    if isLetter(l.ch) {
       tok.Literal = l.readField()
-      tok.Type = l.lookUpField(tok.Literal)
+      tok.Type = FIELD
       return tok
     } else if isDigit(l.ch) {
-      tok.Literal = l.readDuration()
-      tok.Type = l.lookUpDuration(tok.Literal)
+      tok.Type = DUE
+      tok.Literal = l.readDue()
+      return tok
     } else {
       tok = newToken(ILLEGAL, l.ch)
     }
@@ -111,27 +115,31 @@ func (l *Lexer) lookUpDuration(duration string) TokenType {
   if err != nil {
     return ILLEGAL
   }
-  return DURATION
+  return DUE
 }
 
 func (l *Lexer) readField() string {
   position := l.position
   for isField(l.ch) {
+    fmt.Println(string(l.ch))
     l.readChar()
   }
+  fmt.Printf("finished read field %q\n", string(l.ch))
   return l.input[position:l.position]
 }
 
-func (l *Lexer) readDuration() string {
+func (l *Lexer) readDue() string {
   position := l.position
-  for isDuration(l.ch) {
+  for isDue(l.ch) {
+    fmt.Println(string(l.ch))
     l.readChar()
   }
+  fmt.Println("finished read due", string(l.ch))
   return l.input[position:l.position]
 }
 
 func isLetter(ch byte) bool {
-  return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z'
+  return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z')
 }
 
 func isField(ch byte) bool {
@@ -142,8 +150,8 @@ func isDigit(ch byte) bool {
   return ch >= '0' && ch <= '9'
 }
 
-func isDuration(ch byte) bool {
-  return isDigit(ch) || isLetter(ch)
+func isDue(ch byte) bool {
+  return isDigit(ch) || isField(ch) || ch == '/' || ch == ':'
 }
 
 func newToken(token_type TokenType, ch byte) Token {

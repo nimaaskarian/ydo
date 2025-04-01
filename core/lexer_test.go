@@ -7,18 +7,24 @@ import (
 )
 
 func TestNextToken(t *testing.T) {
-  input := `due + 5d - dickwhitman + 5dondraper`
+  input := `(due+ 5d) - dickwhitman + 5dondraper - 2025-12-12/now + 2025-12-30/8:12:12`
   tests := []struct {
     expected_type TokenType
     expected_literal string
   } {
+    {LPAREN, "("},
     {FIELD, "due"},
     {PLUS, "+"},
-    {DURATION, "5d"},
+    {DUE, "5d"},
+    {RPAREN, ")"},
     {MINUS, "-"},
-    {ILLEGAL, "dickwhitman"},
+    {FIELD, "dickwhitman"},
     {PLUS, "+"},
-    {ILLEGAL, "5dondraper"},
+    {DUE, "5dondraper"},
+    {MINUS, "-"},
+    {DUE, "2025-12-12/now"},
+    {PLUS, "+"},
+    {DUE, "2025-12-30/8:12:12"},
     {EOF, ""},
   }
   l := New(input)
