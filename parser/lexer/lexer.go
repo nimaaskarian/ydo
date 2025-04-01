@@ -42,28 +42,14 @@ func (l *Lexer) NextToken() token.Token {
     tok = newToken(token.LPAREN, l.ch)
   case ')':
     tok = newToken(token.RPAREN, l.ch)
-  case ';':
-    tok = newToken(token.SEMICOLON, l.ch)
-  case ',':
-    tok = newToken(token.COMMA, l.ch)
+  case '&':
+    tok = l.peekToken('&', token.BIT_AND, token.AND)
+  case '|':
+    tok = l.peekToken('|', token.BIT_OR, token.OR)
   case '=':
-    if l.peekChar() == '=' {
-      ch := l.ch
-      l.readChar()
-      literal := string(ch) + string(l.ch)
-      tok = token.Token {Type: token.EQ, Literal: literal}
-    } else {
-      tok = newToken(token.ASSIGN, l.ch)
-    }
+    tok = l.peekToken('=', token.ASSIGN, token.EQ)
   case '!':
-    if l.peekChar() == '=' {
-      ch := l.ch
-      l.readChar()
-      literal := string(ch) + string(l.ch)
-      tok = token.Token {Type: token.NOT_EQ, Literal: literal}
-    } else {
-      tok = newToken(token.BANG, l.ch)
-    }
+    tok = l.peekToken('=', token.BANG, token.NOT_EQ)
   case 0:
     tok.Literal = ""
     tok.Type = token.EOF
@@ -82,6 +68,18 @@ func (l *Lexer) NextToken() token.Token {
   }
   l.readChar()
   return tok
+}
+
+// a helper for peekChar and assign
+func (l *Lexer) peekToken(next byte, no_peek_type, peek_type token.Type) token.Token {
+  if l.peekChar() == next {
+    ch := l.ch
+    l.readChar()
+    literal := string(ch) + string(l.ch)
+    return token.Token {Type: peek_type, Literal: literal}
+  } else {
+    return newToken(no_peek_type, l.ch)
+  }
 }
 
 func (l *Lexer) peekChar() byte {

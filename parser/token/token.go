@@ -18,6 +18,10 @@ const (
   SEMICOLON    = ";"
   // operators
   EQ           = "=="
+  BIT_AND      = "&"
+  AND          = "&&"
+  BIT_OR       = "|"
+  OR           = "||"
   NOT_EQ       = "!="
   BANG         = "!"
   ASSIGN       = "="
