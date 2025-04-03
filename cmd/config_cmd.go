@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
+// default config template string with a yaml format
 const DEFAULT_CONFIG = `# list of files that ydo tries to go through to find your tasks.yaml file
 # relative files are relative to your shells cwd when you run the program
 files:
@@ -42,7 +42,7 @@ func init() {
 var configCmd = &cobra.Command{
   Use: "config [tasks (optional)]",
   Short: "edit ydo's config file",
-  Long: "edit ydo's config file in your favorite EDITOR",
+  Long: "edit ydo's config file in your favorite EDITOR. Writes the default config if it founds no config",
   RunE: func(cmd *cobra.Command, keys []string) error {
     if err := ensureConfigFile(); err != nil {
       return err
