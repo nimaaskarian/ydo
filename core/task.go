@@ -12,21 +12,28 @@ import (
 	"github.com/nimaaskarian/ydo/utils"
 )
 
-type Until string;
-
 type Task struct {
-  Task string                   `yaml:",omitempty"`
-  Description string            `yaml:",omitempty"`
+  Task TemplateBase             `yaml:",omitempty"`
+  Description TemplateBase      `yaml:",omitempty"`
   Deps []string                 `yaml:",omitempty,flow"`
   Done bool                     `yaml:",omitempty"`
   AutoComplete bool             `yaml:"auto-complete,omitempty"`
   CreatedAt time.Time           `yaml:"created-at,omitempty"`
-  Due time.Time                 `yaml:",omitempty"`
-  Until string                  `yaml:",omitempty"`
+  Due TemplateDate              `yaml:",omitempty"`
+  Until TemplateDate            `yaml:",omitempty"`
   DoneAt time.Time              `yaml:"done-at,omitempty"`
   DoneAtArchive []time.Time     `yaml:"done-at-archive,omitempty"`
   Recur string                  `yaml:",omitempty"`
   Tags []string                 `yaml:",omitempty"`
+}
+
+func (task *Task) ResolveTemplates() {
+  task.Task.Resolve(task)
+  task.Description.Resolve(task)
+  for range 2 {
+    task.Due.Resolve(task)
+    task.Until.Resolve(task)
+  }
 }
 
 // very computationally expensive function. don't just call it for fun.
@@ -40,6 +47,7 @@ func (task *Task) ReflectAccessField(field string) (any, error) {
   }
   model := reflect.Indirect(reflect.ValueOf(*task))
   value := model.FieldByName(field)
+
   
   if !value.IsValid() {
     return nil, errors.New("No such field")
@@ -127,6 +135,10 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
   if config.Limit != 0 && len(seen_keys) >= config.Limit {
     return 1
   }
+  if !task.Until.ToValue().IsZero() && task.Until.ToValue().Before(config.Now) {
+    return 0
+  }
+
   printIndent(depth, config)
   if task.IsDone(taskmap, config.Now) {
     if *config.Beautify {
@@ -164,8 +176,8 @@ func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
   done_at := task.FindDoneAt(taskmap)
   if !done_at.IsZero() {
     overdue := ""
-    if !task.Due.IsZero() && done_at.After(task.Due) {
-      overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due)) + " overdue"
+    if !task.Due.ToValue().IsZero() && done_at.After(task.Due.ToValue()) {
+      overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due.ToValue())) + " overdue"
     }
     if task.Recur != "" {
       recur = ", each "+task.Recur
@@ -185,11 +197,11 @@ func printPendingTask(task *Task, config *MarkdownConfig) {
     recur = " (each "+task.Recur + ")"
   }
   due_print := ""
-  if !task.Due.IsZero() {
-    diff := task.Due.Sub(config.Now)
+  if !task.Due.ToValue().IsZero() {
+    diff := task.Due.ToValue().Sub(config.Now)
     due_print = " ("
-    if task.Due.Add(-diff).Compare(config.Now) != 0 {
-      due_print += strconv.Itoa(task.Due.Year() - config.Now.Year()) + "y"
+    if task.Due.ToValue().Add(-diff).Compare(config.Now) != 0 {
+      due_print += strconv.Itoa(task.Due.ToValue().Year() - config.Now.Year()) + "y"
     } else {
       if diff < 0 {
         due_print = " (-"
@@ -224,8 +236,8 @@ func printIndent(depth uint, config *MarkdownConfig) {
 }
 
 func printDescription(depth uint, task *Task, config *MarkdownConfig) {
-  if config.Description && task.Description != "" {
-    for line := range strings.Lines(task.Description) {
+  if config.Description && task.Description.ToValue() != "" {
+    for line := range strings.Lines(task.Description.ToValue()) {
       printIndent(depth+1, config)
       fmt.Print(line)
     }

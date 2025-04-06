@@ -31,7 +31,7 @@ day:
     deps: [ydo]
     auto-complete: true
     created-at: 2025-03-15T23:40:02.839592251+03:30
-    due: 2025-03-17T00:00:00+03:30
+    due: "2025-03-17T00:00:00+03:30"
 description:
     task: add description to tasks
     done: true

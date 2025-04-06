@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"reflect"
 
+	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
@@ -69,15 +70,15 @@ var editCmd = &cobra.Command{
     }
     if due != "" {
       if due_date, err := utils.ParseDue(due, now); err == nil {
-        task.Due = due_date
+        task.Due = core.NewTemplateDate(due_date)
       }
     }
     edit_key := args[0]
     if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
-      task.Task = new_task
+      task.Task = core.NewTemplateBase(new_task)
     }
     if description != "" {
-      task.Description = description
+      task.Description = core.NewTemplateBase(description)
     }
     if recur != "" {
         if _, err := utils.ParseDuration(recur, now); err != nil {
@@ -87,7 +88,7 @@ var editCmd = &cobra.Command{
       task.Recur = recur
     }
     if key_regen {
-      new_key = taskmap.TfidfNextKey(task.Task, config.Tfidf, edit_key)
+      new_key = taskmap.TfidfNextKey(task.Task.ToValue(), config.Tfidf, edit_key)
     }
     if _, err := taskmap.GetTask(edit_key); err != nil {
       return err

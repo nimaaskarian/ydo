@@ -153,12 +153,12 @@ func (taskmap TaskMap) SortedKeys() []string {
   slices.SortFunc(keys, func(k1, k2 string) int {
     t1, t2 := taskmap[k1], taskmap[k2]
     due_zero := 0
-    if t1.Due.IsZero() && !t2.Due.IsZero(){
+    if t1.Due.ToValue().IsZero() && !t2.Due.ToValue().IsZero(){
       due_zero = 1
-    }  else if !t1.Due.IsZero() && t2.Due.IsZero() {
+    }  else if !t1.Due.ToValue().IsZero() && t2.Due.ToValue().IsZero() {
       due_zero = -1
     } else {
-      due_zero = t1.Due.Compare(t2.Due)
+      due_zero = t1.Due.ToValue().Compare(t2.Due.ToValue())
     }
     return 2*due_zero+t1.CreatedAt.Compare(t2.CreatedAt)
   })
@@ -221,7 +221,7 @@ func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key
         continue
       }
       for _, word := range words {
-        if strings.Contains(task.Task, word) {
+        if strings.Contains(task.Task.ToValue(), word) {
           word_count_in_docs[word] += 1
         }
       }
@@ -415,5 +415,8 @@ func LoadTaskMap(path string) TaskMap {
   taskmap := TaskMap{}
   content, _ := os.ReadFile(path)
   ParseYaml(taskmap, content)
+  for _, task := range taskmap {
+    task.ResolveTemplates()
+  }
   return taskmap
 }

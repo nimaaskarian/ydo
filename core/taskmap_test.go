@@ -150,7 +150,7 @@ func  TestTfidfNextKey(t *testing.T) {
   ParseYaml(tm, []byte(HOMEWORKS))
   msg := "buy some laptop for uni"
   key := tm.TfidfNextKey(msg, config, "")
-  tm[key] = &Task { Task: msg}
+  tm[key] = &Task { Task: TemplateBase{template: msg}}
   assert.Equal(t, "laptop", key)
   key = tm.TfidfNextKey("buy some milk (fresh)", config, "milk")
   assert.Equal(t, "milk", key)
@@ -236,10 +236,10 @@ func TestCascadeDeps(t *testing.T) {
 }
 func TestSortedKeys(t *testing.T) {
   tm := make(TaskMap)
-  tm["ydo"] = &Task {Task: "make ydo usable"}
-  tm["milk"] = &Task {Task: "buy milk", Due: time.Now().Add(time.Hour*2)}
-  tm["workout"] = &Task {Task: "workout", Due: time.Now().AddDate(1000, 0, 0)}
-  tm["homework"] = &Task {Task: "do homework", Due: time.Now().Add(time.Hour*12)}
+  tm["ydo"] = &Task {Task: TemplateBase{ template: "make ydo usable" }}
+  tm["milk"] = &Task {Task: TemplateBase{ template: "buy milk" }, Due: TemplateDate{date: time.Now().Add(time.Hour*2)}}
+  tm["workout"] = &Task {Task: TemplateBase{template: "workout"}, Due: TemplateDate{date: time.Now().AddDate(1000, 0, 0)}}
+  tm["homework"] = &Task {Task: TemplateBase{template: "do homework"}, Due: TemplateDate{date: time.Now().Add(time.Hour*12)}}
 
   assert.Equal(t, []string{"milk", "homework", "workout", "ydo"}, tm.SortedKeys())
 }
@@ -249,10 +249,10 @@ func ExampleTaskMap_PrintMarkdown() {
   ParseYaml(tm, []byte(HOMEWORKS))
   tm.Do("study", time.Now())
   task := tm["homework"]
-  task.Due = time.Now().Add(time.Hour*24)
+  task.Due = TemplateDate{date: time.Now().Add(time.Hour*24)}
   tm["homework"] = task
   task = tm["milk"]
-  task.Due = time.Now().Add(time.Minute*12)
+  task.Due = TemplateDate{date: time.Now().Add(time.Minute*12)}
   tm["milk"] = task
   config := MarkdownConfig{Indent: 4, Now: time.Now()}
   config.Init()

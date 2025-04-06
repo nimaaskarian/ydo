@@ -53,7 +53,7 @@ var batchCmd = &cobra.Command{
           key = taskmap.TfidfNextKey(task, config.Tfidf, "")
           task = key_task[0]
         }
-        err := taskmap.Add(strings.TrimSpace(key), &core.Task{Task: task, CreatedAt: now.Add(time.Duration(count))})
+        err := taskmap.Add(strings.TrimSpace(key), &core.Task{Task: core.NewTemplateBase(task), CreatedAt: now.Add(time.Duration(count))})
         if err != nil {
           fmt.Println(err)
         } else {

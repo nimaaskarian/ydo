@@ -18,6 +18,7 @@ deps []string
 dep_tos []string
 key string
 due string
+until string
 auto_complete bool
 description string
 tfidf bool
@@ -44,6 +45,9 @@ func init() {
 
   addCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
   addCmd.RegisterFlagCompletionFunc("due", DueCompletion)
+
+  addCmd.Flags().StringVarP(&until, "until", "U", "", "specify due for the tasks to print")
+  addCmd.RegisterFlagCompletionFunc("until", DueCompletion)
 
   addCmd.Flags().StringVarP(&recur, "recur", "r", "", "duration of in which the ask recurs")
   addCmd.RegisterFlagCompletionFunc("recur", DurationCompletion)
@@ -73,23 +77,27 @@ var addCmd = &cobra.Command{
         return err
       }
     }
-    due_time, err := utils.ParseDue(due, now)
-    if err != nil {
-      return err
-    }
     if _, err := utils.ParseDuration(recur, now); err != nil {
       return err
     }
-    err = taskmap.Add(key, &core.Task{
-      Task: taskmsg,
+    task := &core.Task{
+      Task: core.NewTemplateBase(taskmsg),
       Deps: deps,
       AutoComplete: auto_complete,
       CreatedAt: now,
-      Due: due_time,
-      Description: description,
+      Description: core.NewTemplateBase(description),
       Recur: recur,
       Tags: tags,
-    })
+    }
+    var err error
+    task.Due, err = resolveTemplateDate(task, due)
+    if err != nil {
+      return err
+    }
+    task.Until, err = resolveTemplateDate(task, until)
+    yaml, _ := task.Due.MarshalYAML()
+    fmt.Println(task.Due, yaml)
+    err = taskmap.Add(key, task)
     if err != nil {
       return err
     }
@@ -109,6 +117,18 @@ var addCmd = &cobra.Command{
   },
   PostRunE: SaveChanges,
   PreRun: UpdateOldTaskMap,
+}
+
+func resolveTemplateDate(task *core.Task, input string) (core.TemplateDate, error) {
+  date_template, err := core.TemplateDateFromTemplate(input, task)
+  if err != nil {
+    date, err := utils.ParseDue(input, now)
+    if err != nil {
+      return core.TemplateDate{}, err
+    }
+    date_template = core.NewTemplateDate(date)
+  }
+  return date_template, nil
 }
 
 func TaskTitleFromArgs(args []string) (taskmsg string, err error) {

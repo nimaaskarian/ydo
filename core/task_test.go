@@ -17,7 +17,7 @@ func TestParseYaml(t *testing.T) {
   task := Task{};
   ParseYaml(&task, []byte(DATA));
   expected := Task {
-    Task: "buy groceries",
+    Task: TemplateBase{template: "buy groceries"},
     Deps: []string{"2"},
     Done: true,
   };
@@ -53,7 +53,7 @@ func ExampleTask_PrintMarkdown() {
   task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Done = true;
   task.PrintMarkdown(nil, 0, nil, "", &config)
-  task.Due = time.Now().Add(-time.Hour*24*2)
+  task.Due = TemplateDate{ date: time.Now().Add(-time.Hour*24*2) }
   config_done := config
   config_done.Filter = (*Task).IsNotDone
   task.PrintMarkdown(nil, 0, nil, "", &config_done)
@@ -62,7 +62,7 @@ func ExampleTask_PrintMarkdown() {
   task.Deps = []string{"2"};
   task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit)
   task.Undo(nil, time.Now())
-  task.Due = time.Now().AddDate(10000, 0, 0)
+  task.Due = TemplateDate{ date: time.Now().AddDate(10000, 0, 0) }
   task.PrintMarkdown(nil, 0, nil, "", &config)
   taskmap := TaskMap{}
   taskmap["2"] = &Task{}
@@ -77,19 +77,19 @@ func ExampleTask_PrintMarkdown() {
   //    - [ ] 2:
 }
 
-func TestAccessField(t *testing.T) {
-  task := Task{};
-  ParseYaml(&task, []byte(DATA));
-  data, err := task.ReflectAccessField("Task")
-  assert.Nil(t, err)
-  assert.Equal(t, "buy groceries", data)
-  data, err = task.ReflectAccessField("task")
-  assert.Nil(t, err)
-  assert.Equal(t, "buy groceries", data)
-  data, err = task.ReflectAccessField("Due")
-  assert.Nil(t, err)
-  assert.Equal(t, time.Time{}, data)
-  data, err = task.ReflectAccessField("idk")
-  assert.Nil(t, data)
-  assert.ErrorContains(t, err, "No such field")
+func TestInit(t *testing.T) {
+  task := &Task{};
+  ParseYaml(task, []byte(TEMPLATE));
+  assert.Equal(t, "do something till {{ .Due }}", task.Task)
+  old_description := task.Description
+  task.ResolveTemplates()
+  assert.Equal(t, "do something till 2025-12-14 00:00:00 +0330 +0330", task.Task)
+  assert.Equal(t, old_description, task.Description)
 }
+
+const TEMPLATE = `task: do something till {{ .Due }}
+due: 2025-12-14T00:00:00+03:30
+description: |-
+  ok some description might say stuff. some might not.
+  idk bro i have no idea.
+`

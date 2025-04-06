@@ -108,7 +108,7 @@ func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
       words = args[1:]
     }
     task := taskmap[edit_key]
-    words = strings.Fields(task.Task)
+    words = strings.Fields(task.Task.ToValue())
   }
   if cmd == addCmd {
     words = args
