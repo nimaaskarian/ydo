@@ -62,6 +62,9 @@ find:
         unmark and mark seem like the most reasonable ones
         tho they have their own problem as well
     created-at: 2025-03-18T03:23:15.398178952+03:30
+gtasks:
+    task: add google a tasks feature
+    created-at: 2025-04-07T11:33:24.706409544+03:30
 hide:
     task: hide and show commands (with until flag)
     done: true

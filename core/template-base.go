@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var funcs = template.FuncMap{"date": date}
+var TemplateFuncs = template.FuncMap{"date": date}
 
 // a base TemplateField with return type of string
 // Template* structs have to have yaml.Marshaler and yaml.Unmarshaler
@@ -30,7 +30,7 @@ func NewTemplateBase(task string) TemplateBase {
 }
 
 func (tb *TemplateBase) Resolve(task *Task) error {
-	tmpl := template.New("task-field").Funcs(funcs)
+	tmpl := template.New("task-field").Funcs(TemplateFuncs)
 	var buffer bytes.Buffer
 	tmpl, err := tmpl.Parse(tb.Template)
 	if err != nil {

@@ -18,7 +18,7 @@ func date(date TemplateDate, duration string) string {
 	if date.Date.IsZero() {
 		return ""
 	}
-	t, err := utils.ParseDue(duration, date.Date)
+	t, err := utils.ParseDuration(duration, date.Date)
 	if err != nil {
 		return ""
 	}

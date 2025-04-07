@@ -37,7 +37,7 @@ func (task *Task) DateFields() [3]*TemplateDate {
 func (task *Task) ResolveTemplates(now time.Time) {
 	date_fields := task.DateFields()
 	for _, item := range date_fields {
-		date, err := utils.ParseDue(item.Base.Template, now)
+    date, err := time.Parse(DATE_PARSE_LAYOUT, item.Base.resolved)
 		if err == nil {
 			*item = NewTemplateDate(date)
 		}
