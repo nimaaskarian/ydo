@@ -37,6 +37,10 @@ func init() {
 	editCmd.Flags().StringArrayVarP(&flagTask.Deps, "deps", "d", []string{}, "append dependencies for the task")
 	editCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
 
+	editCmd.Flags().StringVarP(&flagTask.Until.Base.Template, "until", "U", "", "specify until (task is ignored after that date) for the tasks to print")
+	editCmd.RegisterFlagCompletionFunc("until", DueCompletion)
+
+
 	editCmd.Flags().StringVarP(&flagTask.Due.Base.Template, "due", "u", "", "specify due for the tasks to print")
 	editCmd.RegisterFlagCompletionFunc("due", DueCompletion)
 
