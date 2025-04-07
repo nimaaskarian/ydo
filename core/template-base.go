@@ -5,48 +5,34 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
-
-type TemplateField[T any] interface {
-  Resolve(*Task) error
-  ToValue() T
-  yaml.Marshaler
-  yaml.Unmarshaler
-}
-
-func date(date TemplateDate, duration string) string {
-  t, err := utils.ParseDue(duration, date.ToValue())
-  if err != nil {
-    return ""
-  }
-  return t.Format(DATE_PARSE_LAYOUT)
-}
 
 var funcs = template.FuncMap{"date": date }
 
 // a base TemplateField with return type of string
+// Template* structs have to have yaml.Marshaler and yaml.Unmarshaler
+// interfaces.
 type TemplateBase struct {
-  template, resolved string
+  Template, resolved string
 }
 
 func (tb TemplateBase) GoString() string {
-  return tb.template
+  return tb.Template
 }
 
 func (tb TemplateBase) String() string {
-  return tb.ToValue()
+  return tb.Value()
 }
 
 func NewTemplateBase(task string) TemplateBase {
-  return TemplateBase { template: task }
+  return TemplateBase { Template: task }
 }
 
 func (tb *TemplateBase) Resolve(task *Task) error {
   tmpl := template.New("task-field").Funcs(funcs)
   var buffer bytes.Buffer
-  tmpl, err := tmpl.Parse(tb.template)
+  tmpl, err := tmpl.Parse(tb.Template)
   if err != nil {
     return err
   }
@@ -60,19 +46,19 @@ func (tb *TemplateBase) Resolve(task *Task) error {
   return nil
 }
 
-func (tb *TemplateBase) ToValue() string {
+func (tb *TemplateBase) Value() string {
   if tb.resolved == "" {
-    return tb.template
+    return tb.Template
   }
   return tb.resolved
 }
 
-func (tb TemplateBase) MarshalYAML() (interface{}, error) {
-  return tb.template, nil
+func (tb TemplateBase) MarshalYAML() (any, error) {
+  return tb.Template, nil
 }
 
 func (tb TemplateBase) IsZero() bool {
-  return tb.template == ""
+  return tb.Template == ""
 }
 
 func (tb *TemplateBase) UnmarshalYAML(node *yaml.Node) error {
@@ -81,6 +67,6 @@ func (tb *TemplateBase) UnmarshalYAML(node *yaml.Node) error {
   if err != nil {
     return err
   }
-  tb.template = raw
+  tb.Template = raw
   return nil
 }

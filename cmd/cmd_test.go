@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -71,7 +72,7 @@ func TestCmdAdd(t *testing.T) {
   assert.ErrorContains(t, rootCmd.Execute(), "Task cannot be empty")
   rootCmd.SetArgs([]string{"-f", "../tests/tasks.yaml", "add", "-k", "lowkey", "some", "task", "msg", "which is", "kinda odd"})
   assert.Nil(t, rootCmd.Execute())
-  assert.Equal(t, "some task msg which is kinda odd", taskmap["lowkey"].Task)
+  assert.Equal(t, "some task msg which is kinda odd", taskmap["lowkey"].Task.Value())
   rootCmd.SetArgs([]string{"-f", "../tests/tasks.yaml", "add", "some", "task", "msg", "which is", "kinda odd", "--tfidf"})
   assert.Nil(t, rootCmd.Execute())
   rootCmd.SetArgs([]string{"-f", "../tests/tasks.yaml", "add", "other", "task", "--dep-to", "tests"})
@@ -81,7 +82,7 @@ func TestCmdAdd(t *testing.T) {
   dep_tos = []string{}
   rootCmd.SetArgs([]string{"-f", "../tests/tasks.yaml", "add", "other", "task", "--due", "fail"})
   assert.ErrorContains(t, rootCmd.Execute(), "Invalid date")
-  due = ""
+  flagTask.Due = core.TemplateDate{}
   rootCmd.SetArgs([]string{"-f", "../tests/tasks.yaml", "add", "other", "task", "--deps", "circus"})
   assert.ErrorContains(t, rootCmd.Execute(), "No such task")
 }

@@ -17,7 +17,7 @@ func TestParseYaml(t *testing.T) {
   task := Task{};
   ParseYaml(&task, []byte(DATA));
   expected := Task {
-    Task: TemplateBase{template: "buy groceries"},
+    Task: TemplateBase{Template: "buy groceries"},
     Deps: []string{"2"},
     Done: true,
   };
@@ -53,7 +53,7 @@ func ExampleTask_PrintMarkdown() {
   task.PrintMarkdown(nil, 0, nil, "", &config)
   task.Done = true;
   task.PrintMarkdown(nil, 0, nil, "", &config)
-  task.Due = TemplateDate{ date: time.Now().Add(-time.Hour*24*2) }
+  task.Due = TemplateDate{ Date: time.Now().Add(-time.Hour*24*2) }
   config_done := config
   config_done.Filter = (*Task).IsNotDone
   task.PrintMarkdown(nil, 0, nil, "", &config_done)
@@ -62,7 +62,7 @@ func ExampleTask_PrintMarkdown() {
   task.Deps = []string{"2"};
   task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit)
   task.Undo(nil, time.Now())
-  task.Due = TemplateDate{ date: time.Now().AddDate(10000, 0, 0) }
+  task.Due = TemplateDate{ Date: time.Now().AddDate(10000, 0, 0) }
   task.PrintMarkdown(nil, 0, nil, "", &config)
   taskmap := TaskMap{}
   taskmap["2"] = &Task{}
@@ -80,11 +80,11 @@ func ExampleTask_PrintMarkdown() {
 func TestInit(t *testing.T) {
   task := &Task{};
   ParseYaml(task, []byte(TEMPLATE));
-  assert.Equal(t, "do something till {{ .Due }}", task.Task)
-  old_description := task.Description
-  task.ResolveTemplates()
-  assert.Equal(t, "do something till 2025-12-14 00:00:00 +0330 +0330", task.Task)
-  assert.Equal(t, old_description, task.Description)
+  assert.Equal(t, "do something till {{ .Due }}", task.Task.Template)
+  old_description := task.Description.Value()
+  task.ResolveTemplates(time.Now())
+  assert.Equal(t, "do something till 2025-12-14T00:00:00+03:30", task.Task.Value())
+  assert.Equal(t, old_description, task.Description.Value())
 }
 
 const TEMPLATE = `task: do something till {{ .Due }}

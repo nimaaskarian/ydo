@@ -28,7 +28,7 @@ func TestTaskMapParseYaml(t *testing.T) {
   ParseYaml(taskmap, []byte(GROCERIES));
   expected_tasks := []string{"buy groceries", "buy milk", "buy bread"};
   for i:=range 3 {
-    assert.Equal(t, expected_tasks[i], taskmap["t"+strconv.Itoa(i+1)].Task)
+    assert.Equal(t, expected_tasks[i], taskmap["t"+strconv.Itoa(i+1)].Task.String())
   }
 }
 
@@ -150,7 +150,7 @@ func  TestTfidfNextKey(t *testing.T) {
   ParseYaml(tm, []byte(HOMEWORKS))
   msg := "buy some laptop for uni"
   key := tm.TfidfNextKey(msg, config, "")
-  tm[key] = &Task { Task: TemplateBase{template: msg}}
+  tm[key] = &Task { Task: TemplateBase{Template: msg}}
   assert.Equal(t, "laptop", key)
   key = tm.TfidfNextKey("buy some milk (fresh)", config, "milk")
   assert.Equal(t, "milk", key)
@@ -177,7 +177,9 @@ func TestWriteAndLoad(t *testing.T) {
   tm := make(TaskMap)
   ParseYaml(tm, []byte(GROCERIES))
   tm.Write("test")
-  tm2 := LoadTaskMap("test")
+  now := time.Now()
+  tm.ResolveAllTemplates(now)
+  tm2 := LoadTaskMap("test", now)
   assert.Equal(t, tm, tm2)
   assert.Error(t, tm.Write(""))
   os.Remove("test")
@@ -198,7 +200,7 @@ func TestWipeDependenciesToKey(t *testing.T) {
 }
 
 func BenchmarkPrintMarkdown(b *testing.B) {
-  tm := LoadTaskMap("../tests/tasks.yaml")
+  tm := LoadTaskMap("../tests/tasks.yaml", time.Now())
   for b.Loop() {
     tm.PrintMarkdown(&MarkdownConfig{Indent: 4})
   }
@@ -236,10 +238,10 @@ func TestCascadeDeps(t *testing.T) {
 }
 func TestSortedKeys(t *testing.T) {
   tm := make(TaskMap)
-  tm["ydo"] = &Task {Task: TemplateBase{ template: "make ydo usable" }}
-  tm["milk"] = &Task {Task: TemplateBase{ template: "buy milk" }, Due: TemplateDate{date: time.Now().Add(time.Hour*2)}}
-  tm["workout"] = &Task {Task: TemplateBase{template: "workout"}, Due: TemplateDate{date: time.Now().AddDate(1000, 0, 0)}}
-  tm["homework"] = &Task {Task: TemplateBase{template: "do homework"}, Due: TemplateDate{date: time.Now().Add(time.Hour*12)}}
+  tm["ydo"] = &Task {Task: TemplateBase{ Template: "make ydo usable" }}
+  tm["milk"] = &Task {Task: TemplateBase{ Template: "buy milk" }, Due: TemplateDate{Date: time.Now().Add(time.Hour*2)}}
+  tm["workout"] = &Task {Task: TemplateBase{Template: "workout"}, Due: TemplateDate{Date: time.Now().AddDate(1000, 0, 0)}}
+  tm["homework"] = &Task {Task: TemplateBase{Template: "do homework"}, Due: TemplateDate{Date: time.Now().Add(time.Hour*12)}}
 
   assert.Equal(t, []string{"milk", "homework", "workout", "ydo"}, tm.SortedKeys())
 }
@@ -249,10 +251,10 @@ func ExampleTaskMap_PrintMarkdown() {
   ParseYaml(tm, []byte(HOMEWORKS))
   tm.Do("study", time.Now())
   task := tm["homework"]
-  task.Due = TemplateDate{date: time.Now().Add(time.Hour*24)}
+  task.Due = TemplateDate{Date: time.Now().Add(time.Hour*24)}
   tm["homework"] = task
   task = tm["milk"]
-  task.Due = TemplateDate{date: time.Now().Add(time.Minute*12)}
+  task.Due = TemplateDate{Date: time.Now().Add(time.Minute*12)}
   tm["milk"] = task
   config := MarkdownConfig{Indent: 4, Now: time.Now()}
   config.Init()

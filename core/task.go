@@ -1,9 +1,7 @@
 package core
 
 import (
-	"errors"
 	"fmt"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -27,32 +25,21 @@ type Task struct {
   Tags []string                 `yaml:",omitempty"`
 }
 
-func (task *Task) ResolveTemplates() {
+func (task *Task) ResolveTemplates(now time.Time) {
+  for _, item := range [...]*TemplateDate {
+    &task.Due,
+    &task.Until,
+  } {
+    date, err := utils.ParseDue(item.Base.Template, now)
+    if err == nil {
+      *item = NewTemplateDate(date)
+    }
+  }
+
+  task.Due.Resolve(task)
+  task.Until.Resolve(task)
   task.Task.Resolve(task)
   task.Description.Resolve(task)
-  for range 2 {
-    task.Due.Resolve(task)
-    task.Until.Resolve(task)
-  }
-}
-
-// very computationally expensive function. don't just call it for fun.
-// with this we try to imitate taskwarrior's DOM in our simple file based
-// database.
-// it also automatically converts the first letter of field to uppercase.
-// for example "task" would be a valid field
-func (task *Task) ReflectAccessField(field string) (any, error) {
-  if field[0] > 'a' && field[0] < 'z' {
-    field = strings.ToUpper(field[:1])+field[1:]
-  }
-  model := reflect.Indirect(reflect.ValueOf(*task))
-  value := model.FieldByName(field)
-
-  
-  if !value.IsValid() {
-    return nil, errors.New("No such field")
-  }
-  return value.Interface(), nil
 }
 
 func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
@@ -236,8 +223,8 @@ func printIndent(depth uint, config *MarkdownConfig) {
 }
 
 func printDescription(depth uint, task *Task, config *MarkdownConfig) {
-  if config.Description && task.Description.ToValue() != "" {
-    for line := range strings.Lines(task.Description.ToValue()) {
+  if config.Description && task.Description.Value() != "" {
+    for line := range strings.Lines(task.Description.Value()) {
       printIndent(depth+1, config)
       fmt.Print(line)
     }

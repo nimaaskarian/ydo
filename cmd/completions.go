@@ -13,7 +13,7 @@ import (
 
 func TaskKeyCompletionFilter(filter core.TaskFilter) cobra.CompletionFunc {
   return func (cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-    taskmap = core.LoadTaskMap(tasks_path)
+    taskmap = core.LoadTaskMap(tasks_path, time.Now())
     now = time.Now()
     if now_str != "" {
       var err error
@@ -100,7 +100,7 @@ func DueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
 }
 
 func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-  taskmap = core.LoadTaskMap(tasks_path)
+  taskmap = core.LoadTaskMap(tasks_path, now)
   var words []string
   if cmd == editCmd {
     edit_key := args[0]
@@ -108,7 +108,7 @@ func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
       words = args[1:]
     }
     task := taskmap[edit_key]
-    words = strings.Fields(task.Task.ToValue())
+    words = strings.Fields(task.Task.Value())
   }
   if cmd == addCmd {
     words = args
@@ -136,6 +136,6 @@ func KeyCompletion(cmd *cobra.Command, args []string, toComplete string) ([]stri
 }
 
 func TagCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	taskmap = core.LoadTaskMap(tasks_path)
+	taskmap = core.LoadTaskMap(tasks_path, now)
 	return taskmap.Tags(), cobra.ShellCompDirectiveDefault
 }

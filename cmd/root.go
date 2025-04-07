@@ -64,7 +64,7 @@ var (
         return err
       }
     }
-    taskmap = core.LoadTaskMap(tasks_path)
+    taskmap = core.LoadTaskMap(tasks_path, now)
     config.Markdown.Filter = MarkdownFilter(&config.Markdown)
     return nil
   },

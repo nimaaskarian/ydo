@@ -15,7 +15,7 @@ func init() {
   mdCmd.RegisterFlagCompletionFunc("due", DueCompletion)
   mdCmd.ValidArgsFunction = TaskKeyCompletionFilter(nil)
 
-	mdCmd.Flags().StringArrayVarP(&tags, "tag", "T", []string{}, "tag(s) for the task")
+	mdCmd.Flags().StringArrayVarP(&flagTask.Tags, "tag", "T", []string{}, "tag(s) for the task")
   mdCmd.RegisterFlagCompletionFunc("tag", TagCompletion)
 }
 
@@ -31,7 +31,8 @@ var mdCmd = &cobra.Command{
     md_config := config.Markdown
     md_config.Limit = 0
     md_config.Filter = func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
-      return (due_time.IsZero() || utils.NaiveDateEqual(task.Due.ToValue(), due_time)) && (len(tags) == 0 || slices.ContainsFunc(tags, func(tag string) bool {
+      return (due_time.IsZero() || utils.NaiveDateEqual(task.Due.ToValue(), due_time)) &&
+      (len(flagTask.Tags) == 0 || slices.ContainsFunc(flagTask.Tags, func(tag string) bool {
 				return slices.Contains(task.Tags, tag)
 			}))
     }

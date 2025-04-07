@@ -14,42 +14,39 @@ import (
 
 // add flags
 var (
-deps []string
 dep_tos []string
 key string
 due string
-until string
-auto_complete bool
-description string
 tfidf bool
 taskmsg string 
 recur string
-tags []string
 )
+
+var flagTask core.Task
 
 func init() {
   rootCmd.AddCommand(addCmd)
-  addCmd.Flags().StringArrayVarP(&deps, "deps", "d", []string{}, "dependencies for the task to add")
-  addCmd.Flags().StringVarP(&description, "description", "e", "", "description of the task")
+  addCmd.Flags().StringArrayVarP(&flagTask.Deps, "deps", "d", []string{}, "dependencies for the task to add")
+  addCmd.Flags().StringVarP(&flagTask.Description.Template, "description", "e", "", "description of the task")
   addCmd.Flags().StringArrayVarP(&dep_tos, "dep-to", "D", []string{}, "task keys for this task to be dependent to")
-  addCmd.Flags().BoolVarP(&auto_complete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
+  addCmd.Flags().BoolVarP(&flagTask.AutoComplete, "auto-complete", "a", false, "enable auto complete for the task (done when deps are done)")
   addCmd.Flags().BoolVarP(&tfidf, "tfidf", "t", false, "use tfidf for automatic key generation (overrides config file and --key flag)")
   addCmd.Flags().StringVarP(&key, "key", "k", "", "key of the new task")
   addCmd.RegisterFlagCompletionFunc("key", KeyCompletion)
 
-	addCmd.Flags().StringArrayVarP(&tags, "tag", "T", []string{}, "tag(s) for the task")
+	addCmd.Flags().StringArrayVarP(&flagTask.Tags, "tag", "T", []string{}, "tag(s) for the task")
   addCmd.RegisterFlagCompletionFunc("tag", TagCompletion)
 
   addCmd.RegisterFlagCompletionFunc("deps", TaskKeyCompletionFilter(nil))
   addCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletionFilter(nil))
 
-  addCmd.Flags().StringVarP(&due, "due", "u", "", "specify due for the tasks to print")
+  addCmd.Flags().StringVarP(&flagTask.Due.Base.Template, "due", "u", "", "specify due for the tasks to print")
   addCmd.RegisterFlagCompletionFunc("due", DueCompletion)
 
-  addCmd.Flags().StringVarP(&until, "until", "U", "", "specify due for the tasks to print")
+  addCmd.Flags().StringVarP(&flagTask.Until.Base.Template, "until", "U", "", "specify due for the tasks to print")
   addCmd.RegisterFlagCompletionFunc("until", DueCompletion)
 
-  addCmd.Flags().StringVarP(&recur, "recur", "r", "", "duration of in which the ask recurs")
+  addCmd.Flags().StringVarP(&flagTask.Recur, "recur", "r", "", "duration of in which the ask recurs")
   addCmd.RegisterFlagCompletionFunc("recur", DurationCompletion)
 }
 
@@ -72,32 +69,29 @@ var addCmd = &cobra.Command{
         key = taskmap.TfidfNextKey(taskmsg, config.Tfidf, "")
       }
     }
-    for _,dep := range deps {
-      if _, err := taskmap.GetTask(dep); err != nil {
-        return err
-      }
-    }
     if _, err := utils.ParseDuration(recur, now); err != nil {
       return err
     }
-    task := &core.Task{
-      Task: core.NewTemplateBase(taskmsg),
-      Deps: deps,
-      AutoComplete: auto_complete,
-      CreatedAt: now,
-      Description: core.NewTemplateBase(description),
-      Recur: recur,
-      Tags: tags,
-    }
+    flagTask.Task = core.NewTemplateBase(taskmsg)
+    flagTask.CreatedAt = now
     var err error
-    task.Due, err = resolveTemplateDate(task, due)
-    if err != nil {
+    for _, item := range [...]*core.TemplateDate {
+      &flagTask.Due,
+      &flagTask.Until,
+    } {
+      date, err := utils.ParseDue(item.Base.Template, now)
+      if err == nil {
+        *item = core.NewTemplateDate(date)
+      }
+    }
+    if err := resolveTemplateDate(&flagTask, &flagTask.Due); err != nil {
       return err
     }
-    task.Until, err = resolveTemplateDate(task, until)
-    yaml, _ := task.Due.MarshalYAML()
-    fmt.Println(task.Due, yaml)
-    err = taskmap.Add(key, task)
+    if err := resolveTemplateDate(&flagTask, &flagTask.Until); err != nil {
+      return err
+    }
+
+    err = taskmap.Add(key, &flagTask)
     if err != nil {
       return err
     }
@@ -119,16 +113,16 @@ var addCmd = &cobra.Command{
   PreRun: UpdateOldTaskMap,
 }
 
-func resolveTemplateDate(task *core.Task, input string) (core.TemplateDate, error) {
-  date_template, err := core.TemplateDateFromTemplate(input, task)
+func resolveTemplateDate(task *core.Task, item *core.TemplateDate) error {
+  err := item.Resolve(task)
   if err != nil {
-    date, err := utils.ParseDue(input, now)
+    date, err := utils.ParseDue(item.Base.Template, now)
     if err != nil {
-      return core.TemplateDate{}, err
+      return err
     }
-    date_template = core.NewTemplateDate(date)
+    *item = core.NewTemplateDate(date)
   }
-  return date_template, nil
+  return nil
 }
 
 func TaskTitleFromArgs(args []string) (taskmsg string, err error) {

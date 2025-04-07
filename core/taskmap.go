@@ -68,6 +68,11 @@ func (taskmap TaskMap) Add(key string, task *Task) error {
   if _, ok := taskmap[key]; ok {
     return errors.New("Task already exists")
   }
+  for _, key := range task.Deps {
+    if _, ok := taskmap[key]; !ok {
+      return errors.New("No such task "+key)
+    }
+  }
   if task == nil {
     panic("Task is nil")
   }
@@ -221,7 +226,7 @@ func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key
         continue
       }
       for _, word := range words {
-        if strings.Contains(task.Task.ToValue(), word) {
+        if strings.Contains(task.Task.Value(), word) {
           word_count_in_docs[word] += 1
         }
       }
@@ -410,13 +415,17 @@ func (taskmap TaskMap) DryWrite(path string) error {
   return nil
 }
 
-func LoadTaskMap(path string) TaskMap {
+func LoadTaskMap(path string, now time.Time) TaskMap {
   slog.Info("Task file loaded.", "path", path)
   taskmap := TaskMap{}
   content, _ := os.ReadFile(path)
   ParseYaml(taskmap, content)
-  for _, task := range taskmap {
-    task.ResolveTemplates()
-  }
+  taskmap.ResolveAllTemplates(now)
   return taskmap
+}
+
+func (tm TaskMap) ResolveAllTemplates(now time.Time) {
+  for _, task := range tm {
+    task.ResolveTemplates(now)
+  }
 }
