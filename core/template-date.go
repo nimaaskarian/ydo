@@ -44,7 +44,9 @@ func (td TemplateDate) String() string {
 
 func NewTemplateDate(date time.Time) TemplateDate {
   td := TemplateDate { Date: date }
-  td.Base.Template = td.Date.Format(DATE_PARSE_LAYOUT)
+  if !td.Date.IsZero() {
+    td.Base.Template = td.Date.Format(DATE_PARSE_LAYOUT)
+  }
   return td
 }
 
