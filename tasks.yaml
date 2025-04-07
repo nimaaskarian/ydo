@@ -48,10 +48,14 @@ due:
     created-at: 2025-03-14T17:11:19.659795653+03:30
 due-enhanced:
     task: add a start and end due date for tasks to do in a defined interval (this week, next week, next  year, etc)
+    done: true
     created-at: 2025-03-19T18:44:07.801574565+03:30
+    done-at: 2025-04-07T09:33:48.677217974+03:30
 editor:
     task: add task editor command
+    done: true
     created-at: 2025-03-29T09:19:08.772741504+03:30
+    done-at: 2025-04-07T09:33:48.677217974+03:30
 find:
     task: find another name for undo (like the old undo)
     description: |-
@@ -60,7 +64,9 @@ find:
     created-at: 2025-03-18T03:23:15.398178952+03:30
 hide:
     task: hide and show commands (with until flag)
+    done: true
     created-at: 2025-03-24T17:39:52.285190133+03:30
+    done-at: 2025-04-07T09:33:48.677217974+03:30
 jalali:
     task: add jalali date
     done: true

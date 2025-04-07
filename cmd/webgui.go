@@ -1,3 +1,4 @@
+//go:build webgui
 // +build webgui
 
 package cmd
@@ -25,156 +26,156 @@ import (
 var embed_fs embed.FS
 
 var (
-  address string
-  port int
-  changed bool
+	address string
+	port    int
+	changed bool
 )
 
 var tmpls *template.Template
+
 func init() {
-  rootCmd.AddCommand(webguiCmd)
-  webguiCmd.Flags().StringVarP(&address, "address", "a", "127.0.0.1", "address to listen and serve to")
-  webguiCmd.Flags().IntVarP(&port, "port", "p", 8485, "port to listen and serve to")
+	rootCmd.AddCommand(webguiCmd)
+	webguiCmd.Flags().StringVarP(&address, "address", "a", "127.0.0.1", "address to listen and serve to")
+	webguiCmd.Flags().IntVarP(&port, "port", "p", 8485, "port to listen and serve to")
 }
 
 func updateChanged() {
-  if !changed {
-    changed = !reflect.DeepEqual(old_taskmap, taskmap)
-  }
+	if !changed {
+		changed = !reflect.DeepEqual(old_taskmap, taskmap)
+	}
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-  err := tmpls.ExecuteTemplate(w, "index.html", map[string]any { "Taskmap": taskmap,
-    "SeenKeys": make(map[string]bool, len(taskmap) ),
-    "Keys": sorted_keys,
-    "Url": r.URL.String(),
-    "Changed": changed,
-  })
-  if err != nil {
-    slog.Error("Error in executing the template", "err", err)
-  }
+	err := tmpls.ExecuteTemplate(w, "index.html", map[string]any{"Taskmap": taskmap,
+		"SeenKeys": make(map[string]bool, len(taskmap)),
+		"Keys":     sorted_keys,
+		"Url":      r.URL.String(),
+		"Changed":  changed,
+	})
+	if err != nil {
+		slog.Error("Error in executing the template", "err", err)
+	}
 }
 
 type TaskData struct {
-  Taskmap core.TaskMap
-  Key string
-  SeenKeys map[string]bool
-  Filter map[string]bool
+	Taskmap  core.TaskMap
+	Key      string
+	SeenKeys map[string]bool
+	Filter   map[string]bool
 }
 
 func dict(args ...any) map[string]any {
-  m := make(map[string]any)
-  for i := 0; i < len(args); i += 2 {
-      m[args[i].(string)] = args[i+1]
-  }
-  return m
+	m := make(map[string]any)
+	for i := 0; i < len(args); i += 2 {
+		m[args[i].(string)] = args[i+1]
+	}
+	return m
 }
 
 func add2map(m map[string]any, args ...any) map[string]any {
-  for i := 0; i < len(args); i += 2 {
-      m[args[i].(string)] = args[i+1]
-  }
-  return m
+	for i := 0; i < len(args); i += 2 {
+		m[args[i].(string)] = args[i+1]
+	}
+	return m
 }
 
-
 func see(seen map[string]bool, key string) string {
-  seen[key] = true
-  return ""
+	seen[key] = true
+	return ""
 }
 
 func Task(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-  w.Header().Add("Content-Type", "text/html")
-  err := tmpls.ExecuteTemplate(w, "task.html", TaskData { Key: ps.ByName("key"), Taskmap: taskmap, SeenKeys: map[string]bool{} })
-  if err != nil {
-    slog.Error("Error in executing the template", "err", err)
-  }
+	w.Header().Add("Content-Type", "text/html")
+	err := tmpls.ExecuteTemplate(w, "task.html", TaskData{Key: ps.ByName("key"), Taskmap: taskmap, SeenKeys: map[string]bool{}})
+	if err != nil {
+		slog.Error("Error in executing the template", "err", err)
+	}
 }
 
 func makeFilter(f core.TaskFilter) map[string]bool {
-  filter := make(map[string]bool, len(taskmap))
-  for key, task := range taskmap {
-    filter[key] = f(task, taskmap, time.Now())
-  }
-  return filter
+	filter := make(map[string]bool, len(taskmap))
+	for key, task := range taskmap {
+		filter[key] = f(task, taskmap, time.Now())
+	}
+	return filter
 }
 
 func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-  key := ps.ByName("key")
-  task := taskmap[key]
-  if !task.AutoComplete {
-    taskmap.Do(key, time.Now())
-  }
+	key := ps.ByName("key")
+	task := taskmap[key]
+	if !task.AutoComplete {
+		taskmap.Do(key, time.Now())
+	}
 
-  url := r.URL.Query().Get("redirect")
-  if url == "" {
-    url = "/"
-  }
-  w.Header().Add("HX-Location", url)
-  updateChanged()
+	url := r.URL.Query().Get("redirect")
+	if url == "" {
+		url = "/"
+	}
+	w.Header().Add("HX-Location", url)
+	updateChanged()
 }
 
 func Todo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-    err := tmpls.ExecuteTemplate(w, "index.html", map[string]any { "Taskmap": taskmap,
-    "SeenKeys": make(map[string]bool, len(taskmap) ),
-    "Keys": sorted_keys,
-    "Url": r.URL.String(),
-    "Changed": changed,
-    "Filter": makeFilter((*core.Task).IsNotDone),
-  })
-  if err != nil {
-    slog.Error("Error in executing the template", "err", err)
-  }
+	err := tmpls.ExecuteTemplate(w, "index.html", map[string]any{"Taskmap": taskmap,
+		"SeenKeys": make(map[string]bool, len(taskmap)),
+		"Keys":     sorted_keys,
+		"Url":      r.URL.String(),
+		"Changed":  changed,
+		"Filter":   makeFilter((*core.Task).IsNotDone),
+	})
+	if err != nil {
+		slog.Error("Error in executing the template", "err", err)
+	}
 }
 
-func Write(cmd *cobra.Command) func (w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-  return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-    rootCmd.PersistentPostRun(cmd, []string{})
-    UpdateOldTaskMap(nil, nil)
-    changed = false
-  }
+func Write(cmd *cobra.Command) func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		rootCmd.PersistentPostRun(cmd, []string{})
+		UpdateOldTaskMap(nil, nil)
+		changed = false
+	}
 }
 
 func UndoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-  key := ps.ByName("key")
-  taskmap.Undo(key, time.Now())
-  url := r.URL.Query().Get("redirect")
-  if url == "" {
-    url = "/"
-  }
-  w.Header().Add("HX-Location", url)
-  updateChanged()
+	key := ps.ByName("key")
+	taskmap.Undo(key, time.Now())
+	url := r.URL.Query().Get("redirect")
+	if url == "" {
+		url = "/"
+	}
+	w.Header().Add("HX-Location", url)
+	updateChanged()
 }
 
 var sorted_keys []string
 var webguiCmd = &cobra.Command{
-  Use: "webgui",
-  Short: "run the webgui on the current file",
-  Run: func(cmd *cobra.Command, args []string) {
-    func_map := template.FuncMap{
-      "dict": dict,
-      "see": see,
-      "add2map": add2map,
-    }
-    tmpls = template.Must(template.New("").Funcs(func_map).ParseFS(embed_fs, "webgui/templates/*"))
-    sorted_keys = taskmap.SortedKeys()
-    server_root, err := fs.Sub(embed_fs, "webgui/static")
-    if err != nil {
-      slog.Error("Error happend when subbing embed_fs", "err", err)
-    }
-    static_server := http.FileServer(http.FS(server_root))
+	Use:   "webgui",
+	Short: "run the webgui on the current file",
+	Run: func(cmd *cobra.Command, args []string) {
+		func_map := template.FuncMap{
+			"dict":    dict,
+			"see":     see,
+			"add2map": add2map,
+		}
+		tmpls = template.Must(template.New("").Funcs(func_map).ParseFS(embed_fs, "webgui/templates/*"))
+		sorted_keys = taskmap.SortedKeys()
+		server_root, err := fs.Sub(embed_fs, "webgui/static")
+		if err != nil {
+			slog.Error("Error happend when subbing embed_fs", "err", err)
+		}
+		static_server := http.FileServer(http.FS(server_root))
 
-    router := httprouter.New()
-    router.GET("/", Index)
-    router.GET("/todo", Todo)
-    router.GET("/task/:key", Task)
-    router.PUT("/write", Write(cmd))
-    router.PUT("/do/:key", DoTask)
-    router.PUT("/undo/:key", UndoTask)
-    router.Handler("GET", "/static/*filepath", http.StripPrefix("/static/", static_server))
+		router := httprouter.New()
+		router.GET("/", Index)
+		router.GET("/todo", Todo)
+		router.GET("/task/:key", Task)
+		router.PUT("/write", Write(cmd))
+		router.PUT("/do/:key", DoTask)
+		router.PUT("/undo/:key", UndoTask)
+		router.Handler("GET", "/static/*filepath", http.StripPrefix("/static/", static_server))
 
-    address = net.JoinHostPort(address, strconv.Itoa(port))
-    go utils.OpenURL("http://"+address)
-    log.Fatal(http.ListenAndServe(address, router))
-  },
+		address = net.JoinHostPort(address, strconv.Itoa(port))
+		go utils.OpenURL("http://" + address)
+		log.Fatal(http.ListenAndServe(address, router))
+	},
 }

@@ -36,25 +36,25 @@ tfidf:
 `
 
 func init() {
-  rootCmd.AddCommand(configCmd)
+	rootCmd.AddCommand(configCmd)
 }
 
 var configCmd = &cobra.Command{
-  Use: "config [tasks (optional)]",
-  Short: "edit ydo's config file",
-  Long: "edit ydo's config file in your favorite EDITOR. Writes the default config if it founds no config",
-  RunE: func(cmd *cobra.Command, keys []string) error {
-    if err := ensureConfigFile(); err != nil {
-      return err
-    }
-    c, err := utils.EditorCmd(config_path)
-    utils.CmdStdOs(c)
+	Use:   "config [tasks (optional)]",
+	Short: "edit ydo's config file",
+	Long:  "edit ydo's config file in your favorite EDITOR. Writes the default config if it founds no config",
+	RunE: func(cmd *cobra.Command, keys []string) error {
+		if err := ensureConfigFile(); err != nil {
+			return err
+		}
+		c, err := utils.EditorCmd(config_path)
+		utils.CmdStdOs(c)
 
-    if err != nil {
-      return err
-    }
-    return c.Run()
-  },
+		if err != nil {
+			return err
+		}
+		return c.Run()
+	},
 }
 
 func ensureConfigFile() error {
@@ -65,11 +65,11 @@ func ensureConfigFile() error {
 		}
 		defer f.Close()
 
-    tmpl, err := template.New("config").Parse(DEFAULT_CONFIG)
-    if err != nil {
-      panic(err)
-    }
-    tmpl.Execute(f, tasks_path)
+		tmpl, err := template.New("config").Parse(DEFAULT_CONFIG)
+		if err != nil {
+			panic(err)
+		}
+		tmpl.Execute(f, tasks_path)
 	} else if err != nil { // some other error occurred
 		return err
 	}

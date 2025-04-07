@@ -6,36 +6,36 @@ import (
 )
 
 func init() {
-  rootCmd.AddCommand(regenKeyCmd)
-  regenKeyCmd.ValidArgsFunction = TaskKeyCompletionFilter(nil)
+	rootCmd.AddCommand(regenKeyCmd)
+	regenKeyCmd.ValidArgsFunction = TaskKeyCompletionFilter(nil)
 }
 
 var regenKeyCmd = &cobra.Command{
-  Use: "regen-key [tasks]",
-  Short: "regen key with the automatic key generator (respects config file)",
-  RunE: func(cmd *cobra.Command, keys []string) error {
-    if len(keys) > 0 {
-      for _,key := range keys {
-        task, err := taskmap.GetTask(key)
-        if err != nil {
-          return err
-        }
-        new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
-        taskmap.ReplaceKeyInDeps(key, new_key)
-        taskmap[new_key] = task
-      }
-    } else {
-      if always_yes || utils.ReadYesNo("Regen key for all the tasks? (yes/no) ")  {
-        for key := range taskmap {
-          task := taskmap[key]
-          new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
-          taskmap.ReplaceKeyInDeps(key, new_key)
-          taskmap[new_key] = task
-        }
-      }
-    }
-    return nil
-  },
-  PostRunE: SaveChanges,
-  PreRun: UpdateOldTaskMap,
+	Use:   "regen-key [tasks]",
+	Short: "regen key with the automatic key generator (respects config file)",
+	RunE: func(cmd *cobra.Command, keys []string) error {
+		if len(keys) > 0 {
+			for _, key := range keys {
+				task, err := taskmap.GetTask(key)
+				if err != nil {
+					return err
+				}
+				new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
+				taskmap.ReplaceKeyInDeps(key, new_key)
+				taskmap[new_key] = task
+			}
+		} else {
+			if always_yes || utils.ReadYesNo("Regen key for all the tasks? (yes/no) ") {
+				for key := range taskmap {
+					task := taskmap[key]
+					new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
+					taskmap.ReplaceKeyInDeps(key, new_key)
+					taskmap[new_key] = task
+				}
+			}
+		}
+		return nil
+	},
+	PostRunE: SaveChanges,
+	PreRun:   UpdateOldTaskMap,
 }

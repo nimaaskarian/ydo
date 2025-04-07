@@ -1,7 +1,7 @@
 package cmd
 
 import (
-  "time"
+	"time"
 
 	"github.com/nimaaskarian/ydo/core"
 	"github.com/nimaaskarian/ydo/utils"
@@ -9,30 +9,30 @@ import (
 )
 
 func init() {
-  rootCmd.AddCommand(undoCmd)
+	rootCmd.AddCommand(undoCmd)
 }
 
 var undoCmd = &cobra.Command{
-  Aliases: []string{"u"},
-  Use: "undo [keys]",
-  Short: "set tasks as not completed",
-  ValidArgsFunction: TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool {return !t.AutoComplete && t.IsDone(tm, now)}),
-  RunE: func(cmd *cobra.Command, keys []string) error {
-    if len(keys) > 0 {
-      for _,key := range keys {
-        if err := taskmap.Undo(key, now); err != nil {
-          return err
-        }
-      }
-    } else {
-      if always_yes || utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ")  {
-        for key := range taskmap {
-          taskmap.Undo(key, now)
-        }
-      }
-    }
-    return nil
-  },
-  PostRunE: SaveChanges,
-  PreRun: UpdateOldTaskMap,
+	Aliases:           []string{"u"},
+	Use:               "undo [keys]",
+	Short:             "set tasks as not completed",
+	ValidArgsFunction: TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool { return !t.AutoComplete && t.IsDone(tm, now) }),
+	RunE: func(cmd *cobra.Command, keys []string) error {
+		if len(keys) > 0 {
+			for _, key := range keys {
+				if err := taskmap.Undo(key, now); err != nil {
+					return err
+				}
+			}
+		} else {
+			if always_yes || utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ") {
+				for key := range taskmap {
+					taskmap.Undo(key, now)
+				}
+			}
+		}
+		return nil
+	},
+	PostRunE: SaveChanges,
+	PreRun:   UpdateOldTaskMap,
 }
