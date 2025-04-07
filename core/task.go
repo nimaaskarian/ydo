@@ -26,19 +26,25 @@ type Task struct {
 	Tags          []string     `yaml:",omitempty"`
 }
 
-func (task *Task) ResolveTemplates(now time.Time) {
-	for _, item := range [...]*TemplateDate{
+func (task *Task) DateFields() [3]*TemplateDate {
+	return [...]*TemplateDate{
 		&task.Due,
 		&task.Until,
-	} {
+		&task.Schedule,
+	}
+}
+
+func (task *Task) ResolveTemplates(now time.Time) {
+	date_fields := task.DateFields()
+	for _, item := range date_fields {
 		date, err := utils.ParseDue(item.Base.Template, now)
 		if err == nil {
 			*item = NewTemplateDate(date)
 		}
 	}
-
-	task.Due.Resolve(task)
-	task.Until.Resolve(task)
+	for _, item := range date_fields {
+		item.Resolve(task)
+	}
 	task.Task.Resolve(task)
 	task.Description.Resolve(task)
 }
@@ -100,7 +106,7 @@ func (task *Task) IsNotDone(taskmap TaskMap, now time.Time) bool {
 	return !task.IsDone(taskmap, now)
 }
 
-// copy a task, delete() the key, run this.
+// delete() the key, run this.
 // runs over dependencies listed within the task itself.
 func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
 	for _, dep := range task.Deps {
@@ -111,20 +117,16 @@ func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
 }
 
 func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig) (count int) {
-	if task == nil {
+	if task == nil ||
+		(config.Filter != nil && !config.Filter(task, taskmap, config.Now)) ||
+		config.Now.Before(task.CreatedAt) ||
+		(!task.Until.Value().IsZero() && task.Until.Value().Before(config.Now)) ||
+		(!task.Schedule.Value().IsZero() && task.Schedule.Value().After(config.Now)) {
 		return 0
 	}
-	if config.Filter != nil && !config.Filter(task, taskmap, config.Now) {
-		return 0
-	}
-	if config.Now.Before(task.CreatedAt) {
-		return 0
-	}
+
 	if config.Limit != 0 && len(seen_keys) >= config.Limit {
 		return 1
-	}
-	if !task.Until.ToValue().IsZero() && task.Until.ToValue().Before(config.Now) {
-		return 0
 	}
 
 	printIndent(depth, config)
@@ -164,8 +166,8 @@ func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	done_at := task.FindDoneAt(taskmap)
 	if !done_at.IsZero() {
 		overdue := ""
-		if !task.Due.ToValue().IsZero() && done_at.After(task.Due.ToValue()) {
-			overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due.ToValue())) + " overdue"
+		if !task.Due.Value().IsZero() && done_at.After(task.Due.Value()) {
+			overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due.Value())) + " overdue"
 		}
 		if task.Recur != "" {
 			recur = ", each " + task.Recur
@@ -185,11 +187,11 @@ func printPendingTask(task *Task, config *MarkdownConfig) {
 		recur = " (each " + task.Recur + ")"
 	}
 	due_print := ""
-	if !task.Due.ToValue().IsZero() {
-		diff := task.Due.ToValue().Sub(config.Now)
+	if !task.Due.Value().IsZero() {
+		diff := task.Due.Value().Sub(config.Now)
 		due_print = " ("
-		if task.Due.ToValue().Add(-diff).Compare(config.Now) != 0 {
-			due_print += strconv.Itoa(task.Due.ToValue().Year()-config.Now.Year()) + "y"
+		if task.Due.Value().Add(-diff).Compare(config.Now) != 0 {
+			due_print += strconv.Itoa(task.Due.Value().Year()-config.Now.Year()) + "y"
 		} else {
 			if diff < 0 {
 				due_print = " (-"

@@ -43,6 +43,9 @@ func init() {
 	editCmd.Flags().StringArrayVarP(&dep_tos, "dep-to", "D", []string{}, "append task keys for this task to be dependent to")
 	editCmd.RegisterFlagCompletionFunc("dep-to", TaskKeyCompletionFilter(nil))
 
+	editCmd.Flags().StringVarP(&flagTask.Schedule.Base.Template, "schedule", "s", "", "specify schedule for the tasks to print")
+	editCmd.RegisterFlagCompletionFunc("schedule", DueCompletion)
+
 	editCmd.Flags().StringVarP(&flagTask.Recur, "recur", "r", "", "duration of in which the ask recurs")
 	editCmd.RegisterFlagCompletionFunc("recur", DurationCompletion)
 
@@ -99,6 +102,17 @@ var editCmd = &cobra.Command{
 				return err
 			}
 		}
+    if err := checkFlagTaskDateFields(); err != nil {
+      return err
+    }
+
+    taskDateFields := task.DateFields()
+    for i, item := range flagTask.DateFields() {
+      if !item.IsZero() {
+        *taskDateFields[i] = *item
+      }
+    }
+
 		if remove_deps {
 			task.Deps = make([]string, 0)
 		}

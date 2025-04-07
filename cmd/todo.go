@@ -35,7 +35,7 @@ var todoCmd = &cobra.Command{
 		md_config := config.Markdown
 		md_config.Limit = 0
 		md_config.Filter = func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
-			return (due_time.IsZero() || utils.NaiveDateEqual(due_time, task.Due.ToValue())) && task.IsNotDone(taskmap, now) && (len(flagTask.Tags) == 0 || slices.ContainsFunc(flagTask.Tags, func(tag string) bool {
+			return (due_time.IsZero() || utils.NaiveDateEqual(due_time, task.Due.Value())) && task.IsNotDone(taskmap, now) && (len(flagTask.Tags) == 0 || slices.ContainsFunc(flagTask.Tags, func(tag string) bool {
 				return slices.Contains(task.Tags, tag)
 			}))
 		}

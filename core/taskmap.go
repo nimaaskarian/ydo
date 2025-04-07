@@ -159,12 +159,12 @@ func (taskmap TaskMap) SortedKeys() []string {
 	slices.SortFunc(keys, func(k1, k2 string) int {
 		t1, t2 := taskmap[k1], taskmap[k2]
 		due_zero := 0
-		if t1.Due.ToValue().IsZero() && !t2.Due.ToValue().IsZero() {
+		if t1.Due.Value().IsZero() && !t2.Due.Value().IsZero() {
 			due_zero = 1
-		} else if !t1.Due.ToValue().IsZero() && t2.Due.ToValue().IsZero() {
+		} else if !t1.Due.Value().IsZero() && t2.Due.Value().IsZero() {
 			due_zero = -1
 		} else {
-			due_zero = t1.Due.ToValue().Compare(t2.Due.ToValue())
+			due_zero = t1.Due.Value().Compare(t2.Due.Value())
 		}
 		return 2*due_zero + t1.CreatedAt.Compare(t2.CreatedAt)
 	})

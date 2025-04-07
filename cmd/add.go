@@ -43,8 +43,11 @@ func init() {
 	addCmd.Flags().StringVarP(&flagTask.Due.Base.Template, "due", "u", "", "specify due for the tasks to print")
 	addCmd.RegisterFlagCompletionFunc("due", DueCompletion)
 
-	addCmd.Flags().StringVarP(&flagTask.Until.Base.Template, "until", "U", "", "specify due for the tasks to print")
+	addCmd.Flags().StringVarP(&flagTask.Until.Base.Template, "until", "U", "", "specify until (task is ignored after that date) for the tasks to print")
 	addCmd.RegisterFlagCompletionFunc("until", DueCompletion)
+
+	addCmd.Flags().StringVarP(&flagTask.Schedule.Base.Template, "schedule", "s", "", "specify schedule for the tasks to print")
+	addCmd.RegisterFlagCompletionFunc("schedule", DueCompletion)
 
 	addCmd.Flags().StringVarP(&flagTask.Recur, "recur", "r", "", "duration of in which the ask recurs")
 	addCmd.RegisterFlagCompletionFunc("recur", DurationCompletion)
@@ -74,24 +77,10 @@ var addCmd = &cobra.Command{
 		}
 		flagTask.Task = core.NewTemplateBase(taskmsg)
 		flagTask.CreatedAt = now
-		var err error
-		for _, item := range [...]*core.TemplateDate{
-			&flagTask.Due,
-			&flagTask.Until,
-		} {
-			date, err := utils.ParseDue(item.Base.Template, now)
-			if err == nil {
-				*item = core.NewTemplateDate(date)
-			}
-		}
-		if err := resolveTemplateDate(&flagTask, &flagTask.Due); err != nil {
-			return err
-		}
-		if err := resolveTemplateDate(&flagTask, &flagTask.Until); err != nil {
-			return err
-		}
-
-		err = taskmap.Add(key, &flagTask)
+    if err := checkFlagTaskDateFields(); err != nil {
+      return err
+    }
+    err := taskmap.Add(key, &flagTask)
 		if err != nil {
 			return err
 		}
@@ -111,6 +100,22 @@ var addCmd = &cobra.Command{
 	},
 	PostRunE: SaveChanges,
 	PreRun:   UpdateOldTaskMap,
+}
+
+func checkFlagTaskDateFields() error {
+  date_fields := flagTask.DateFields()
+  for _, item :=  range date_fields {
+    date, err := utils.ParseDue(item.Base.Template, now)
+    if err == nil {
+      *item = core.NewTemplateDate(date)
+    }
+  }
+  for _, item :=  range date_fields {
+    if err := resolveTemplateDate(&flagTask, item); err != nil {
+      return err
+    }
+  }
+  return nil
 }
 
 func resolveTemplateDate(task *core.Task, item *core.TemplateDate) error {

@@ -34,7 +34,7 @@ func (td *TemplateDate) Resolve(task *Task) error {
 	return err
 }
 
-func (td *TemplateDate) ToValue() time.Time {
+func (td *TemplateDate) Value() time.Time {
 	return td.Date
 }
 
