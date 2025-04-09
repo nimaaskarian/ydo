@@ -55,7 +55,7 @@ func TestDo(t *testing.T) {
 	ParseYaml(taskmap, []byte(GROCERIES))
 	assert.True(t, taskmap["t2"].IsDone(taskmap, time.Now()))
 	assert.False(t, taskmap["t3"].IsDone(taskmap, time.Now()))
-	taskmap.Do("t3", time.Now())
+	taskmap.Do("t3", time.Now(), false)
 	assert.True(t, taskmap["t3"].IsDone(taskmap, time.Now()))
 }
 
@@ -79,9 +79,9 @@ func TestDepIsDone(t *testing.T) {
 	taskmap := make(TaskMap)
 	ParseYaml(taskmap, []byte(GROCERIES))
 	assert.False(t, taskmap["t1"].IsDone(taskmap, time.Now()))
-	taskmap.Do("t2", time.Now())
+	taskmap.Do("t2", time.Now(), false)
 	assert.False(t, taskmap["t1"].IsDone(taskmap, time.Now()))
-	taskmap.Do("t3", time.Now())
+	taskmap.Do("t3", time.Now(), false)
 	assert.True(t, taskmap["t1"].IsDone(taskmap, time.Now()))
 }
 
@@ -188,7 +188,7 @@ func TestWriteAndLoad(t *testing.T) {
 func TestFindDoneAt(t *testing.T) {
 	tm := make(TaskMap)
 	ParseYaml(tm, []byte(GROCERIES))
-	tm.Do("t3", time.Now())
+	tm.Do("t3", time.Now(), false)
 	assert.Equal(t, tm["t3"].DoneAt, tm["t1"].FindDoneAt(tm))
 }
 
@@ -249,7 +249,7 @@ func TestSortedKeys(t *testing.T) {
 func ExampleTaskMap_PrintMarkdown() {
 	tm := make(TaskMap)
 	ParseYaml(tm, []byte(HOMEWORKS))
-	tm.Do("study", time.Now())
+	tm.Do("study", time.Now(), false)
 	task := tm["homework"]
 	task.Due = TemplateDate{Date: time.Now().Add(time.Hour * 24)}
 	tm["homework"] = task

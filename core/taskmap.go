@@ -86,12 +86,14 @@ func (taskmap TaskMap) HasTask(key string) bool {
 	return ok
 }
 
-func (taskmap TaskMap) Do(key string, now time.Time) error {
+func (taskmap TaskMap) Do(key string, now time.Time, force bool) error {
 	task, err := taskmap.GetTask(key)
 	if err != nil {
 		return err
 	}
-	task.Do(taskmap, now)
+	if err := task.Do(taskmap, now, force); err != nil {
+		return err
+	}
 	slog.Info("Completed task", "key", key)
 	return nil
 }

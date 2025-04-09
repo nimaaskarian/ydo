@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -64,14 +65,19 @@ func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
 	return task.Done && (task.DoneAt.IsZero() || !task.DoneAt.Before(task.DoneAt))
 }
 
-func (task *Task) Do(taskmap TaskMap, now time.Time) {
-	if !task.IsDone(taskmap, now) && !task.AutoComplete {
-		task.Done = true
-		if task.Recur != "" && !task.DoneAt.IsZero() {
-			task.DoneAtArchive = append(task.DoneAtArchive, task.DoneAt)
-		}
-		task.DoneAt = now
-	}
+func (task *Task) Do(taskmap TaskMap, now time.Time, force bool) error {
+  if task.AutoComplete {
+    return errors.New("Task is auto-completed")
+  }
+  if !force && task.IsDone(taskmap, now) {
+    return errors.New("Task is already done")
+  }
+  task.Done = true
+  if task.Recur != "" && !task.DoneAt.IsZero() {
+    task.DoneAtArchive = append(task.DoneAtArchive, task.DoneAt)
+  }
+  task.DoneAt = now
+  return nil
 }
 
 func (task *Task) Undo(taskmap TaskMap, now time.Time) {
