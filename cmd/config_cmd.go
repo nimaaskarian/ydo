@@ -27,8 +27,10 @@ markdown:
   description: false
   # true or false. by default gets enabled when the color is enabled
   beautify: true
-  # possible values: todo, md, smart (default)
+  # possible values: todo, md, smart (decides on the "limit" field, default)
   mode: smart
+  # limit the count of markdown output
+  limit: 5
 tfidf:
   enabled: false
   # minimum tasks needed to turn on tfidf (enabled has to be true for this to work)
