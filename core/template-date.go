@@ -12,7 +12,7 @@ type TemplateDate struct {
 	Date time.Time
 }
 
-const DATE_PARSE_LAYOUT = "2006-01-02T15:04:05.999999999-07:00"
+const DATE_PARSE_LAYOUT = time.RFC3339
 
 func date(date TemplateDate, duration string) string {
 	if date.Date.IsZero() {

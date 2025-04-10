@@ -115,7 +115,7 @@ func parseDate(s string, now time.Time) (time.Time, error) {
         }
       }
       if err != nil {
-        return time.Time{}, fmt.Errorf("Invalid time %q. Time is a string with format HH:MM:SS, HH:MM or HH", date_time[1])
+        return time.Time{}, fmt.Errorf("Invalid time %q. Time is a string with format H:M:S, H:M or H", date_time[1])
       }
     }
     time_duration = time.Hour*time.Duration(t.Hour()) + time.Minute*time.Duration(t.Minute()) + time.Second*time.Duration(t.Second()) + time.Nanosecond*time.Duration(t.Nanosecond())

@@ -322,16 +322,23 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64
 	}
 
 	for _, task := range taskmap {
-		// ignore legeacy tasks
+		// ignore legeacy tasks that have no DoneAt date saved
 		if task.IsDone(taskmap, now) && task.DoneAt.IsZero() {
 			continue
 		}
+    end_date := end
 		created_date := utils.NaiveDate(task.CreatedAt)
+    if !task.Schedule.Value().IsZero() {
+      created_date = utils.NaiveDate(task.Schedule.Value())
+    }
+    if !task.Until.Value().IsZero() {
+      end_date = task.Until.Date
+    }
 		if task.Recur == "" {
 			if !task.DoneAt.IsZero() {
 				for i := range as_days(task.DoneAt.Sub(created_date)) + 1 {
 					exists_date := created_date.AddDate(0, 0, i)
-					if addToIndexIfKeyOk(total_done_map, start, end, 0, exists_date) {
+					if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
 						break
 					}
 				}
@@ -342,9 +349,9 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64
 					total_done_map[done_date] = arr
 				}
 			} else {
-				for i := range as_days(end.Sub(created_date)) + 1 {
+				for i := range as_days(end_date.Sub(created_date)) + 1 {
 					exists_date := created_date.AddDate(0, 0, i)
-					if addToIndexIfKeyOk(total_done_map, start, end, 0, exists_date) {
+					if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
 						break
 					}
 				}
@@ -360,24 +367,24 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64
 			for i, created := range created_dates {
 				upper_bound := done_dates[i]
 				if done_dates[i].IsZero() {
-					upper_bound = end
+					upper_bound = end_date
 				}
 				for j := range as_days(upper_bound.Sub(created)) + 1 {
 					exists_date := created.AddDate(0, 0, j)
-					if addToIndexIfKeyOk(total_done_map, start, end, 0, exists_date) {
+					if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
 						break
 					}
 				}
 			}
 			last_created, _ := utils.ParseDuration(task.Recur, utils.NaiveDate(task.DoneAt))
-			for i := range as_days(end.Sub(last_created)) + 1 {
+			for i := range as_days(end_date.Sub(last_created)) + 1 {
 				exists_date := last_created.AddDate(0, 0, i)
-				if addToIndexIfKeyOk(total_done_map, start, end, 0, exists_date) {
+				if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
 					break
 				}
 			}
 			for _, done_at := range done_dates {
-				if addToIndexIfKeyOk(total_done_map, start, end, 1, utils.NaiveDate(done_at)) {
+				if addToIndexIfKeyOk(total_done_map, start, end_date, 1, utils.NaiveDate(done_at)) {
 					break
 				}
 			}
