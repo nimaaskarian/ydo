@@ -65,11 +65,5 @@ func (td TemplateDate) IsZero() bool {
 }
 
 func (td *TemplateDate) UnmarshalYAML(node *yaml.Node) error {
-	var raw string
-	err := node.Decode(&raw)
-	if err != nil {
-		return err
-	}
-	td.Base.Template = raw
-	return nil
+  return td.Base.UnmarshalYAML(node)
 }

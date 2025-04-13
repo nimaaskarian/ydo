@@ -38,7 +38,7 @@ func (task *Task) DateFields() [3]*TemplateDate {
 func (task *Task) ResolveTemplates(now time.Time) {
 	date_fields := task.DateFields()
 	for _, item := range date_fields {
-    date, err := time.Parse(DATE_PARSE_LAYOUT, item.Base.resolved)
+		date, err := time.Parse(DATE_PARSE_LAYOUT, item.Base.resolved)
 		if err == nil {
 			*item = NewTemplateDate(date)
 		}
@@ -66,18 +66,18 @@ func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
 }
 
 func (task *Task) Do(taskmap TaskMap, now time.Time, force bool) error {
-  if task.AutoComplete {
-    return errors.New("Task is auto-completed")
-  }
-  if !force && task.IsDone(taskmap, now) {
-    return errors.New("Task is already done")
-  }
-  task.Done = true
-  if task.Recur != "" && !task.DoneAt.IsZero() {
-    task.DoneAtArchive = append(task.DoneAtArchive, task.DoneAt)
-  }
-  task.DoneAt = now
-  return nil
+	if task.AutoComplete {
+		return errors.New("Task is auto-completed")
+	}
+	if !force && task.IsDone(taskmap, now) {
+		return errors.New("Task is already done")
+	}
+	task.Done = true
+	if task.Recur != "" && !task.DoneAt.IsZero() {
+		task.DoneAtArchive = append(task.DoneAtArchive, task.DoneAt)
+	}
+	task.DoneAt = now
+	return nil
 }
 
 func (task *Task) Undo(taskmap TaskMap, now time.Time) {
@@ -135,22 +135,15 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
 		return 1
 	}
 
-	printIndent(depth, config)
+	config.PrintIndent(depth)
 	if task.IsDone(taskmap, config.Now) {
-		if *config.Beautify {
-			fmt.Print(" [✓] ")
-		} else {
-			fmt.Print("- [x] ")
-		}
+		config.PrintDonePrefix()
 		printKey(key)
 		printDoneTask(task, taskmap, config)
 	} else {
-		if !*config.Beautify {
-			fmt.Print("-")
-		}
-		fmt.Print(" [ ] ")
+		config.PrintUndonePrefix()
 		printKey(key)
-		printPendingTask(task, config)
+		printPendingTask(task, taskmap, config)
 	}
 	printTags(task)
 	fmt.Println()
@@ -187,10 +180,15 @@ func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	}
 }
 
-func printPendingTask(task *Task, config *MarkdownConfig) {
+func printPendingTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	var recur string
 	if task.Recur != "" {
-		recur = " (each " + task.Recur + ")"
+		recur = " (each " + task.Recur
+    done_at := task.FindDoneAt(taskmap)
+    if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
+      recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
+    }
+    recur +=  ")"
 	}
 	due_print := ""
 	if !task.Due.Value().IsZero() {
@@ -227,16 +225,58 @@ func printTags(task *Task) {
 	}
 }
 
-func printIndent(depth uint, config *MarkdownConfig) {
-	for range depth * config.Indent {
+type TaskFilter func(task *Task, taskmap TaskMap, now time.Time) bool
+
+type MarkdownConfig struct {
+	Indent      uint   `yaml:",omitempty"`
+	Mode        string `yaml:",omitempty"`
+	Description bool   `yaml:",omitempty"`
+	Limit       int    `yaml:",omitempty"`
+	Beautify    *bool  `yaml:",omitempty"`
+	Filter      TaskFilter
+	Now         time.Time
+}
+
+func (config *MarkdownConfig) Init() {
+	if config.Beautify == nil {
+		beautify := !color.NoColor
+		config.Beautify = &beautify
+	}
+	if config.Indent == 0 {
+		config.Indent = 3
+	}
+}
+func (mc *MarkdownConfig) PrintIndent(depth uint) {
+	for range depth * mc.Indent {
 		fmt.Print(" ")
 	}
+}
+
+func (mc *MarkdownConfig) PrintDonePrefix() {
+  mc.PrintListPrefix()
+	if *mc.Beautify {
+		fmt.Print("[✓] ")
+	} else {
+		fmt.Print("[x] ")
+	}
+}
+
+func (mc *MarkdownConfig) PrintListPrefix() {
+  if !*mc.Beautify {
+		fmt.Print("-")
+	}
+  fmt.Print(" ")
+}
+
+func (mc *MarkdownConfig) PrintUndonePrefix() {
+  mc.PrintListPrefix()
+	fmt.Print("[ ] ")
 }
 
 func printDescription(depth uint, task *Task, config *MarkdownConfig) {
 	if config.Description && task.Description.Value() != "" {
 		for line := range strings.Lines(task.Description.Value()) {
-			printIndent(depth+1, config)
+			config.PrintIndent(depth + 1)
 			fmt.Print(line)
 		}
 		fmt.Println()

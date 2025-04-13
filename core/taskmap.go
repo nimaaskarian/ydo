@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -132,28 +131,6 @@ func PrintYaml(obj any) error {
 	}
 	fmt.Printf("%s", s)
 	return nil
-}
-
-type TaskFilter func(task *Task, taskmap TaskMap, now time.Time) bool
-
-type MarkdownConfig struct {
-	Indent      uint   `yaml:",omitempty"`
-	Mode        string `yaml:",omitempty"`
-	Description bool   `yaml:",omitempty"`
-	Limit       int    `yaml:",omitempty"`
-	Beautify    *bool  `yaml:",omitempty"`
-	Filter      TaskFilter
-	Now         time.Time
-}
-
-func (config *MarkdownConfig) Init() {
-	if config.Beautify == nil {
-		beautify := !color.NoColor
-		config.Beautify = &beautify
-	}
-	if config.Indent == 0 {
-		config.Indent = 3
-	}
 }
 
 func (taskmap TaskMap) SortedKeys() []string {
