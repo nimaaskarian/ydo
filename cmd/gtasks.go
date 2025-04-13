@@ -27,6 +27,18 @@ func init() {
 	gtasksCmd.PersistentFlags().StringVar(&gtasksFlags.CacheFile, "cache", filepath.Join(config_dir, "cache.yaml"), "path to cache file")
 	gtasksCmd.PersistentFlags().StringVar(&gtasksFlags.CacheExpire, "cache-expire", "1d", "cache expire duration")
 	gtasksCmd.RegisterFlagCompletionFunc("cache-expire", DurationCompletion)
+  gtasksAddCmd.ValidArgsFunction = TasklistIdCompletionOnFirst
+
+}
+
+func TasklistIdCompletionOnFirst(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  if len(args) > 0 {
+		return []string{}, cobra.ShellCompDirectiveDefault
+  }
+  gtasksFlags.CacheExpire = "1000y"
+  gtasksFlags.ReadCache(now)
+  ids := utils.Keys(gtasksFlags.Cache.Tasklists)
+  return ids, cobra.ShellCompDirectiveNoFileComp
 }
 
 var gtasksCmd = &cobra.Command{

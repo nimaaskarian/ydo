@@ -34,12 +34,11 @@ type Gtasks struct {
 }
 
 type GtasksCache struct {
-	Tasklists   map[string]*tasks.TaskList
-	Tasks       map[string][]*tasks.Task
-	Time        time.Time
-	EditedLists EditedIdCache[string, *tasks.TaskList]
-	// tasks are identified by their tasklist_id and task_id
-	EditedTasks EditedIdCache[[2]string, CreatedTask]
+	Tasklists   map[string]*tasks.TaskList             `yaml:",omitempty"`
+	Tasks       map[string][]*tasks.Task               `yaml:",omitempty"`
+	Time        time.Time                              `yaml:",omitempty"`
+	EditedLists EditedIdCache[string, *tasks.TaskList] `yaml:",omitempty"`
+	EditedTasks EditedIdCache[[2]string, CreatedTask]  `yaml:",omitempty"`
 }
 type CreatedTask struct {
 	Task *tasks.Task
@@ -80,7 +79,7 @@ func (gtasks *Gtasks) SaveCache(now time.Time) error {
 	return nil
 }
 
-func (gtasks *Gtasks) readCacheYaml(now time.Time) error {
+func (gtasks *Gtasks) ReadCache(now time.Time) error {
 	slog.Debug("Loading cache file", "path", gtasks.CacheFile)
 	content, _ := os.ReadFile(gtasks.CacheFile)
 	if err := yaml.Unmarshal(content, &gtasks.Cache); err != nil {
@@ -91,6 +90,7 @@ func (gtasks *Gtasks) readCacheYaml(now time.Time) error {
 		panic("Cache expire format is incorrect")
 	}
 	if date.Before(now) {
+		gtasks.Cache = GtasksCache{}
 		return errors.New("Cache is older than one day")
 	}
 	return nil
@@ -105,14 +105,14 @@ func (gtasks *Gtasks) DeleteTaskCache(task_id string, list_id string) {
 
 func (gtasks *Gtasks) AddTaskCache(task *tasks.Task, list_id string) {
 	gtasks.Cache.EditedTasks.Created = append(gtasks.Cache.EditedTasks.Created, CreatedTask{Task: task, Id: list_id})
-  if gtasks.Cache.Tasks == nil {
-    gtasks.Cache.Tasks = make(map[string][]*tasks.Task, 1)
-  }
-  gtasks.Cache.Tasks[list_id] = append(gtasks.Cache.Tasks[list_id], task)
+	if gtasks.Cache.Tasks == nil {
+		gtasks.Cache.Tasks = make(map[string][]*tasks.Task, 1)
+	}
+	gtasks.Cache.Tasks[list_id] = append(gtasks.Cache.Tasks[list_id], task)
 }
 
 func (gtasks *Gtasks) Sync(now time.Time) error {
-  slog.Debug("Syncing tasks")
+	slog.Debug("Syncing tasks")
 	for _, updated := range gtasks.Cache.EditedLists.Updated {
 		_, err := gtasks.srv.Tasklists.Patch(updated, gtasks.Cache.Tasklists[updated]).Do()
 		if err != nil {
@@ -156,10 +156,10 @@ func (gtasks *Gtasks) Sync(now time.Time) error {
 			return err
 		}
 	}
-  gtasks.Cache.EditedLists = EditedIdCache[string, *tasks.TaskList]{}
-  gtasks.Cache.EditedTasks = EditedIdCache[[2]string, CreatedTask]{}
-  gtasks.UpdateTasklists()
-  gtasks.UpdateAllTasks(now)
+	gtasks.Cache.EditedLists = EditedIdCache[string, *tasks.TaskList]{}
+	gtasks.Cache.EditedTasks = EditedIdCache[[2]string, CreatedTask]{}
+	gtasks.UpdateTasklists()
+	gtasks.UpdateAllTasks(now)
 	return nil
 }
 
@@ -282,9 +282,9 @@ func (gtasks *Gtasks) UpdateTasklists() error {
 }
 
 func (gtasks *Gtasks) makeTasklistsMap(items []*tasks.TaskList) {
-  if gtasks.Cache.Tasklists == nil {
-    gtasks.Cache.Tasklists = make(map[string]*tasks.TaskList, len(items))
-  }
+	if gtasks.Cache.Tasklists == nil {
+		gtasks.Cache.Tasklists = make(map[string]*tasks.TaskList, len(items))
+	}
 	for _, item := range items {
 		gtasks.Cache.Tasklists[item.Id] = item
 	}
@@ -311,7 +311,7 @@ func (gtasks *Gtasks) UpdateTasks(id string) error {
 }
 
 func (gtasks *Gtasks) Load(now time.Time) error {
-	err := gtasks.readCacheYaml(now)
+	err := gtasks.ReadCache(now)
 	if err != nil {
 		slog.Debug("Reading cache file failed.", "err", err)
 		// if updating gtasks failed (for some connection problem) use the cache with
