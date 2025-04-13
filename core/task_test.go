@@ -46,26 +46,25 @@ func ExampleTask_PrintMarkdown() {
 	task.Deps = []string{}
 	config := MarkdownConfig{Indent: 3, Now: time.Now()}
 	config.Init()
-	task.PrintMarkdown(nil, 0, nil, "", &config)
+	task.PrintMarkdown(nil, 0, nil, "", &config, nil)
 	task.Done = false
 	task.DoneAt = time.Now().Add(-time.Hour * 24)
-	task.PrintMarkdown(nil, 0, nil, "", &config)
+	task.PrintMarkdown(nil, 0, nil, "", &config, nil)
 	task.Done = true
-	task.PrintMarkdown(nil, 0, nil, "", &config)
+	task.PrintMarkdown(nil, 0, nil, "", &config, nil)
 	task.Due = TemplateDate{Date: time.Now().Add(-time.Hour * 24 * 2)}
 	config_done := config
-	config_done.Filter = (*Task).IsNotDone
-	task.PrintMarkdown(nil, 0, nil, "", &config_done)
+	task.PrintMarkdown(nil, 0, nil, "", &config_done, (*Task).IsNotDone)
 	config_limit := config
 	config_limit.Limit = 1
 	task.Deps = []string{"2"}
-	task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit)
+	task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit, (*Task).IsNotDone)
 	task.Undo(nil, time.Now())
 	task.Due = TemplateDate{Date: time.Now().AddDate(10000, 0, 0)}
-	task.PrintMarkdown(nil, 0, nil, "", &config)
+	task.PrintMarkdown(nil, 0, nil, "", &config, (*Task).IsNotDone)
 	taskmap := TaskMap{}
 	taskmap["2"] = &Task{}
-	task.PrintMarkdown(taskmap, 0, nil, "", &config)
+	task.PrintMarkdown(taskmap, 0, nil, "", &config, (*Task).IsNotDone)
 	// Output:
 	// - [x] buy groceries
 	// - [ ] buy groceries

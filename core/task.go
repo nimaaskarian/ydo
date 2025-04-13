@@ -122,9 +122,9 @@ func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
 	}
 }
 
-func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig) (count int) {
+func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig, filter TaskFilter) (count int) {
 	if task == nil ||
-		(config.Filter != nil && !config.Filter(task, taskmap, config.Now)) ||
+		(filter != nil && !filter(task, taskmap, config.Now)) ||
 		config.Now.Before(task.CreatedAt) ||
 		(!task.Until.Value().IsZero() && task.Until.Value().Before(config.Now)) ||
 		(!task.Schedule.Value().IsZero() && task.Schedule.Value().After(config.Now)) {
@@ -155,7 +155,7 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
 		seen_keys[key] = true
 	}
 	for _, dep_key := range task.Deps {
-		count += taskmap[dep_key].PrintMarkdown(taskmap, depth+1, seen_keys, dep_key, config)
+		count += taskmap[dep_key].PrintMarkdown(taskmap, depth+1, seen_keys, dep_key, config, filter)
 	}
 	return 1 + count
 }
@@ -233,7 +233,6 @@ type MarkdownConfig struct {
 	Description bool   `yaml:",omitempty"`
 	Limit       int    `yaml:",omitempty"`
 	Beautify    *bool  `yaml:",omitempty"`
-	Filter      TaskFilter
 	Now         time.Time
 }
 

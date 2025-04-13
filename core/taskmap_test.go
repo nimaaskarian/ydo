@@ -202,7 +202,7 @@ func TestWipeDependenciesToKey(t *testing.T) {
 func BenchmarkPrintMarkdown(b *testing.B) {
 	tm := LoadTaskMap("../tests/tasks.yaml", time.Now())
 	for b.Loop() {
-		tm.PrintMarkdown(&MarkdownConfig{Indent: 4})
+		tm.PrintMarkdown(&MarkdownConfig{Indent: 4}, nil)
 	}
 }
 
@@ -218,7 +218,7 @@ func TestAddDep(t *testing.T) {
 
 func TestEmptyTaskMapMarkdownError(t *testing.T) {
 	tm := make(TaskMap)
-	assert.Error(t, tm.PrintMarkdown(&MarkdownConfig{Indent: 4}))
+	assert.Error(t, tm.PrintMarkdown(&MarkdownConfig{Indent: 4}, nil))
 }
 
 func TestCascadeDeps(t *testing.T) {
@@ -258,7 +258,7 @@ func ExampleTaskMap_PrintMarkdown() {
 	tm["milk"] = task
 	config := MarkdownConfig{Indent: 4, Now: time.Now()}
 	config.Init()
-	tm.PrintMarkdown(&config)
+	tm.PrintMarkdown(&config, nil)
 	// Output:
 	// - [ ] milk: buy some milk (12min)
 	// - [ ] homework: do uni practice (1d)

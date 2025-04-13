@@ -30,14 +30,14 @@ var mdCmd = &cobra.Command{
 		}
 		md_config := config.Markdown
 		md_config.Limit = 0
-		md_config.Filter = func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
+    markdownFilter := func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
 			return (due_time.IsZero() || utils.NaiveDateEqual(task.Due.Value(), due_time)) &&
 				(len(flagTask.Tags) == 0 || slices.ContainsFunc(flagTask.Tags, func(tag string) bool {
 					return slices.Contains(task.Tags, tag)
 				}))
 		}
 		if len(keys) == 0 {
-			taskmap.PrintMarkdown(&md_config)
+			taskmap.PrintMarkdown(&md_config, markdownFilter)
 		} else {
 			md_config.Description = true
 			seen_keys := make(map[string]bool, len(keys))
@@ -46,7 +46,7 @@ var mdCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config)
+				task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config, markdownFilter)
 			}
 		}
 		return nil

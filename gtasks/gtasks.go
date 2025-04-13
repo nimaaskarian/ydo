@@ -111,8 +111,26 @@ func (gtasks *Gtasks) AddTaskCache(task *tasks.Task, list_id string) {
 	gtasks.Cache.Tasks[list_id] = append(gtasks.Cache.Tasks[list_id], task)
 }
 
+func (gtasks *Gtasks) DoTaskCache(list_id string , task_id string) error {
+	gtasks.Cache.EditedTasks.Updated = append(gtasks.Cache.EditedTasks.Updated, [...]string{list_id, task_id})
+	if gtasks.Cache.Tasks == nil {
+		gtasks.Cache.Tasks = make(map[string][]*tasks.Task, 1)
+	}
+  tasks_tmp := gtasks.Cache.Tasks[list_id]
+  index := slices.IndexFunc(tasks_tmp, func(task *tasks.Task) bool {
+    return task.Id == task_id
+  })
+  if index == -1 {
+    return errors.New("Task not found")
+  }
+  tasks_tmp[index].Status = "completed"
+  return nil
+}
+
 func (gtasks *Gtasks) Sync(now time.Time) error {
 	slog.Debug("Syncing tasks")
+  slog.Debug("edited lists", "updated", gtasks.Cache.EditedLists.Updated, "created", gtasks.Cache.EditedLists.Created, "deleted", gtasks.Cache.EditedLists.Deleted)
+  slog.Debug("edited tasks", "updated", gtasks.Cache.EditedTasks.Updated, "created", gtasks.Cache.EditedTasks.Created, "deleted", gtasks.Cache.EditedTasks.Deleted)
 	for _, updated := range gtasks.Cache.EditedLists.Updated {
 		_, err := gtasks.srv.Tasklists.Patch(updated, gtasks.Cache.Tasklists[updated]).Do()
 		if err != nil {
@@ -132,7 +150,7 @@ func (gtasks *Gtasks) Sync(now time.Time) error {
 		}
 	}
 	for _, updated := range gtasks.Cache.EditedTasks.Updated {
-		tasks_tmp := gtasks.Cache.Tasks[updated[1]]
+		tasks_tmp := gtasks.Cache.Tasks[updated[0]]
 		index := slices.IndexFunc(tasks_tmp, func(task *tasks.Task) bool {
 			return task.Id == updated[1]
 		})
@@ -337,7 +355,8 @@ func (gtasks *Gtasks) UpdateAllTasks(now time.Time) error {
 	return nil
 }
 
-func (gtasks *Gtasks) PrintMarkdown(mc *core.MarkdownConfig) error {
+type GtasksFilter func(*tasks.Task) bool
+func (gtasks *Gtasks) PrintMarkdown(mc *core.MarkdownConfig, filter GtasksFilter) error {
 	for _, item := range gtasks.Cache.Tasklists {
 		mc.PrintListPrefix()
 		fmt.Println(item.Title)
@@ -355,6 +374,14 @@ func (gtasks *Gtasks) PrintMarkdown(mc *core.MarkdownConfig) error {
 		}
 	}
 	return nil
+}
+
+func IsCompleted(task *tasks.Task) bool {
+  return task.Status == "completed"
+}
+
+func IsPending(task *tasks.Task) bool {
+  return task.Status == "needsAction"
 }
 
 func printTask(task *tasks.Task, mc *core.MarkdownConfig, depth uint, parent_stacks map[string][]int, tasks []*tasks.Task) {

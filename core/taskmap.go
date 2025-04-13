@@ -157,7 +157,7 @@ func (taskmap TaskMap) Tags() (tags []string) {
 	return tags
 }
 
-func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
+func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig, filter TaskFilter) error {
 	if len(taskmap) == 0 {
 		return errors.New("No tasks found")
 	}
@@ -166,7 +166,7 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig) error {
 	count := 0
 	for _, key := range keys {
 		if _, ok := seen_keys[key]; !ok {
-			count += taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, config)
+			count += taskmap[key].PrintMarkdown(taskmap, 0, seen_keys, key, config, filter)
 		}
 	}
 	shown := len(seen_keys)

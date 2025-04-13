@@ -29,6 +29,7 @@ var (
 
 	config_dir string
 	config     Config
+  tasksMarkdownFilter core.TaskFilter
 
 	rootCmd = &cobra.Command{
 		SilenceErrors: true,
@@ -65,11 +66,11 @@ var (
 				}
 			}
 			taskmap = core.LoadTaskMap(tasks_path, now)
-			config.Markdown.Filter = MarkdownFilter(&config.Markdown)
+			tasksMarkdownFilter = makeTasksMarkdownFilter(&config.Markdown)
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return taskmap.PrintMarkdown(&config.Markdown)
+			return taskmap.PrintMarkdown(&config.Markdown, tasksMarkdownFilter)
 		},
 	}
 )
@@ -82,7 +83,7 @@ func SaveChanges(cmd *cobra.Command, args []string) error {
 		} else {
 			taskmap.Write(tasks_path)
 		}
-		if err := taskmap.PrintMarkdown(&config.Markdown); err != nil {
+		if err := taskmap.PrintMarkdown(&config.Markdown, tasksMarkdownFilter); err != nil {
 			return err
 		}
 	}

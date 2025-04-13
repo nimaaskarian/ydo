@@ -65,7 +65,7 @@ func (config *Config) SlogLevel() slog.Level {
 	}
 }
 
-func MarkdownFilter(md_config *core.MarkdownConfig) core.TaskFilter {
+func makeTasksMarkdownFilter(md_config *core.MarkdownConfig) core.TaskFilter {
 	switch md_config.Mode {
 	case "todo":
 		return (*core.Task).IsNotDone
