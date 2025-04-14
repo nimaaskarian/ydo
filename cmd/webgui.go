@@ -102,7 +102,7 @@ func makeFilter(f core.TaskFilter) map[string]bool {
 
 func DoTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	key := ps.ByName("key")
-  taskmap.Do(key, time.Now(), false)
+	taskmap.Do(key, time.Now(), false)
 
 	url := r.URL.Query().Get("redirect")
 	if url == "" {

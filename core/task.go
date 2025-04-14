@@ -184,11 +184,11 @@ func printPendingTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	var recur string
 	if task.Recur != "" {
 		recur = " (each " + task.Recur
-    done_at := task.FindDoneAt(taskmap)
-    if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
-      recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
-    }
-    recur +=  ")"
+		done_at := task.FindDoneAt(taskmap)
+		if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
+			recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
+		}
+		recur += ")"
 	}
 	due_print := ""
 	if !task.Due.Value().IsZero() {
@@ -252,7 +252,7 @@ func (mc *MarkdownConfig) PrintIndent(depth uint) {
 }
 
 func (mc *MarkdownConfig) PrintDonePrefix() {
-  mc.PrintListPrefix()
+	mc.PrintListPrefix()
 	if *mc.Beautify {
 		fmt.Print("[✓] ")
 	} else {
@@ -261,14 +261,14 @@ func (mc *MarkdownConfig) PrintDonePrefix() {
 }
 
 func (mc *MarkdownConfig) PrintListPrefix() {
-  if !*mc.Beautify {
+	if !*mc.Beautify {
 		fmt.Print("-")
 	}
-  fmt.Print(" ")
+	fmt.Print(" ")
 }
 
 func (mc *MarkdownConfig) PrintUndonePrefix() {
-  mc.PrintListPrefix()
+	mc.PrintListPrefix()
 	fmt.Print("[ ] ")
 }
 

@@ -40,7 +40,6 @@ func init() {
 	editCmd.Flags().StringVarP(&flagTask.Until.Base.Template, "until", "U", "", "specify until (task is ignored after that date) for the tasks to print")
 	editCmd.RegisterFlagCompletionFunc("until", DueCompletion)
 
-
 	editCmd.Flags().StringVarP(&flagTask.Due.Base.Template, "due", "u", "", "specify due for the tasks to print")
 	editCmd.RegisterFlagCompletionFunc("due", DueCompletion)
 
@@ -106,16 +105,16 @@ var editCmd = &cobra.Command{
 				return err
 			}
 		}
-    if err := checkFlagTaskDateFields(); err != nil {
-      return err
-    }
+		if err := checkFlagTaskDateFields(); err != nil {
+			return err
+		}
 
-    taskDateFields := task.DateFields()
-    for i, item := range flagTask.DateFields() {
-      if !item.IsZero() {
-        *taskDateFields[i] = *item
-      }
-    }
+		taskDateFields := task.DateFields()
+		for i, item := range flagTask.DateFields() {
+			if !item.IsZero() {
+				*taskDateFields[i] = *item
+			}
+		}
 
 		if remove_deps {
 			task.Deps = make([]string, 0)

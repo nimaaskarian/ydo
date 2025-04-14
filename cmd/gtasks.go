@@ -26,6 +26,7 @@ func init() {
 	gtasksCmd.AddCommand(gtasksMdCmd)
 	gtasksCmd.AddCommand(gtasksTodoCmd)
 	gtasksCmd.AddCommand(gtasksDoCmd)
+	gtasksCmd.AddCommand(gtasksEditCmd)
 	gtasksCmd.PersistentFlags().StringVar(&gtasksFlags.CredentialsFile, "credentials", filepath.Join(config_dir, "credentials.json"), "path to credentials file (credentials to your google tasks app)")
 	gtasksCmd.PersistentFlags().StringVar(&gtasksFlags.TokenFile, "token", filepath.Join(config_dir, "token.json"), "path to token file (token to your login info)")
 	gtasksCmd.PersistentFlags().StringVar(&gtasksFlags.CacheFile, "cache", filepath.Join(config_dir, "cache.yaml"), "path to cache file")
@@ -143,7 +144,9 @@ var gtasksAddCmd = &cobra.Command{
 		list_id := args[0]
 		task_title := strings.Join(args[1:], " ")
 		task := &tasks.Task{Title: task_title}
-		gtasksFlags.AddTaskCache(task, list_id)
+		if err := gtasksFlags.AddTaskCache(task, list_id); err != nil {
+			return err
+		}
 		return gtasksFlags.PrintMarkdown(&config.Markdown, gtasksMarkdownFilter)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
@@ -166,15 +169,15 @@ var gtasksTodoCmd = &cobra.Command{
 var gtasksEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "edit cache file in your favorite editor",
-  RunE: func(cmd *cobra.Command, args []string) error {
-    c, err := utils.EditorCmd(gtasksFlags.CacheFile)
-    if err != nil {
-      return err
-    }
-    utils.CmdStdOs(c)
-    c.Run()
-    return nil
-  },
+	RunE: func(cmd *cobra.Command, args []string) error {
+		c, err := utils.EditorCmd(gtasksFlags.CacheFile)
+		if err != nil {
+			return err
+		}
+		utils.CmdStdOs(c)
+		c.Run()
+		return nil
+	},
 }
 
 var gtasksDoCmd = &cobra.Command{

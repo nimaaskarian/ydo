@@ -1,7 +1,7 @@
-run: coverage.out bench ydo
+run: fmt coverage.out bench ydo
 	./ydo ${ARGS}
 
-all: coverage.out ydo
+all: fmt coverage.out ydo
 
 DEP_DIRS=core utils cmd
 DEPS=$(foreach dir, ${DEP_DIRS}, $(wildcard $(dir)/*.go)) main.go
@@ -13,6 +13,9 @@ GUI_DEPS = ${DEPS} ${ICONS} $(wildcard cmd/webgui/*/*) ${TW_OUT}
 
 coverage.out: ${DEPS} main.go
 	go test ./... -coverprofile=coverage.out || rm coverage.out
+
+fmt:
+	go fmt ./...
 
 ydo: ${DEPS}
 	go build

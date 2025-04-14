@@ -30,7 +30,7 @@ var mdCmd = &cobra.Command{
 		}
 		md_config := config.Markdown
 		md_config.Limit = 0
-    markdownFilter := func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
+		markdownFilter := func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
 			return (due_time.IsZero() || utils.NaiveDateEqual(task.Due.Value(), due_time)) &&
 				(len(flagTask.Tags) == 0 || slices.ContainsFunc(flagTask.Tags, func(tag string) bool {
 					return slices.Contains(task.Tags, tag)

@@ -77,10 +77,10 @@ var addCmd = &cobra.Command{
 		}
 		flagTask.Task = core.NewTemplateBase(taskmsg)
 		flagTask.CreatedAt = now
-    if err := checkFlagTaskDateFields(); err != nil {
-      return err
-    }
-    err := taskmap.Add(key, &flagTask)
+		if err := checkFlagTaskDateFields(); err != nil {
+			return err
+		}
+		err := taskmap.Add(key, &flagTask)
 		if err != nil {
 			return err
 		}
@@ -103,19 +103,19 @@ var addCmd = &cobra.Command{
 }
 
 func checkFlagTaskDateFields() error {
-  date_fields := flagTask.DateFields()
-  for _, item :=  range date_fields {
-    date, err := utils.ParseDue(item.Base.Template, now)
-    if err == nil {
-      *item = core.NewTemplateDate(date)
-    }
-  }
-  for _, item :=  range date_fields {
-    if err := resolveTemplateDate(&flagTask, item); err != nil {
-      return err
-    }
-  }
-  return nil
+	date_fields := flagTask.DateFields()
+	for _, item := range date_fields {
+		date, err := utils.ParseDue(item.Base.Template, now)
+		if err == nil {
+			*item = core.NewTemplateDate(date)
+		}
+	}
+	for _, item := range date_fields {
+		if err := resolveTemplateDate(&flagTask, item); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func resolveTemplateDate(task *core.Task, item *core.TemplateDate) error {

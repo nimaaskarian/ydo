@@ -27,9 +27,9 @@ var (
 	old_taskmap map[string]core.Task
 	taskmap     core.TaskMap
 
-	config_dir string
-	config     Config
-  tasksMarkdownFilter core.TaskFilter
+	config_dir          string
+	config              Config
+	tasksMarkdownFilter core.TaskFilter
 
 	rootCmd = &cobra.Command{
 		SilenceErrors: true,

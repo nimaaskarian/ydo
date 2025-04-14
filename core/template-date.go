@@ -65,5 +65,5 @@ func (td TemplateDate) IsZero() bool {
 }
 
 func (td *TemplateDate) UnmarshalYAML(node *yaml.Node) error {
-  return td.Base.UnmarshalYAML(node)
+	return td.Base.UnmarshalYAML(node)
 }

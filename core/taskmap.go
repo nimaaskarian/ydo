@@ -303,14 +303,14 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64
 		if task.IsDone(taskmap, now) && task.DoneAt.IsZero() {
 			continue
 		}
-    end_date := end
+		end_date := end
 		created_date := utils.NaiveDate(task.CreatedAt)
-    if !task.Schedule.Value().IsZero() {
-      created_date = utils.NaiveDate(task.Schedule.Value())
-    }
-    if !task.Until.Value().IsZero() {
-      end_date = task.Until.Date
-    }
+		if !task.Schedule.Value().IsZero() {
+			created_date = utils.NaiveDate(task.Schedule.Value())
+		}
+		if !task.Until.Value().IsZero() {
+			end_date = task.Until.Date
+		}
 		if task.Recur == "" {
 			if !task.DoneAt.IsZero() {
 				for i := range as_days(task.DoneAt.Sub(created_date)) + 1 {

@@ -103,34 +103,38 @@ func (gtasks *Gtasks) DeleteTaskCache(task_id string, list_id string) {
 	})
 }
 
-func (gtasks *Gtasks) AddTaskCache(task *tasks.Task, list_id string) {
+func (gtasks *Gtasks) AddTaskCache(task *tasks.Task, list_id string) error {
 	gtasks.Cache.EditedTasks.Created = append(gtasks.Cache.EditedTasks.Created, CreatedTask{Task: task, Id: list_id})
 	if gtasks.Cache.Tasks == nil {
-		gtasks.Cache.Tasks = make(map[string][]*tasks.Task, 1)
+		return errors.New("No tasklist exist (probably uninitialized)")
+	}
+	if _, ok := gtasks.Cache.Tasks[list_id]; !ok {
+		return errors.New("No tasklist with given id exist")
 	}
 	gtasks.Cache.Tasks[list_id] = append(gtasks.Cache.Tasks[list_id], task)
+	return nil
 }
 
-func (gtasks *Gtasks) DoTaskCache(list_id string , task_id string) error {
+func (gtasks *Gtasks) DoTaskCache(list_id string, task_id string) error {
 	gtasks.Cache.EditedTasks.Updated = append(gtasks.Cache.EditedTasks.Updated, [...]string{list_id, task_id})
 	if gtasks.Cache.Tasks == nil {
 		gtasks.Cache.Tasks = make(map[string][]*tasks.Task, 1)
 	}
-  tasks_tmp := gtasks.Cache.Tasks[list_id]
-  index := slices.IndexFunc(tasks_tmp, func(task *tasks.Task) bool {
-    return task.Id == task_id
-  })
-  if index == -1 {
-    return errors.New("Task not found")
-  }
-  tasks_tmp[index].Status = "completed"
-  return nil
+	tasks_tmp := gtasks.Cache.Tasks[list_id]
+	index := slices.IndexFunc(tasks_tmp, func(task *tasks.Task) bool {
+		return task.Id == task_id
+	})
+	if index == -1 {
+		return errors.New("Task not found")
+	}
+	tasks_tmp[index].Status = "completed"
+	return nil
 }
 
 func (gtasks *Gtasks) Sync(now time.Time) error {
 	slog.Debug("Syncing tasks")
-  slog.Debug("edited lists", "updated", gtasks.Cache.EditedLists.Updated, "created", gtasks.Cache.EditedLists.Created, "deleted", gtasks.Cache.EditedLists.Deleted)
-  slog.Debug("edited tasks", "updated", gtasks.Cache.EditedTasks.Updated, "created", gtasks.Cache.EditedTasks.Created, "deleted", gtasks.Cache.EditedTasks.Deleted)
+	slog.Debug("edited lists", "updated", gtasks.Cache.EditedLists.Updated, "created", gtasks.Cache.EditedLists.Created, "deleted", gtasks.Cache.EditedLists.Deleted)
+	slog.Debug("edited tasks", "updated", gtasks.Cache.EditedTasks.Updated, "created", gtasks.Cache.EditedTasks.Created, "deleted", gtasks.Cache.EditedTasks.Deleted)
 	for _, updated := range gtasks.Cache.EditedLists.Updated {
 		_, err := gtasks.srv.Tasklists.Patch(updated, gtasks.Cache.Tasklists[updated]).Do()
 		if err != nil {
@@ -356,6 +360,7 @@ func (gtasks *Gtasks) UpdateAllTasks(now time.Time) error {
 }
 
 type GtasksFilter func(*tasks.Task) bool
+
 func (gtasks *Gtasks) PrintMarkdown(mc *core.MarkdownConfig, filter GtasksFilter) error {
 	for _, item := range gtasks.Cache.Tasklists {
 		mc.PrintListPrefix()
@@ -363,12 +368,18 @@ func (gtasks *Gtasks) PrintMarkdown(mc *core.MarkdownConfig, filter GtasksFilter
 		tasks := gtasks.Cache.Tasks[item.Id]
 		parent_stacks := map[string][]int{}
 		for i, task := range tasks {
+			if filter != nil && !filter(task) {
+				continue
+			}
 			if task.Parent != "" {
 				parent_stacks[task.Parent] = append(parent_stacks[task.Parent], i)
 			}
 		}
 		for _, task := range tasks {
 			if task.Parent == "" {
+				if filter != nil && !filter(task) {
+					continue
+				}
 				printTask(task, mc, 1, parent_stacks, tasks)
 			}
 		}
@@ -377,11 +388,11 @@ func (gtasks *Gtasks) PrintMarkdown(mc *core.MarkdownConfig, filter GtasksFilter
 }
 
 func IsCompleted(task *tasks.Task) bool {
-  return task.Status == "completed"
+	return task.Status == "completed"
 }
 
 func IsPending(task *tasks.Task) bool {
-  return task.Status == "needsAction"
+	return task.Status == "needsAction"
 }
 
 func printTask(task *tasks.Task, mc *core.MarkdownConfig, depth uint, parent_stacks map[string][]int, tasks []*tasks.Task) {
