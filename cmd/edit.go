@@ -87,12 +87,10 @@ var editCmd = &cobra.Command{
 		if !flagTask.Description.IsZero() {
 			task.Description = flagTask.Description
 		}
-		if recur != "" {
-			if _, err := utils.ParseDuration(recur, now); err != nil {
+		if flagTask.Recur != "" {
+			if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
 				return err
 			}
-
-			task.Recur = recur
 		}
 		if key_regen {
 			new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, edit_key)

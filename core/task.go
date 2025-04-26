@@ -122,12 +122,16 @@ func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
 	}
 }
 
+func (task *Task) IsDeleted(date time.Time) bool {
+  return date.Before(task.CreatedAt) ||
+  (!task.Until.Value().IsZero() && task.Until.Value().Before(date)) ||
+  (!task.Schedule.Value().IsZero() && task.Schedule.Value().After(date))
+}
+
 func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig, filter TaskFilter) (count int) {
 	if task == nil ||
 		(filter != nil && !filter(task, taskmap, config.Now)) ||
-		config.Now.Before(task.CreatedAt) ||
-		(!task.Until.Value().IsZero() && task.Until.Value().Before(config.Now)) ||
-		(!task.Schedule.Value().IsZero() && task.Schedule.Value().After(config.Now)) {
+    task.IsDeleted(config.Now) {
 		return 0
 	}
 

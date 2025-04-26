@@ -19,7 +19,6 @@ var (
 	due     string
 	tfidf   bool
 	taskmsg string
-	recur   string
 )
 
 var flagTask core.Task
@@ -72,7 +71,7 @@ var addCmd = &cobra.Command{
 				key = taskmap.TfidfNextKey(taskmsg, config.Tfidf, "")
 			}
 		}
-		if _, err := utils.ParseDuration(recur, now); err != nil {
+		if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
 			return err
 		}
 		flagTask.Task = core.NewTemplateBase(taskmsg)

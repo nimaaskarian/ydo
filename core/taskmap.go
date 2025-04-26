@@ -281,6 +281,7 @@ func addToIndexIfKeyOk(m map[time.Time][2]int, start, end time.Time, index int, 
 	if key.Before(start) {
 		return false
 	}
+  slog.Debug("Add to index", "start", start, "end", end, "index", index, "key", key)
 	arr := m[key]
 	arr[index] += 1
 	m[key] = arr
@@ -372,6 +373,9 @@ func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64
 	slices.SortFunc(sorted_keys, time.Time.Compare)
 	for _, key := range sorted_keys {
 		item := total_done_map[key]
+    if item[0] == 0 && item[1] != 0 {
+      fmt.Println(key, item[1])
+    }
 		discipline := float64(item[1]) / float64(item[0])
 		discipline_arr = append(discipline_arr, discipline)
 	}

@@ -64,7 +64,9 @@ find:
     created-at: 2025-03-18T03:23:15.398178952+03:30
 gtasks:
     task: add google a tasks feature
+    done: true
     created-at: 2025-04-07T11:33:24.706409544+03:30
+    done-at: 2025-04-14T22:00:50.315486139+03:30
 hide:
     task: hide and show commands (with until flag)
     done: true

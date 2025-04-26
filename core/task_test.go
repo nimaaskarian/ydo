@@ -44,6 +44,7 @@ func ExampleTask_PrintMarkdown() {
 	task := &Task{}
 	ParseYaml(task, []byte(DATA))
 	task.Deps = []string{}
+  task.CreatedAt = time.Now()
 	config := MarkdownConfig{Indent: 3, Now: time.Now()}
 	config.Init()
 	task.PrintMarkdown(nil, 0, nil, "", &config, nil)
@@ -53,12 +54,13 @@ func ExampleTask_PrintMarkdown() {
 	task.Done = true
 	task.PrintMarkdown(nil, 0, nil, "", &config, nil)
 	task.Due = TemplateDate{Date: time.Now().Add(-time.Hour * 24 * 2)}
-	config_done := config
-	task.PrintMarkdown(nil, 0, nil, "", &config_done, (*Task).IsNotDone)
+	task.PrintMarkdown(nil, 0, nil, "", &config, (*Task).IsNotDone)
 	config_limit := config
 	config_limit.Limit = 1
 	task.Deps = []string{"2"}
-	task.PrintMarkdown(nil, 0, map[string]bool{}, "", &config_limit, (*Task).IsNotDone)
+	task.PrintMarkdown(nil, 0, nil, "", &config_limit, (*Task).IsNotDone)
+	task.Due = TemplateDate{Date: time.Now().AddDate(0, 0, -2)}
+	task.PrintMarkdown(nil, 0, nil, "", &config, nil)
 	task.Undo(nil, time.Now())
 	task.Due = TemplateDate{Date: time.Now().AddDate(10000, 0, 0)}
 	task.PrintMarkdown(nil, 0, nil, "", &config, (*Task).IsNotDone)
