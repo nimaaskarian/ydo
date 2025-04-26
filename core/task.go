@@ -189,10 +189,12 @@ func printPendingTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	if task.Recur != "" {
 		recur = " (each " + task.Recur
 		done_at := task.FindDoneAt(taskmap)
-		if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
-			recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
-		}
-		recur += ")"
+    if !done_at.IsZero() {
+      if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
+        recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
+      }
+    }
+    recur += ")"
 	}
 	due_print := ""
 	if !task.Due.Value().IsZero() {

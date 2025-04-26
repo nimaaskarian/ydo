@@ -71,7 +71,8 @@ var editCmd = &cobra.Command{
 			utils.CmdStdOs(c)
 			return c.Run()
 		}
-		task, err := taskmap.GetTask(args[0])
+		edit_key := args[0]
+		task, err := taskmap.GetTask(edit_key)
 		if err != nil {
 			return err
 		}
@@ -80,32 +81,24 @@ var editCmd = &cobra.Command{
 				task.Due = core.NewTemplateDate(due_date)
 			}
 		}
-		edit_key := args[0]
 		if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
 			task.Task = core.NewTemplateBase(new_task)
 		}
 		if !flagTask.Description.IsZero() {
 			task.Description = flagTask.Description
 		}
-		if flagTask.Recur != "" {
-			if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
-				return err
-			}
-		}
 		if key_regen {
 			new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, edit_key)
-		}
-		if _, err := taskmap.GetTask(edit_key); err != nil {
-			return err
 		}
 		for _, dep := range task.Deps {
 			if _, err := taskmap.GetTask(dep); err != nil {
 				return err
 			}
 		}
-		if err := checkFlagTaskDateFields(); err != nil {
+		if err := checkFlagTask(); err != nil {
 			return err
 		}
+    task.Recur = flagTask.Recur
 
 		taskDateFields := task.DateFields()
 		for i, item := range flagTask.DateFields() {

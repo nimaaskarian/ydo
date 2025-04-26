@@ -42,6 +42,11 @@ func init() {
 }
 
 var configCmd = &cobra.Command{
+  Aliases: []string {
+    "conf",
+    "cfg",
+    "c",
+  },
 	Use:   "config [tasks (optional)]",
 	Short: "edit ydo's config file",
 	Long:  "edit ydo's config file in your favorite EDITOR. Writes the default config if it founds no config",

@@ -71,12 +71,9 @@ var addCmd = &cobra.Command{
 				key = taskmap.TfidfNextKey(taskmsg, config.Tfidf, "")
 			}
 		}
-		if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
-			return err
-		}
 		flagTask.Task = core.NewTemplateBase(taskmsg)
 		flagTask.CreatedAt = now
-		if err := checkFlagTaskDateFields(); err != nil {
+		if err := checkFlagTask(); err != nil {
 			return err
 		}
 		err := taskmap.Add(key, &flagTask)
@@ -99,6 +96,16 @@ var addCmd = &cobra.Command{
 	},
 	PostRunE: SaveChanges,
 	PreRun:   UpdateOldTaskMap,
+}
+
+func checkFlagTask() error {
+  if err := checkFlagTaskDateFields(); err != nil {
+    return err
+  }
+  if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
+    return err
+  }
+  return nil
 }
 
 func checkFlagTaskDateFields() error {
