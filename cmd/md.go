@@ -21,9 +21,9 @@ func init() {
 
 var mdCmd = &cobra.Command{
   Aliases: []string {
-    "ls",
-    "list",
     "markdown",
+    "all",
+    "la",
   },
 	Use:   "md [tasks (optional)]",
 	Short: "output tasks as markdown",

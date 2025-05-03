@@ -11,7 +11,7 @@ require (
 	github.com/yaa110/go-persian-calendar v1.2.1
 	golang.org/x/oauth2 v0.29.0
 	google.golang.org/api v0.228.0
-  gopkg.in/yaml.v3 v3.0.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

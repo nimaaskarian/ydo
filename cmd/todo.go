@@ -22,9 +22,14 @@ func init() {
 }
 
 var todoCmd = &cobra.Command{
-	Aliases:           []string{"t"},
+	Aliases:           []string{
+    "t",
+    "l",
+    "ls",
+    "list",
+  },
 	Use:               "todo [tasks (optional)]",
-	Short:             "output to-do as markdown",
+	Short:             "output to-dos as markdown",
 	Long:              "output all unfinished tasks (to-dos) as markdown",
 	ValidArgsFunction: TaskKeyCompletionFilter((*core.Task).IsNotDone),
 	RunE: func(cmd *cobra.Command, keys []string) error {

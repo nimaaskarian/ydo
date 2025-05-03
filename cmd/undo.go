@@ -16,7 +16,7 @@ var undoCmd = &cobra.Command{
 	Aliases:           []string{"u"},
 	Use:               "undo [keys]",
 	Short:             "set tasks as not completed",
-	ValidArgsFunction: TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool { return !t.AutoComplete && t.IsDone(tm, now) }),
+	ValidArgsFunction: TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool { return !t.AutoComplete && t.IsDone(tm, now) && !t.IsDeleted(now) }),
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		if len(keys) > 0 {
 			for _, key := range keys {
