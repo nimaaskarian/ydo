@@ -99,13 +99,13 @@ var addCmd = &cobra.Command{
 }
 
 func checkFlagTask() error {
-  if err := checkFlagTaskDateFields(); err != nil {
-    return err
-  }
-  if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
-    return err
-  }
-  return nil
+	if err := checkFlagTaskDateFields(); err != nil {
+		return err
+	}
+	if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
+		return err
+	}
+	return nil
 }
 
 func checkFlagTaskDateFields() error {

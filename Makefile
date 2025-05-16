@@ -18,14 +18,14 @@ fmt:
 	go fmt ./...
 
 ydo: ${DEPS}
-	go build
+	go build -tags "$(TAGS)"
 
 ydo.exe: ${BIN_DEPS}
-	GOOS=windows go build
+	GOOS=windows go build -tags "$(TAGS)"
 
 ydo.termux: ${BIN_DEPS}
 	GOARCH=arm64 CC=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang\
-				 GOOS=android CGO_ENABLED=1 go build -o ydo.termux
+				 GOOS=android CGO_ENABLED=1 go build -o ydo.termux -tags "$(TAGS)"
 
 # thank you tailwind. we love you but don't write extra bytes in my css.
 # sorry if you got tailed

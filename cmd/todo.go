@@ -22,12 +22,12 @@ func init() {
 }
 
 var todoCmd = &cobra.Command{
-	Aliases:           []string{
-    "t",
-    "l",
-    "ls",
-    "list",
-  },
+	Aliases: []string{
+		"t",
+		"l",
+		"ls",
+		"list",
+	},
 	Use:               "todo [tasks (optional)]",
 	Short:             "output to-dos as markdown",
 	Long:              "output all unfinished tasks (to-dos) as markdown",

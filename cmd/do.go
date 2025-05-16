@@ -15,7 +15,9 @@ var (
 func init() {
 	rootCmd.AddCommand(doCmd)
 	doCmd.Flags().BoolVarP(&force, "force", "F", false, "Force do task, ignore if its already done or not. Using this you might override the DoneAt data.")
-	doCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool { return !t.AutoComplete && !t.IsDone(tm, now) && !t.IsDeleted(now) })
+	doCmd.ValidArgsFunction = TaskKeyCompletionFilter(func(t *core.Task, tm core.TaskMap, now time.Time) bool {
+		return !t.AutoComplete && !t.IsDone(tm, now) && !t.IsDeleted(now)
+	})
 }
 
 var doCmd = &cobra.Command{

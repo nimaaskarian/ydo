@@ -98,7 +98,7 @@ var editCmd = &cobra.Command{
 		if err := checkFlagTask(); err != nil {
 			return err
 		}
-    task.Recur = flagTask.Recur
+		task.Recur = flagTask.Recur
 
 		taskDateFields := task.DateFields()
 		for i, item := range flagTask.DateFields() {

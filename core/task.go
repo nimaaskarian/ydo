@@ -123,15 +123,15 @@ func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
 }
 
 func (task *Task) IsDeleted(date time.Time) bool {
-  return date.Before(task.CreatedAt) ||
-  (!task.Until.Value().IsZero() && task.Until.Value().Before(date)) ||
-  (!task.Schedule.Value().IsZero() && task.Schedule.Value().After(date))
+	return date.Before(task.CreatedAt) ||
+		(!task.Until.Value().IsZero() && task.Until.Value().Before(date)) ||
+		(!task.Schedule.Value().IsZero() && task.Schedule.Value().After(date))
 }
 
 func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[string]bool, key string, config *MarkdownConfig, filter TaskFilter) (count int) {
 	if task == nil ||
 		(filter != nil && !filter(task, taskmap, config.Now)) ||
-    task.IsDeleted(config.Now) {
+		task.IsDeleted(config.Now) {
 		return 0
 	}
 
@@ -189,12 +189,12 @@ func printPendingTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	if task.Recur != "" {
 		recur = " (each " + task.Recur
 		done_at := task.FindDoneAt(taskmap)
-    if !done_at.IsZero() {
-      if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
-        recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
-      }
-    }
-    recur += ")"
+		if !done_at.IsZero() {
+			if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
+				recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
+			}
+		}
+		recur += ")"
 	}
 	due_print := ""
 	if !task.Due.Value().IsZero() {
