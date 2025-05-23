@@ -35,6 +35,8 @@ tfidf:
   enabled: false
   # minimum tasks needed to turn on tfidf (enabled has to be true for this to work)
   min-task-count: 0
+# whether to use regexp or exact match
+regexp: false
 `
 
 func init() {

@@ -26,8 +26,10 @@ var doCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		if len(keys) > 0 {
 			for _, key := range keys {
-				if err := taskmap.Do(key, now, force); err != nil {
-					return err
+				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
+					if err := taskmap.Do(key, now, force); err != nil {
+						return err
+					}
 				}
 			}
 		} else {

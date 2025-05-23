@@ -18,6 +18,7 @@ type Config struct {
 	Tfidf    core.TfidfConfig    `yaml:",omitempty"`
 	Markdown core.MarkdownConfig `yaml:",omitempty"`
 	Color    string              `yaml:",omitempty"`
+	Regexp   bool                `yaml:",omitempty"`
 }
 
 func (config *Config) ReadFile(path string) {

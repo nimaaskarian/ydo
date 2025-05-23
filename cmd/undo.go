@@ -22,8 +22,10 @@ var undoCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		if len(keys) > 0 {
 			for _, key := range keys {
-				if err := taskmap.Undo(key, now); err != nil {
-					return err
+				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
+					if err := taskmap.Undo(key, now); err != nil {
+						return err
+					}
 				}
 			}
 		} else {

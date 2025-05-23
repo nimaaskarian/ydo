@@ -20,11 +20,13 @@ var yamlCmd = &cobra.Command{
 		} else {
 			tmp_map := make(core.TaskMap, len(keys))
 			for _, key := range keys {
-				task, err := taskmap.GetTask(key)
-				if err != nil {
-					return err
+				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
+					task, err := taskmap.GetTask(key)
+					if err != nil {
+						return err
+					}
+					tmp_map[key] = task
 				}
-				tmp_map[key] = task
 			}
 			core.PrintYaml(tmp_map)
 		}

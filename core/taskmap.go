@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math"
 	"os"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -25,6 +26,19 @@ func ParseYaml(obj any, input []byte) {
 }
 
 type TaskMap map[string]*Task
+
+func (taskmap TaskMap) RegexpMatchingKeys(query string, use_regexp bool) []string {
+	if use_regexp {
+		keys := make([]string, 0, 1)
+		for key := range taskmap {
+			if matched, err := regexp.MatchString(query, key); matched && err == nil {
+				keys = append(keys, key)
+			}
+		}
+		return keys
+	}
+	return []string{query}
+}
 
 func (taskmap TaskMap) Delete(key string, cascade bool) error {
 	task, err := taskmap.GetTask(key)

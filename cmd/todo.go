@@ -28,10 +28,12 @@ var todoCmd = &cobra.Command{
 		"ls",
 		"list",
 	},
-	Use:               "todo [tasks (optional)]",
-	Short:             "output to-dos as markdown",
-	Long:              "output all unfinished tasks (to-dos) as markdown",
-	ValidArgsFunction: TaskKeyCompletionFilter((*core.Task).IsNotDone),
+	Use:   "todo [tasks (optional)]",
+	Short: "output to-dos as markdown",
+	Long:  "output all unfinished tasks (to-dos) as markdown",
+	ValidArgsFunction: TaskKeyCompletionFilter(func(task *core.Task, taskmap core.TaskMap, now time.Time) bool {
+		return task.IsNotDone(taskmap, now) && !task.IsDeleted(now)
+	}),
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		due_time, err := utils.ParseDue(due, now)
 		if err != nil {
@@ -50,11 +52,13 @@ var todoCmd = &cobra.Command{
 			md_config.Description = true
 			seen_keys := make(map[string]bool, len(keys))
 			for _, key := range keys {
-				task, err := taskmap.GetTask(key)
-				if err != nil {
-					return err
+				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
+					task, err := taskmap.GetTask(key)
+					if err != nil {
+						return err
+					}
+					task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config, markdownFilter)
 				}
-				task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config, markdownFilter)
 			}
 		}
 		return nil

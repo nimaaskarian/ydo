@@ -71,71 +71,72 @@ var editCmd = &cobra.Command{
 			utils.CmdStdOs(c)
 			return c.Run()
 		}
-		edit_key := args[0]
-		task, err := taskmap.GetTask(edit_key)
-		if err != nil {
-			return err
-		}
-		if due != "" {
-			if due_date, err := utils.ParseDue(due, now); err == nil {
-				task.Due = core.NewTemplateDate(due_date)
-			}
-		}
-		if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
-			task.Task = core.NewTemplateBase(new_task)
-		}
-		if !flagTask.Description.IsZero() {
-			task.Description = flagTask.Description
-		}
-		if key_regen {
-			new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, edit_key)
-		}
-		for _, dep := range task.Deps {
-			if _, err := taskmap.GetTask(dep); err != nil {
-				return err
-			}
-		}
-		if err := checkFlagTask(); err != nil {
-			return err
-		}
-		task.Recur = flagTask.Recur
-
-		taskDateFields := task.DateFields()
-		for i, item := range flagTask.DateFields() {
-			if !item.IsZero() {
-				*taskDateFields[i] = *item
-			}
-		}
-
-		if remove_deps {
-			task.Deps = make([]string, 0)
-		}
-		if len(flagTask.Tags) > 0 {
-			task.Tags = flagTask.Tags
-		}
-		if remove_dep_to {
-			taskmap.WipeDependenciesToKey(edit_key)
-		}
-		for _, dep_key := range dep_tos {
-			task, err := taskmap.AddDep(dep_key, edit_key)
+		for _, edit_key := range taskmap.RegexpMatchingKeys(args[0], config.Regexp) {
+			task, err := taskmap.GetTask(edit_key)
 			if err != nil {
 				return err
 			}
-			taskmap[dep_key] = task
+			if due != "" {
+				if due_date, err := utils.ParseDue(due, now); err == nil {
+					task.Due = core.NewTemplateDate(due_date)
+				}
+			}
+			if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
+				task.Task = core.NewTemplateBase(new_task)
+			}
+			if !flagTask.Description.IsZero() {
+				task.Description = flagTask.Description
+			}
+			if key_regen {
+				new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, edit_key)
+			}
+			for _, dep := range task.Deps {
+				if _, err := taskmap.GetTask(dep); err != nil {
+					return err
+				}
+			}
+			if err := checkFlagTask(); err != nil {
+				return err
+			}
+			task.Recur = flagTask.Recur
+
+			taskDateFields := task.DateFields()
+			for i, item := range flagTask.DateFields() {
+				if !item.IsZero() {
+					*taskDateFields[i] = *item
+				}
+			}
+
+			if remove_deps {
+				task.Deps = make([]string, 0)
+			}
+			if len(flagTask.Tags) > 0 {
+				task.Tags = flagTask.Tags
+			}
+			if remove_dep_to {
+				taskmap.WipeDependenciesToKey(edit_key)
+			}
+			for _, dep_key := range dep_tos {
+				task, err := taskmap.AddDep(dep_key, edit_key)
+				if err != nil {
+					return err
+				}
+				taskmap[dep_key] = task
+			}
+			edit_key = taskmap.ReplaceKeyInDeps(edit_key, new_key)
+			if auto_complete {
+				task.AutoComplete = true
+			}
+			if no_auto_complete {
+				task.AutoComplete = false
+			}
+			task.Deps = append(task.Deps, flagTask.Deps...)
+			taskmap[edit_key] = task
+			if reflect.DeepEqual(taskmap, old_taskmap) {
+				return errors.New("Not edited")
+			}
+			slog.Info("Task edited", "task", task)
 		}
-		edit_key = taskmap.ReplaceKeyInDeps(edit_key, new_key)
-		if auto_complete {
-			task.AutoComplete = true
-		}
-		if no_auto_complete {
-			task.AutoComplete = false
-		}
-		task.Deps = append(task.Deps, flagTask.Deps...)
-		taskmap[edit_key] = task
-		if reflect.DeepEqual(taskmap, old_taskmap) {
-			return errors.New("Not edited")
-		}
-		slog.Info("Task edited", "task", task)
 		return nil
 	},
 	PostRunE: SaveChanges,

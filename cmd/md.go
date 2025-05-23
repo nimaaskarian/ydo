@@ -47,11 +47,13 @@ var mdCmd = &cobra.Command{
 			md_config.Description = true
 			seen_keys := make(map[string]bool, len(keys))
 			for _, key := range keys {
-				task, err := taskmap.GetTask(key)
-				if err != nil {
-					return err
+				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
+					task, err := taskmap.GetTask(key)
+					if err != nil {
+						return err
+					}
+					task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config, markdownFilter)
 				}
-				task.PrintMarkdown(taskmap, 0, seen_keys, key, &md_config, markdownFilter)
 			}
 		}
 		return nil

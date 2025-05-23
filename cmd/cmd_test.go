@@ -14,6 +14,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
+func init() {
+  config_path = "./config.yaml"
+}
 
 func TestCmdRoot(t *testing.T) {
 	assert.Nil(t, taskmap)

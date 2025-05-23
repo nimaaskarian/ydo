@@ -20,6 +20,8 @@ var (
 	config_path  string
 	dry_run      bool
 	always_yes   bool
+	exact_match  bool
+	regexp       bool
 	now          time.Time
 	now_str      string
 	color_option string
@@ -53,6 +55,12 @@ var (
 				config.Color = color_option
 			}
 			config.Init()
+			if exact_match {
+				config.Regexp = false
+			}
+			if regexp {
+				config.Regexp = true
+			}
 			loglevel := config.SlogLevel()
 			slog.SetLogLoggerLevel(loglevel)
 			log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
@@ -100,6 +108,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&config_path, "config", "c", filepath.Join(config_dir, "config.yaml"), "path to config file")
 	rootCmd.PersistentFlags().BoolVarP(&dry_run, "dry-run", "n", false, "perform a trial run with no changes made")
 	rootCmd.PersistentFlags().BoolVarP(&always_yes, "always-yes", "Y", false, "answer yes to all the yes/no questions")
+	rootCmd.PersistentFlags().BoolVar(&exact_match, "exact-match", false, "exact match instead of using regexp to match the keys")
+	rootCmd.PersistentFlags().BoolVar(&regexp, "regexp", false, "regexp instead of using exact match to match the keys")
+	rootCmd.MarkFlagsMutuallyExclusive("regexp", "exact-match")
 
 	rootCmd.PersistentFlags().StringVarP(&now_str, "now", "N", "", "current time of operations (defaults to current system time)")
 	rootCmd.RegisterFlagCompletionFunc("now", DueCompletion)

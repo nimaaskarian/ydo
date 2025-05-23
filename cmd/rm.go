@@ -21,8 +21,10 @@ var rmCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		if len(keys) > 0 {
 			for _, key := range keys {
-				if err := taskmap.Delete(key, cascade); err != nil {
-					return err
+				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
+					if err := taskmap.Delete(key, cascade); err != nil {
+						return err
+					}
 				}
 			}
 		} else {
