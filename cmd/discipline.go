@@ -26,7 +26,8 @@ var disciplineCmd = &cobra.Command{
 		var start, end time.Time
 		var err error
 		if len(args) >= 1 {
-			start, err = time.ParseInLocation("2006-01-02", args[0], time.Local)
+
+			start, err = utils.ParseDue(args[0], now)
 			if err != nil {
 				return err
 			}
@@ -37,14 +38,25 @@ var disciplineCmd = &cobra.Command{
 			start = taskmap[min_created_at_key].CreatedAt
 		}
 		if len(args) == 2 {
-			end, err = time.ParseInLocation("2006-01-02", args[1], time.Local)
+			end, err = utils.ParseDue(args[1], now)
 			if err != nil {
 				return err
 			}
 		} else {
 			end = now
 		}
-		data := taskmap.TrackDisciplineDaily(start, end, now)
+		// data := taskmap.TrackDisciplineDaily(start, end, now)
+		d := taskmap.TrackDiscipline(start, end, now, time.Hour*24)
+		keys := utils.Keys(d)
+		slices.SortFunc(keys, time.Time.Compare)
+		for _, date := range keys {
+			item := d[date]
+			fmt.Println(date)
+			for key, item := range item {
+				fmt.Println(key, *item)
+			}
+		}
+		data := taskmap.DisciplineSum(d)
 		discipline_color := asciigraph.Blue
 		if color.NoColor {
 			discipline_color = asciigraph.Default

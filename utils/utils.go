@@ -65,7 +65,7 @@ func ParseDuration(input string, now time.Time) (time.Time, error) {
 		coefficient = -1
 		input = input[1:]
 	}
-	index := strings.IndexFunc(input, func(r rune) bool { return r > '9' || r < '0' })
+	index := strings.IndexFunc(input, IsNotDigit)
 	num, err := strconv.Atoi(input[:index])
 	num *= coefficient
 	if err != nil {
@@ -149,7 +149,7 @@ func parseDate(s string, now time.Time) (time.Time, error) {
 		// yeah. like you gonna do that in a thousand years
 		return AddDate(now, 1000, 0, 0), nil
 	default:
-		date, err := parseYmd(date_time[0], time.Local)
+		date, err := ParseYmd(date_time[0], time.Local)
 		if err != nil {
 			return date, fmt.Errorf("Invalid date %q. Date is a Y-M-D, weekday, yesterday, today, tomorrow or later", date_time[0])
 		}
@@ -268,6 +268,6 @@ func CmdStdOs(c *exec.Cmd) {
 	c.Stderr = os.Stderr
 }
 
-func IsDigit(r rune) bool {
+func IsNotDigit(r rune) bool {
 	return r > '9' || r < '0'
 }

@@ -302,6 +302,74 @@ func addToIndexIfKeyOk(m map[time.Time][2]int, start, end time.Time, index int, 
 	return false
 }
 
+type Disicipline struct {
+	Count uint
+	Done  uint
+}
+
+func (d *Disicipline) Index() float64 {
+	return float64(d.Done) / float64(d.Count)
+}
+
+func (a *Disicipline) Add(b *Disicipline) {
+	a.Count += b.Count
+	a.Done += b.Done
+}
+
+func (taskmap TaskMap) DisciplineSum(disipline_map map[time.Time]map[string]*Disicipline) []float64 {
+	out := make([]float64, 0, len(disipline_map)*len(taskmap))
+	keys := utils.Keys(disipline_map)
+	slices.SortFunc(keys, time.Time.Compare)
+	for _, key := range keys {
+		m := disipline_map[key]
+		discipline := Disicipline{}
+		for _, d := range m {
+			discipline.Add(d)
+		}
+		out = append(out, discipline.Index())
+	}
+	return out
+}
+
+func (taskmap TaskMap) TrackDiscipline(start, end, now time.Time, step time.Duration) map[time.Time]map[string]*Disicipline {
+	t := start.Add(-step)
+	was_done := map[string]bool{}
+	for key, task := range taskmap {
+		was_done[key] = task.IsDone(taskmap, t)
+	}
+	t = start
+
+	discipline_map := map[time.Time]map[string]*Disicipline{}
+	for t.Before(end) {
+		time_map, ok := discipline_map[t]
+		if !ok {
+			time_map = map[string]*Disicipline{}
+			discipline_map[t] = time_map
+		}
+		for key, task := range taskmap {
+			if task.IsDeleted(t) {
+				continue
+			}
+			discipline, ok := time_map[key]
+			if !ok {
+				discipline = &Disicipline{}
+				time_map[key] = discipline
+			}
+			is_done := task.IsDone(taskmap, t)
+			if is_done && was_done[key] {
+				continue
+			}
+			discipline.Count = 1
+			if is_done {
+				discipline.Done = 1
+			}
+			was_done[key] = is_done
+		}
+		t = t.Add(step)
+	}
+	return discipline_map
+}
+
 // start and end are included
 func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64 {
 	end = utils.NaiveDate(end)

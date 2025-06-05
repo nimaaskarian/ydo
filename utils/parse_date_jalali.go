@@ -10,7 +10,7 @@ import (
 	ptime "github.com/yaa110/go-persian-calendar"
 )
 
-func parseYmd(s string, loc *time.Location) (time.Time, error) {
+func ParseYmd(s string, loc *time.Location) (time.Time, error) {
 	var y, m, d int
 	_, err := fmt.Sscanf(s, "%d-%d-%d", &y, &m, &d)
 

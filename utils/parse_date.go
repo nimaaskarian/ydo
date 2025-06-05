@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func parseYmd(s string, loc *time.Location) (time.Time, error) {
+func ParseYmd(s string, loc *time.Location) (time.Time, error) {
 	return time.ParseInLocation(time.DateOnly, s, loc)
 }
 
