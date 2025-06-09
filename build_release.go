@@ -22,13 +22,7 @@ func main() {
 	exec.Command("go", "test", "./...")
 	tags := [][]string{
 		[]string{
-			"jalali", "webgui",
-		},
-		[]string{
 			"jalali",
-		},
-		[]string{
-			"webgui",
 		},
 		[]string{},
 	}

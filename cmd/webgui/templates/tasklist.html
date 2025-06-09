@@ -1,7 +1,0 @@
-<ul class="ml-4 list-disc list-outside">
-{{- range .Keys }}
-{{if or (eq $.Filter nil) (index $.Filter .)}}
-{{- template "task.html" (add2map $ "Key" .) }}
-{{- end}}
-{{- end }}
-</ul>
