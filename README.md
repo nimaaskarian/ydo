@@ -1,6 +1,6 @@
 <div align="center">
    
-# ![ydo](https://raw.githubusercontent.com/nimaaskarian/ydo/refs/heads/master/cmd/webgui/static/imgs/icon-48x48.png)
+# ydo
 
 ![Github top language](https://img.shields.io/github/languages/top/nimaaskarian/ydo?style=flat&color=blue)
 
