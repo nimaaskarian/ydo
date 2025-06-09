@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"time"
@@ -12,19 +13,40 @@ import (
 )
 
 var height int
+var thisweek bool
+var thisday bool
+var hourly bool
+var start_of_the_week string
 
 func init() {
 	rootCmd.AddCommand(disciplineCmd)
 	disciplineCmd.Flags().IntVarP(&height, "height", "H", 5, "specify height for the discipline graph")
+	disciplineCmd.Flags().BoolVarP(&thisweek, "this-week", "w", false, "draw discipline for this week")
+	disciplineCmd.Flags().BoolVarP(&thisday, "this-day", "d", false, "draw discipline for this day")
+	disciplineCmd.Flags().BoolVar(&hourly, "hourly", false, "calculate discipline hourly, instead of daily")
+	disciplineCmd.Flags().StringVar(&start_of_the_week, "start-of-the-week", "", "calculate discipline hourly, instead of daily")
+	disciplineCmd.MarkFlagsMutuallyExclusive("this-day", "this-week")
 }
 
 var disciplineCmd = &cobra.Command{
-	Use:   "discipline [start] [end]",
-	Short: "get a discipline graph",
-	Long:  " get a graph of discipline from the start (which defaults to first task created) to end (which defaults to today)",
+	Use:               "discipline [start] [end]",
+	Short:             "get a discipline graph",
+	Args:              cobra.MaximumNArgs(2),
+	ValidArgsFunction: DueCompletion,
+	Long:              "get a graph of discipline from the start (which defaults to first task created) to end (which defaults to today)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var start, end time.Time
 		var err error
+    var first_weekday = time.Sunday
+    if start_of_the_week != "" {
+      if !thisweek {
+        return errors.New(`flag "start-of-the-week" must be used with "this-week"`)
+      }
+      first_weekday, err = utils.ParseWeekday(start_of_the_week)
+      if err != nil {
+        return err
+      }
+    }
 		if len(args) >= 1 {
 
 			start, err = utils.ParseDue(args[0], now)
@@ -32,10 +54,19 @@ var disciplineCmd = &cobra.Command{
 				return err
 			}
 		} else {
-			min_created_at_key := slices.MinFunc(utils.Keys(taskmap), func(a, b string) int {
-				return taskmap[a].CreatedAt.Compare(taskmap[b].CreatedAt)
-			})
-			start = taskmap[min_created_at_key].CreatedAt
+			if thisweek {
+				start = utils.NaiveDate(now)
+				for start.Weekday() != first_weekday {
+					start = start.Add(-24 * time.Hour)
+				}
+			} else if thisday {
+				start = utils.NaiveDate(now).AddDate(0, 0, -1)
+			} else {
+				min_created_at_key := slices.MinFunc(utils.Keys(taskmap), func(a, b string) int {
+					return taskmap[a].CreatedAt.Compare(taskmap[b].CreatedAt)
+				})
+				start = utils.NaiveDate(taskmap[min_created_at_key].CreatedAt)
+			}
 		}
 		if len(args) == 2 {
 			end, err = utils.ParseDue(args[1], now)
@@ -43,19 +74,12 @@ var disciplineCmd = &cobra.Command{
 				return err
 			}
 		} else {
-			end = now
+			end = utils.NaiveDate(now).AddDate(0, 0, 1)
 		}
-		// data := taskmap.TrackDisciplineDaily(start, end, now)
-		d := taskmap.TrackDiscipline(start, end, now, time.Hour*24)
+		d := taskmap.TrackDiscipline(start, end, time.Hour*24)
 		keys := utils.Keys(d)
 		slices.SortFunc(keys, time.Time.Compare)
-		for _, date := range keys {
-			item := d[date]
-			fmt.Println(date)
-			for key, item := range item {
-				fmt.Println(key, *item)
-			}
-		}
+
 		data := taskmap.DisciplineSum(d)
 		discipline_color := asciigraph.Blue
 		if color.NoColor {

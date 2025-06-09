@@ -271,3 +271,14 @@ func CmdStdOs(c *exec.Cmd) {
 func IsNotDigit(r rune) bool {
 	return r > '9' || r < '0'
 }
+
+func ParseWeekday(s string) (time.Weekday, error) {
+  for day := time.Sunday; day <= time.Saturday; day++ {
+    day_s := day.String()
+    if strings.HasPrefix(day_s, s) || strings.HasPrefix(strings.ToLower(day_s), s) {
+      return day, nil
+    }
+  }
+  return time.Sunday, errors.New("Not a weekday")
+}
+

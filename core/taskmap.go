@@ -331,16 +331,10 @@ func (taskmap TaskMap) DisciplineSum(disipline_map map[time.Time]map[string]*Dis
 	return out
 }
 
-func (taskmap TaskMap) TrackDiscipline(start, end, now time.Time, step time.Duration) map[time.Time]map[string]*Disicipline {
-	t := start.Add(-step)
-	was_done := map[string]bool{}
-	for key, task := range taskmap {
-		was_done[key] = task.IsDone(taskmap, t)
-	}
-	t = start
-
+func (taskmap TaskMap) TrackDiscipline(start, end time.Time, step time.Duration) map[time.Time]map[string]*Disicipline {
+	t := start
 	discipline_map := map[time.Time]map[string]*Disicipline{}
-	for t.Before(end) {
+	for !t.After(end) {
 		time_map, ok := discipline_map[t]
 		if !ok {
 			time_map = map[string]*Disicipline{}
@@ -350,20 +344,21 @@ func (taskmap TaskMap) TrackDiscipline(start, end, now time.Time, step time.Dura
 			if task.IsDeleted(t) {
 				continue
 			}
+			was_done := task.IsDone(taskmap, t.Add(-step))
 			discipline, ok := time_map[key]
 			if !ok {
 				discipline = &Disicipline{}
 				time_map[key] = discipline
 			}
 			is_done := task.IsDone(taskmap, t)
-			if is_done && was_done[key] {
+			if is_done && was_done {
 				continue
 			}
-			discipline.Count = 1
+			discipline.Count += 1
 			if is_done {
-				discipline.Done = 1
+				discipline.Done += 1
 			}
-			was_done[key] = is_done
+			was_done = is_done
 		}
 		t = t.Add(step)
 	}
