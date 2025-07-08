@@ -111,7 +111,7 @@ func checkTask(task *core.Task) error {
 func checkTaskDateFields(task *core.Task) error {
 	date_fields := task.DateFields()
 	for _, item := range date_fields {
-    item.Resolve(task)
+		item.Resolve(task)
 		date, err := utils.ParseDue(item.Base.Template, now)
 		if err == nil {
 			*item = core.NewTemplateDate(date)

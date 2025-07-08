@@ -273,12 +273,11 @@ func IsNotDigit(r rune) bool {
 }
 
 func ParseWeekday(s string) (time.Weekday, error) {
-  for day := time.Sunday; day <= time.Saturday; day++ {
-    day_s := day.String()
-    if strings.HasPrefix(day_s, s) || strings.HasPrefix(strings.ToLower(day_s), s) {
-      return day, nil
-    }
-  }
-  return time.Sunday, errors.New("Not a weekday")
+	for day := time.Sunday; day <= time.Saturday; day++ {
+		day_s := day.String()
+		if strings.HasPrefix(day_s, s) || strings.HasPrefix(strings.ToLower(day_s), s) {
+			return day, nil
+		}
+	}
+	return time.Sunday, errors.New("Not a weekday")
 }
-

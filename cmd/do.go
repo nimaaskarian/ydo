@@ -52,7 +52,7 @@ var doCmd = &cobra.Command{
 var interactiveDoCmd = &cobra.Command{
 	Use:   "interactive",
 	Short: "interactively set tasks as done",
-	Long: "interactively set tasks as done using your EDITOR. all removed lines will be done",
+	Long:  "interactively set tasks as done using your EDITOR. all removed lines will be done",
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		task_should_do, err := interactiveHelper("ydo-interactive-do", doCmdInclude)
 		if err != nil {

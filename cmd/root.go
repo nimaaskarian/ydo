@@ -103,15 +103,16 @@ func UpdateOldTaskMap(cmd *cobra.Command, args []string) {
 	old_taskmap = utils.DeepCopyMap(taskmap)
 }
 
-func interactiveHelper(name string, include_func func(*core.Task, core.TaskMap, time.Time) bool) (map[string] bool, error) {
+func interactiveHelper(name string, include_func func(*core.Task, core.TaskMap, time.Time) bool) (map[string]bool, error) {
 	temp, err := os.CreateTemp("", name)
 	if err != nil {
 		return nil, err
 	}
 	out := make(map[string]bool, 0)
-	for key,task := range taskmap {
+	for _, key := range taskmap.SortedKeys() {
+		task := taskmap[key]
 		if include_func == nil || include_func(task, taskmap, now) {
-			temp.WriteString(key+"\n")
+			temp.WriteString(key + "\n")
 			out[key] = true
 		}
 	}

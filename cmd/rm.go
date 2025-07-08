@@ -44,7 +44,7 @@ var rmCmd = &cobra.Command{
 var interactiveRmCmd = &cobra.Command{
 	Use:   "interactive",
 	Short: "interactively remove tasks",
-	Long: "interactively remove tasks using your EDITOR. all removed lines will be done",
+	Long:  "interactively remove tasks using your EDITOR. all removed lines will be done",
 	RunE: func(cmd *cobra.Command, keys []string) error {
 		task_should_do, err := interactiveHelper("ydo-interactive-rm", nil)
 		if err != nil {

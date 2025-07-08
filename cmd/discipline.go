@@ -37,16 +37,16 @@ var disciplineCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var start, end time.Time
 		var err error
-    var first_weekday = time.Sunday
-    if start_of_the_week != "" {
-      if !thisweek {
-        return errors.New(`flag "start-of-the-week" must be used with "this-week"`)
-      }
-      first_weekday, err = utils.ParseWeekday(start_of_the_week)
-      if err != nil {
-        return err
-      }
-    }
+		var first_weekday = time.Sunday
+		if start_of_the_week != "" {
+			if !thisweek {
+				return errors.New(`flag "start-of-the-week" must be used with "this-week"`)
+			}
+			first_weekday, err = utils.ParseWeekday(start_of_the_week)
+			if err != nil {
+				return err
+			}
+		}
 		if len(args) >= 1 {
 
 			start, err = utils.ParseDue(args[0], now)
