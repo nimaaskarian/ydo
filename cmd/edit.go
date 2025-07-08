@@ -95,9 +95,6 @@ var editCmd = &cobra.Command{
 					return err
 				}
 			}
-			if err := checkFlagTask(); err != nil {
-				return err
-			}
 			task.Recur = flagTask.Recur
 
 			taskDateFields := task.DateFields()
@@ -105,6 +102,9 @@ var editCmd = &cobra.Command{
 				if !item.IsZero() {
 					*taskDateFields[i] = *item
 				}
+			}
+			if err := checkTask(task); err != nil {
+				return err
 			}
 
 			if remove_deps {

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"log/slog"
@@ -100,6 +101,44 @@ func SaveChanges(cmd *cobra.Command, args []string) error {
 
 func UpdateOldTaskMap(cmd *cobra.Command, args []string) {
 	old_taskmap = utils.DeepCopyMap(taskmap)
+}
+
+func interactiveHelper(name string, include_func func(*core.Task, core.TaskMap, time.Time) bool) (map[string] bool, error) {
+	temp, err := os.CreateTemp("", name)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[string]bool, 0)
+	for key,task := range taskmap {
+		if include_func == nil || include_func(task, taskmap, now) {
+			temp.WriteString(key+"\n")
+			out[key] = true
+		}
+	}
+	temp_name := temp.Name()
+	if err := temp.Close(); err != nil {
+		return nil, err
+	}
+	c, err := utils.EditorCmd(temp_name)
+	if err != nil {
+		return nil, err
+	}
+	utils.CmdStdOs(c)
+	if err := c.Run(); err != nil {
+		return nil, err
+	}
+	content, err := os.ReadFile(temp_name)
+	if err != nil {
+		return nil, err
+	}
+	for line := range bytes.Lines(content) {
+		key := string(bytes.TrimSpace(line))
+		if _, ok := out[key]; !ok {
+			return nil, fmt.Errorf("Key not found: %q", key)
+		}
+		out[key] = false
+	}
+	return out, nil
 }
 
 func init() {

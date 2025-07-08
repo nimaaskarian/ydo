@@ -1,3 +1,6 @@
+aur:
+    task: aur
+    created-at: 2025-06-10T20:07:30.048765731+03:30
 better-md:
     task: improve markdown output
     done: true
@@ -96,6 +99,9 @@ md-circular:
     task: improve fix markdown circular output
     done: true
     created-at: 2025-03-14T17:04:50.975357064+03:30
+notification:
+    task: notification daemon
+    created-at: 2025-06-10T20:07:48.335852254+03:30
 percentage:
     task: add percentage for autocompleted tasks
     created-at: 2025-03-29T09:19:24.536171782+03:30
@@ -179,13 +185,6 @@ tracking:
     done: true
     created-at: 2025-03-20T11:49:04.724766521+03:30
     done-at: 2025-03-27T09:54:14.431631499+03:30
-undo:
-    task: add undo to webgui (like real undo)
-    description: |-
-        idk what to name the current undo command and thats the problem
-        this can be implemented using something like a stack allocated buffer of maps (wouldn't be really "stack allcated" but anyways)
-    deps: [find]
-    created-at: 2025-03-18T03:22:15.397799013+03:30
 webgui:
     task: add webgui
     done: true

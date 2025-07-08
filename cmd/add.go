@@ -73,7 +73,7 @@ var addCmd = &cobra.Command{
 		}
 		flagTask.Task = core.NewTemplateBase(taskmsg)
 		flagTask.CreatedAt = now
-		if err := checkFlagTask(); err != nil {
+		if err := checkTask(&flagTask); err != nil {
 			return err
 		}
 		err := taskmap.Add(key, &flagTask)
@@ -98,26 +98,27 @@ var addCmd = &cobra.Command{
 	PreRun:   UpdateOldTaskMap,
 }
 
-func checkFlagTask() error {
-	if err := checkFlagTaskDateFields(); err != nil {
+func checkTask(task *core.Task) error {
+	if err := checkTaskDateFields(task); err != nil {
 		return err
 	}
-	if _, err := utils.ParseDuration(flagTask.Recur, now); err != nil {
+	if _, err := utils.ParseDuration(task.Recur, now); err != nil {
 		return err
 	}
 	return nil
 }
 
-func checkFlagTaskDateFields() error {
-	date_fields := flagTask.DateFields()
+func checkTaskDateFields(task *core.Task) error {
+	date_fields := task.DateFields()
 	for _, item := range date_fields {
+    item.Resolve(task)
 		date, err := utils.ParseDue(item.Base.Template, now)
 		if err == nil {
 			*item = core.NewTemplateDate(date)
 		}
 	}
 	for _, item := range date_fields {
-		if err := resolveTemplateDate(&flagTask, item); err != nil {
+		if err := resolveTemplateDate(task, item); err != nil {
 			return err
 		}
 	}
