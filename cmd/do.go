@@ -14,8 +14,13 @@ var (
 )
 
 func doCmdInclude(t *core.Task, tm core.TaskMap, now time.Time) bool {
-	return !t.AutoComplete && !t.IsDone(tm, now) && !t.IsDeleted(now)
+	if force {
+		return !t.AutoComplete && !t.IsDeleted(now)
+	} else {
+		return !t.AutoComplete && !t.IsDone(tm, now) && !t.IsDeleted(now)
+	}
 }
+
 
 func init() {
 	rootCmd.AddCommand(doCmd)
@@ -53,11 +58,9 @@ var interactiveDoCmd = &cobra.Command{
 	Use:   "interactive",
 	Short: "interactively set tasks as done",
 	Long:  "interactively set tasks as done using your EDITOR. all removed lines will be done",
-	RunE: func(cmd *cobra.Command, keys []string) error {
-		task_should_do, err := interactiveHelper("ydo-interactive-do", doCmdInclude)
-		if err != nil {
-			return err
-		}
+	RunE: func(cmd *cobra.Command, keys []string) (err error) {
+		var task_should_do map[string]bool
+		task_should_do, err = interactiveHelper("ydo-interactive-do", doCmdInclude)
 		for key, should_do := range task_should_do {
 			if should_do {
 				slog.Info("Interactively doing task", "key", key)
