@@ -75,6 +75,9 @@ hide:
     done: true
     created-at: 2025-03-24T17:39:52.285190133+03:30
     done-at: 2025-04-07T09:33:48.677217974+03:30
+interactive-edit:
+    task: interactive edit with diff matching
+    created-at: 2025-07-13T08:00:16.386954308+03:30
 jalali:
     task: add jalali date
     done: true
@@ -195,3 +198,6 @@ ydo:
     deps: [webgui, cli, core]
     auto-complete: true
     created-at: 2025-03-14T16:28:20.755500724+03:30
+ydo-hooks:
+    task: ydo-hooks and ydo git hook
+    created-at: 2025-07-13T07:59:54.71321491+03:30
