@@ -14,6 +14,7 @@ import (
 type Config struct {
 	// files to look for if --file option is not present
 	Files    []string            `yaml:",omitempty"`
+	Hooks    []string            `yaml:",omitempty"`
 	LogLevel string              `yaml:",omitempty"`
 	Tfidf    core.TfidfConfig    `yaml:",omitempty"`
 	Markdown core.MarkdownConfig `yaml:",omitempty"`

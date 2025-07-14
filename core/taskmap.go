@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nimaaskarian/ydo/hooks"
 	"github.com/nimaaskarian/ydo/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -40,17 +41,18 @@ func (taskmap TaskMap) RegexpMatchingKeys(query string, use_regexp bool) []strin
 	return []string{query}
 }
 
-func (taskmap TaskMap) Delete(key string, cascade bool) error {
+func (taskmap TaskMap) Delete(key string, cascade bool) (hooks.Events, error) {
 	task, err := taskmap.GetTask(key)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	delete(taskmap, key)
+	events := hooks.Events{hooks.Event{Type: hooks.Delete, Literal: key}}
 	taskmap.WipeDependenciesToKey(key)
 	if cascade {
-		task.CascadeOrphanDeps(taskmap)
+		events = append(events, task.CascadeOrphanDeps(taskmap)...)
 	}
-	return nil
+	return events, nil
 }
 
 func (taskmap TaskMap) WipeDependenciesToKey(key string) error {
@@ -78,20 +80,20 @@ func (taskmap TaskMap) GetTask(key string) (*Task, error) {
 	return task, nil
 }
 
-func (taskmap TaskMap) Add(key string, task *Task) error {
+func (taskmap TaskMap) Add(key string, task *Task) (hooks.Event, error) {
 	if _, ok := taskmap[key]; ok {
-		return errors.New("Task already exists")
+		return hooks.Event{}, errors.New("Task already exists")
 	}
 	for _, key := range task.Deps {
 		if _, ok := taskmap[key]; !ok {
-			return errors.New("No such task " + key)
+			return hooks.Event{}, errors.New("No such task " + key)
 		}
 	}
 	if task == nil {
 		panic("Task is nil")
 	}
 	taskmap[key] = task
-	return nil
+	return hooks.Event{Type: hooks.Add, Literal: key}, nil
 }
 
 func (taskmap TaskMap) HasTask(key string) bool {
@@ -99,42 +101,42 @@ func (taskmap TaskMap) HasTask(key string) bool {
 	return ok
 }
 
-func (taskmap TaskMap) Do(key string, now time.Time, force bool) error {
+func (taskmap TaskMap) Do(key string, now time.Time, force bool) (hooks.Event, error) {
 	task, err := taskmap.GetTask(key)
 	if err != nil {
-		return err
+		return hooks.Event{}, err
 	}
 	if err := task.Do(taskmap, now, force); err != nil {
-		return err
+		return hooks.Event{}, err
 	}
 	slog.Info("Completed task", "key", key)
-	return nil
+	return hooks.Event{Type: hooks.Do, Literal: key}, nil
 }
 
-func (tm TaskMap) AddDep(key string, dep string) (*Task, error) {
+func (tm TaskMap) AddDep(key string, dep string) (*Task,hooks.Event, error) {
 	task, err := tm.GetTask(key)
 	if err != nil {
-		return nil, err
+		return nil,hooks.Event{}, err
 	} else {
 		_, err := tm.GetTask(dep)
 		if err != nil {
-			return nil, err
+			return nil,hooks.Event{}, err
 		}
 	}
 	if !slices.Contains(task.Deps, dep) {
 		task.Deps = append(task.Deps, dep)
 	}
-	return task, nil
+	return task, hooks.Event{Type: hooks.AddDep, }, nil
 }
 
-func (taskmap TaskMap) Undo(key string, now time.Time) error {
+func (taskmap TaskMap) Undo(key string, now time.Time) (hooks.Event, error) {
 	task, err := taskmap.GetTask(key)
 	if err != nil {
-		return err
+		return hooks.Event{}, err
 	}
 	task.Undo(taskmap, now)
 	slog.Info("Un-completed task", "key", key)
-	return nil
+	return hooks.Event{Type: hooks.Undo, Literal: key}, nil
 }
 
 func PrintYaml(obj any) error {
@@ -259,7 +261,7 @@ func (taskmap TaskMap) TfidfNextKey(task string, config TfidfConfig, current_key
 
 // replaces keys in dependencies of the whole list. returns the new key if the
 // transition went good, the old key if not
-func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) string {
+func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) (hooks.Event, string) {
 	if new_key != "" && new_key != old_key && !taskmap.HasTask(new_key) {
 		for dep_key, task := range taskmap {
 			index := slices.Index(task.Deps, old_key)
@@ -269,9 +271,9 @@ func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) string {
 			}
 		}
 		delete(taskmap, old_key)
-		return new_key
+		return hooks.Event{Type: hooks.UpdateKey, Literal: old_key },new_key
 	} else {
-		return old_key
+		return hooks.Event{}, old_key
 	}
 }
 

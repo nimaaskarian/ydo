@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/hooks"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
@@ -25,20 +26,22 @@ var rmCmd = &cobra.Command{
 		if len(keys) > 0 {
 			for _, key := range keys {
 				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
-					if err := taskmap.Delete(key, cascade); err != nil {
+					delete_events, err := taskmap.Delete(key, cascade)
+					if err != nil {
 						return err
 					}
+					events = append(events, delete_events...)
 				}
 			}
 		} else {
 			if always_yes || utils.ReadYesNo("WARN This will DELETE ALL THE TASKS. ARE YOU REALLY SURE? (yes/no) ") {
 				taskmap = make(core.TaskMap)
+				events = append(events, hooks.Event{Type: hooks.DeleteAll})
 			}
 		}
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }
 
 var interactiveRmCmd = &cobra.Command{
@@ -53,11 +56,11 @@ var interactiveRmCmd = &cobra.Command{
 		for key, should_rm := range task_should_do {
 			if should_rm {
 				slog.Info("Interactively removing task", "key", key)
-				taskmap.Delete(key, cascade)
+				delete_events, _ := taskmap.Delete(key, cascade)
+				events = append(events, delete_events...)
 			}
 		}
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }

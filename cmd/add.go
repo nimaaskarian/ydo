@@ -76,26 +76,24 @@ var addCmd = &cobra.Command{
 		if err := checkTask(&flagTask); err != nil {
 			return err
 		}
-		err := taskmap.Add(key, &flagTask)
+		event, err := taskmap.Add(key, &flagTask)
 		if err != nil {
 			return err
 		}
+		events = append(events, event)
 		for _, dep_to := range dep_tos {
-			task, err := taskmap.AddDep(dep_to, key)
-			if err != nil {
-				return err
-			}
+			task, event, err := taskmap.AddDep(dep_to, key)
 			if err != nil {
 				return err
 			}
 			taskmap[dep_to] = task
+			events = append(events, event)
 		}
 		fmt.Printf("Task %q added\n", key)
 		slog.Debug("Added a task", "task", taskmap[key])
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }
 
 func checkTask(task *core.Task) error {

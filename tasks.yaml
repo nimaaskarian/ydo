@@ -200,4 +200,6 @@ ydo:
     created-at: 2025-03-14T16:28:20.755500724+03:30
 ydo-hooks:
     task: ydo-hooks and ydo git hook
+    done: true
     created-at: 2025-07-13T07:59:54.71321491+03:30
+    done-at: 2025-07-14T19:59:48.020669306+03:30

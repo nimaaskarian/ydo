@@ -102,14 +102,9 @@ func TestMutatingCmdGotRightFuncs(t *testing.T) {
 		batchCmd,
 	}
 	save_changes := reflect.ValueOf(SaveChanges)
-	save_old_map := reflect.ValueOf(UpdateOldTaskMap)
 	for _, cmd := range cmds {
 		if !assert.Equal(t, save_changes, reflect.ValueOf(cmd.PostRunE)) {
 			defer fmt.Printf("ERROR The command %q doesn't have the SaveChanges PostRunE\n", cmd.Name())
-			break
-		}
-		if !assert.Equal(t, save_old_map, reflect.ValueOf(cmd.PreRun)) {
-			defer fmt.Printf("ERROR The command %q doesn't have the UpdateOldMap PreRun\n", cmd.Name())
 			break
 		}
 	}

@@ -23,20 +23,22 @@ var undoCmd = &cobra.Command{
 		if len(keys) > 0 {
 			for _, key := range keys {
 				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
-					if err := taskmap.Undo(key, now); err != nil {
+					event, err := taskmap.Undo(key, now)
+					if err != nil {
 						return err
 					}
+					events = append(events, event)
 				}
 			}
 		} else {
 			if always_yes || utils.ReadYesNo("This will set all tasks as not completed. ARE YOU REALLY SURE? (yes/no) ") {
 				for key := range taskmap {
-					taskmap.Undo(key, now)
+					event, _ := taskmap.Undo(key, now)
+					events = append(events, event)
 				}
 			}
 		}
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }

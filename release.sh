@@ -7,7 +7,7 @@ go test ./... -coverprofile=coverage.out || {
   exit 1
 }
 go run build_release.go "$1"
-files=($(go run build_release.go "$1" list))
+readarray -t files < <(go run build_release.go "$1" list)
 zip_files=()
 for file in "${files[@]}"; do
   if [[ $file = *.exe ]]; then

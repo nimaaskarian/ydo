@@ -163,12 +163,12 @@ func TestReplaceKeyInDeps(t *testing.T) {
 	taskmap := make(TaskMap)
 	ParseYaml(taskmap, []byte(GROCERIES))
 	fmt.Println(taskmap["t1"].Deps)
-	key := taskmap.ReplaceKeyInDeps("t2", "milk")
+	_, key := taskmap.ReplaceKeyInDeps("t2", "milk")
 	expected := []string{"t3", "milk"}
 	assert.Equal(t, expected, taskmap["t1"].Deps)
 	assert.Equal(t, "milk", key)
 
-	key = taskmap.ReplaceKeyInDeps("t3", "")
+	_, key = taskmap.ReplaceKeyInDeps("t3", "")
 	assert.Equal(t, expected, taskmap["t1"].Deps)
 	assert.Equal(t, "t3", key)
 }
@@ -209,9 +209,9 @@ func BenchmarkPrintMarkdown(b *testing.B) {
 func TestAddDep(t *testing.T) {
 	tm := make(TaskMap)
 	ParseYaml(tm, []byte(HOMEWORKS))
-	task, err := tm.AddDep("homework", "coco")
+	task, _, err := tm.AddDep("homework", "coco")
 	assert.Error(t, err)
-	task, err = tm.AddDep("homework", "milk")
+	task, _, err = tm.AddDep("homework", "milk")
 	assert.Nil(t, err)
 	assert.Equal(t, []string{"study", "project", "milk"}, task.Deps)
 }

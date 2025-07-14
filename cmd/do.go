@@ -21,7 +21,6 @@ func doCmdInclude(t *core.Task, tm core.TaskMap, now time.Time) bool {
 	}
 }
 
-
 func init() {
 	rootCmd.AddCommand(doCmd)
 	doCmd.AddCommand(interactiveDoCmd)
@@ -36,22 +35,24 @@ var doCmd = &cobra.Command{
 		if len(keys) > 0 {
 			for _, key := range keys {
 				for _, key := range taskmap.RegexpMatchingKeys(key, config.Regexp) {
-					if err := taskmap.Do(key, now, force); err != nil {
+					event, err := taskmap.Do(key, now, force)
+					if err != nil {
 						return err
 					}
+					events = append(events, event)
 				}
 			}
 		} else {
 			if always_yes || utils.ReadYesNo("This will set all tasks as completed. ARE YOU REALLY SURE? (yes/no) ") {
 				for key := range taskmap {
-					taskmap.Do(key, now, force)
+					event, _ := taskmap.Do(key, now, force)
+					events = append(events, event)
 				}
 			}
 		}
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }
 
 var interactiveDoCmd = &cobra.Command{
@@ -64,11 +65,14 @@ var interactiveDoCmd = &cobra.Command{
 		for key, should_do := range task_should_do {
 			if should_do {
 				slog.Info("Interactively doing task", "key", key)
-				taskmap.Do(key, now, force)
+				event, err := taskmap.Do(key, now, force)
+				if err != nil {
+					return err
+				}
+				events = append(events, event)
 			}
 		}
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }

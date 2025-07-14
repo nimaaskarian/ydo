@@ -1,30 +1,28 @@
 package cmd
 
 import (
-	"errors"
+	"fmt"
 	"log/slog"
-	"reflect"
 
 	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/hooks"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
 
 // edit flags
 var (
-	new_key          string
-	remove_deps      bool
-	key_regen        bool
-	remove_dep_to    bool
-	no_auto_complete bool
-	auto_complete    bool
+	new_key       string
+	remove_deps   bool
+	key_regen     bool
+	remove_dep_to bool
+	auto_complete bool
 )
 
 func init() {
 	rootCmd.AddCommand(editCmd)
 	editCmd.Flags().BoolVarP(&key_regen, "key-regen", "K", false, "regen key using the automatic next key generator (respects the config file)")
-	editCmd.Flags().BoolVarP(&flagTask.AutoComplete, "auto-complete", "a", false, "enable auto complete for the task")
-	editCmd.Flags().BoolVarP(&no_auto_complete, "no-auto-complete", "A", false, "disable auto complete for the task")
+	editCmd.Flags().BoolVarP(&flagTask.AutoComplete, "auto-complete", "a", false, "toggle auto complete for the task")
 	editCmd.Flags().BoolVar(&remove_dep_to, "clean-dep-to", false, "remove previous 'dependent to' for the task. using this with --dep-to causes to replace 'dependent to's")
 	editCmd.Flags().StringVarP(&flagTask.Description.Template, "description", "e", "", "new description of the task")
 	editCmd.Flags().BoolVar(&remove_deps, "remove-deps", false, "remove previous dependencies for the task. using this with --deps causes to replace dependencies")
@@ -52,7 +50,6 @@ func init() {
 	editCmd.Flags().StringVarP(&flagTask.Recur, "recur", "r", "", "duration of in which the ask recurs")
 	editCmd.RegisterFlagCompletionFunc("recur", DurationCompletion)
 
-	editCmd.MarkFlagsMutuallyExclusive("no-auto-complete", "auto-complete")
 	editCmd.ValidArgsFunction = TaskKeyCompletionOnFirst
 
 }
@@ -89,6 +86,9 @@ var editCmd = &cobra.Command{
 			}
 			if key_regen {
 				new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, edit_key)
+				if new_key != edit_key {
+					events = append(events, hooks.Event{Type: hooks.UpdateKey, Literal: new_key, SecondaryLiteral: edit_key})
+				}
 			}
 			for _, dep := range task.Deps {
 				if _, err := taskmap.GetTask(dep); err != nil {
@@ -117,28 +117,34 @@ var editCmd = &cobra.Command{
 				taskmap.WipeDependenciesToKey(edit_key)
 			}
 			for _, dep_key := range dep_tos {
-				task, err := taskmap.AddDep(dep_key, edit_key)
+				task, event, err := taskmap.AddDep(dep_key, edit_key)
 				if err != nil {
 					return err
 				}
 				taskmap[dep_key] = task
+				events = append(events, event)
 			}
-			edit_key = taskmap.ReplaceKeyInDeps(edit_key, new_key)
+			event, edit_key := taskmap.ReplaceKeyInDeps(edit_key, new_key)
+			events = append(events, event)
 			if auto_complete {
-				task.AutoComplete = true
-			}
-			if no_auto_complete {
-				task.AutoComplete = false
+				task.AutoComplete = !task.AutoComplete
+				events = append(events, hooks.Event{
+					Type:    hooks.Edit,
+					Literal: fmt.Sprintf("toggle auto complete of %q", edit_key),
+				})
 			}
 			task.Deps = append(task.Deps, flagTask.Deps...)
-			taskmap[edit_key] = task
-			if reflect.DeepEqual(taskmap, old_taskmap) {
-				return errors.New("Not edited")
+			for _, dep := range flagTask.Deps {
+				events = append(events, hooks.Event{
+					Type:             hooks.AddDep,
+					Literal:          edit_key,
+					SecondaryLiteral: dep,
+				})
 			}
+			taskmap[edit_key] = task
 			slog.Info("Task edited", "task", task)
 		}
 		return nil
 	},
 	PostRunE: SaveChanges,
-	PreRun:   UpdateOldTaskMap,
 }

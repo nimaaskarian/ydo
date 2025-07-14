@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/nimaaskarian/ydo/hooks"
 	"github.com/nimaaskarian/ydo/utils"
 )
 
@@ -114,12 +115,14 @@ func (task *Task) IsNotDone(taskmap TaskMap, now time.Time) bool {
 
 // delete() the key, run this.
 // runs over dependencies listed within the task itself.
-func (task *Task) CascadeOrphanDeps(taskmap TaskMap) {
+func (task *Task) CascadeOrphanDeps(taskmap TaskMap) (out hooks.Events) {
 	for _, dep := range task.Deps {
 		if !taskmap.HasKeyInDeps(dep) {
 			delete(taskmap, dep)
+			out = append(out, hooks.Event{Type: hooks.Delete, Literal: dep})
 		}
 	}
+	return
 }
 
 func (task *Task) IsDeleted(date time.Time) bool {

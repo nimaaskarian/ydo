@@ -6,11 +6,13 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
-	"reflect"
+	"strings"
 	"time"
 
 	"github.com/nimaaskarian/ydo/core"
+	"github.com/nimaaskarian/ydo/hooks"
 	"github.com/nimaaskarian/ydo/utils"
 	"github.com/spf13/cobra"
 )
@@ -27,8 +29,8 @@ var (
 	now_str      string
 	color_option string
 	// global state
-	old_taskmap map[string]core.Task
-	taskmap     core.TaskMap
+	taskmap core.TaskMap
+	events  hooks.Events
 
 	config_dir          string
 	config              Config
@@ -85,22 +87,31 @@ var (
 )
 
 func SaveChanges(cmd *cobra.Command, args []string) error {
-	if !reflect.DeepEqual(old_taskmap, utils.DeepCopyMap(taskmap)) {
-		slog.Debug("TaskMap has changed. Writing to file.", "old", old_taskmap, "new", taskmap)
+	if !events.Empty() {
+		slog.Debug("TaskMap has changed. Writing to file.", "events", events)
 		if dry_run {
 			taskmap.DryWrite(tasks_path)
 		} else {
 			taskmap.Write(tasks_path)
+		}
+		for _, hook := range config.Hooks {
+			args := strings.Fields(hook)
+			for i, arg := range args {
+				if arg == "{}" {
+					args[i] = events.String()
+				}
+			}
+			cmd := exec.Command(args[0], args[1:]...)
+			cmd.Dir = filepath.Dir(tasks_path)
+			if err := cmd.Run(); err != nil {
+				return err
+			}
 		}
 		if err := taskmap.PrintMarkdown(&config.Markdown, tasksMarkdownFilter); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func UpdateOldTaskMap(cmd *cobra.Command, args []string) {
-	old_taskmap = utils.DeepCopyMap(taskmap)
 }
 
 func interactiveHelper(name string, include_func func(*core.Task, core.TaskMap, time.Time) bool) (map[string]bool, error) {
