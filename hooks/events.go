@@ -27,8 +27,20 @@ const (
 )
 
 func (events Events) String() (output string) {
-	for _, event := range events {
-		if event.Type != None {
+	for i := 0; i < len(events); i++ {
+		if events[i].Type != None {
+			event := &events[i]
+			// squash simple events of same kind together
+			if (events[i].Type == Add) || events[i].Type == Delete || events[i].Type == Do || events[i].Type == Undo {
+				j := i+1
+				for j < len(events) && events[j].Type == events[i].Type {
+					events[i].Literal += ", " + events[j].Literal
+					j++
+				}
+				if i != j {
+					i = j
+				}
+			}
 			output += event.String() + "\n"
 		}
 	}
@@ -50,21 +62,21 @@ func (event *Event) String() string {
 	case None:
 		return ""
 	case Add:
-		return fmt.Sprintf("Add %q", event.Literal)
+		return fmt.Sprintf("Add %s", event.Literal)
 	case Edit:
-		return fmt.Sprintf("Update %q to %q", event.SecondaryLiteral, event.Literal)
+		return fmt.Sprintf("Update %s to %s", event.SecondaryLiteral, event.Literal)
 	case Delete:
-		return fmt.Sprintf("Remove %q", event.Literal)
+		return fmt.Sprintf("Remove %s", event.Literal)
 	case DeleteAll:
 		return "Remove all tasks"
 	case Do:
-		return fmt.Sprintf("chore: Do %q", event.Literal)
+		return fmt.Sprintf("chore: Do %s", event.Literal)
 	case Undo:
-		return fmt.Sprintf("chore: Undo %q", event.Literal)
+		return fmt.Sprintf("chore: Undo %s", event.Literal)
 	case UpdateKey:
-		return fmt.Sprintf("Update key from %q to %q", event.SecondaryLiteral, event.Literal)
+		return fmt.Sprintf("Update key from %s to %s", event.SecondaryLiteral, event.Literal)
 	case AddDep:
-		return fmt.Sprintf("Add %q to %q dependencies", event.SecondaryLiteral, event.Literal)
+		return fmt.Sprintf("Add %q to %s dependencies", event.SecondaryLiteral, event.Literal)
 	default:
 		return event.Literal
 	}
