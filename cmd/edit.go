@@ -80,6 +80,11 @@ var editCmd = &cobra.Command{
 			}
 			if new_task, err := TaskTitleFromArgs(args[1:]); err == nil {
 				task.Task = core.NewTemplateBase(new_task)
+				events = append(events, hooks.Event{
+					Type: hooks.Edit,
+					Key: edit_key,
+					Secondary: new_task,
+				})
 			}
 			if !flagTask.Description.IsZero() {
 				task.Description = flagTask.Description
@@ -87,7 +92,7 @@ var editCmd = &cobra.Command{
 			if key_regen {
 				new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, edit_key)
 				if new_key != edit_key {
-					events = append(events, hooks.Event{Type: hooks.UpdateKey, Literal: new_key, SecondaryLiteral: edit_key})
+					events = append(events, hooks.Event{Type: hooks.UpdateKey, Key: new_key, Secondary: edit_key})
 				}
 			}
 			for _, dep := range task.Deps {
@@ -130,15 +135,15 @@ var editCmd = &cobra.Command{
 				task.AutoComplete = !task.AutoComplete
 				events = append(events, hooks.Event{
 					Type:    hooks.Edit,
-					Literal: fmt.Sprintf("toggle auto complete of %q", edit_key),
+					Key: fmt.Sprintf("toggle auto complete of %q", edit_key),
 				})
 			}
 			task.Deps = append(task.Deps, flagTask.Deps...)
 			for _, dep := range flagTask.Deps {
 				events = append(events, hooks.Event{
 					Type:             hooks.AddDep,
-					Literal:          edit_key,
-					SecondaryLiteral: dep,
+					Key:          edit_key,
+					Secondary: dep,
 				})
 			}
 			taskmap[edit_key] = task

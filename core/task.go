@@ -119,7 +119,7 @@ func (task *Task) CascadeOrphanDeps(taskmap TaskMap) (out hooks.Events) {
 	for _, dep := range task.Deps {
 		if !taskmap.HasKeyInDeps(dep) {
 			delete(taskmap, dep)
-			out = append(out, hooks.Event{Type: hooks.Delete, Literal: dep})
+			out = append(out, hooks.Event{Type: hooks.Delete, Key: dep})
 		}
 	}
 	return

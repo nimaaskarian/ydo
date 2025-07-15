@@ -47,7 +47,7 @@ func (taskmap TaskMap) Delete(key string, cascade bool) (hooks.Events, error) {
 		return nil, err
 	}
 	delete(taskmap, key)
-	events := hooks.Events{hooks.Event{Type: hooks.Delete, Literal: key}}
+	events := hooks.Events{hooks.Event{Type: hooks.Delete, Key: key}}
 	taskmap.WipeDependenciesToKey(key)
 	if cascade {
 		events = append(events, task.CascadeOrphanDeps(taskmap)...)
@@ -93,7 +93,7 @@ func (taskmap TaskMap) Add(key string, task *Task) (hooks.Event, error) {
 		panic("Task is nil")
 	}
 	taskmap[key] = task
-	return hooks.Event{Type: hooks.Add, Literal: key}, nil
+	return hooks.Event{Type: hooks.Add, Key: key}, nil
 }
 
 func (taskmap TaskMap) HasTask(key string) bool {
@@ -110,7 +110,7 @@ func (taskmap TaskMap) Do(key string, now time.Time, force bool) (hooks.Event, e
 		return hooks.Event{}, err
 	}
 	slog.Info("Completed task", "key", key)
-	return hooks.Event{Type: hooks.Do, Literal: key}, nil
+	return hooks.Event{Type: hooks.Do, Key: key}, nil
 }
 
 func (tm TaskMap) AddDep(key string, dep string) (*Task,hooks.Event, error) {
@@ -136,7 +136,7 @@ func (taskmap TaskMap) Undo(key string, now time.Time) (hooks.Event, error) {
 	}
 	task.Undo(taskmap, now)
 	slog.Info("Un-completed task", "key", key)
-	return hooks.Event{Type: hooks.Undo, Literal: key}, nil
+	return hooks.Event{Type: hooks.Undo, Key: key}, nil
 }
 
 func PrintYaml(obj any) error {
@@ -271,7 +271,7 @@ func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) (hooks.E
 			}
 		}
 		delete(taskmap, old_key)
-		return hooks.Event{Type: hooks.UpdateKey, Literal: old_key },new_key
+		return hooks.Event{Type: hooks.UpdateKey, Key: old_key },new_key
 	} else {
 		return hooks.Event{}, old_key
 	}

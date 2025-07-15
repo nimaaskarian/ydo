@@ -6,8 +6,8 @@ type Events []Event
 
 type Event struct {
 	Type             EventType
-	Literal          string
-	SecondaryLiteral string
+	Key          string
+	Secondary string
 }
 
 type EventType int
@@ -34,7 +34,7 @@ func (events Events) String() (output string) {
 			if (events[i].Type == Add) || events[i].Type == Delete || events[i].Type == Do || events[i].Type == Undo {
 				j := i+1
 				for j < len(events) && events[j].Type == events[i].Type {
-					events[i].Literal += ", " + events[j].Literal
+					events[i].Key += ", " + events[j].Key
 					j++
 				}
 				if i != j {
@@ -62,22 +62,22 @@ func (event *Event) String() string {
 	case None:
 		return ""
 	case Add:
-		return fmt.Sprintf("Add %s", event.Literal)
+		return fmt.Sprintf("Add %s", event.Key)
 	case Edit:
-		return fmt.Sprintf("Update %s to %s", event.SecondaryLiteral, event.Literal)
+		return fmt.Sprintf("Update %s to %q", event.Key, event.Secondary)
 	case Delete:
-		return fmt.Sprintf("Remove %s", event.Literal)
+		return fmt.Sprintf("Remove %s", event.Key)
 	case DeleteAll:
 		return "Remove all tasks"
 	case Do:
-		return fmt.Sprintf("chore: Do %s", event.Literal)
+		return fmt.Sprintf("chore: Do %s", event.Key)
 	case Undo:
-		return fmt.Sprintf("chore: Undo %s", event.Literal)
+		return fmt.Sprintf("chore: Undo %s", event.Key)
 	case UpdateKey:
-		return fmt.Sprintf("Update key from %s to %s", event.SecondaryLiteral, event.Literal)
+		return fmt.Sprintf("Update key from %q to %q", event.Secondary, event.Key)
 	case AddDep:
-		return fmt.Sprintf("Add %q to %s dependencies", event.SecondaryLiteral, event.Literal)
+		return fmt.Sprintf("Add %q to %q dependencies", event.Secondary, event.Key)
 	default:
-		return event.Literal
+		return event.Key
 	}
 }
