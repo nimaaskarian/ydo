@@ -20,17 +20,15 @@ var regenKeyCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
-				taskmap.ReplaceKeyInDeps(key, new_key)
-				taskmap[new_key] = task
+				editTask.newKey = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
+				editTask.ApplyEdit(taskmap, key)
 			}
 		} else {
 			if always_yes || utils.ReadYesNo("Regen key for all the tasks? (yes/no) ") {
 				for key := range taskmap {
 					task := taskmap[key]
-					new_key = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
-					taskmap.ReplaceKeyInDeps(key, new_key)
-					taskmap[new_key] = task
+					editTask.newKey = taskmap.TfidfNextKey(task.Task.Value(), config.Tfidf, key)
+					editTask.ApplyEdit(taskmap, key)
 				}
 			}
 		}

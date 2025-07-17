@@ -143,6 +143,7 @@ func interactiveHelper(name string, include_func func(*core.Task, core.TaskMap, 
 	if err != nil {
 		return nil, err
 	}
+	os.Remove(temp_name)
 	for line := range bytes.Lines(content) {
 		key := string(bytes.TrimSpace(line))
 		if _, ok := out[key]; !ok {

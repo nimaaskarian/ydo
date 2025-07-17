@@ -113,20 +113,20 @@ func (taskmap TaskMap) Do(key string, now time.Time, force bool) (hooks.Event, e
 	return hooks.Event{Type: hooks.Do, Key: key}, nil
 }
 
-func (tm TaskMap) AddDep(key string, dep string) (*Task,hooks.Event, error) {
+func (tm TaskMap) AddDep(key string, dep string) (*Task, hooks.Event, error) {
 	task, err := tm.GetTask(key)
 	if err != nil {
-		return nil,hooks.Event{}, err
+		return nil, hooks.Event{}, err
 	} else {
 		_, err := tm.GetTask(dep)
 		if err != nil {
-			return nil,hooks.Event{}, err
+			return nil, hooks.Event{}, err
 		}
 	}
 	if !slices.Contains(task.Deps, dep) {
 		task.Deps = append(task.Deps, dep)
 	}
-	return task, hooks.Event{Type: hooks.AddDep, }, nil
+	return task, hooks.Event{Type: hooks.AddDep}, nil
 }
 
 func (taskmap TaskMap) Undo(key string, now time.Time) (hooks.Event, error) {
@@ -187,7 +187,7 @@ func (taskmap TaskMap) PrintMarkdown(config *MarkdownConfig, filter TaskFilter) 
 	}
 	shown := len(seen_keys)
 	if count > shown {
-		fmt.Printf("%d tasks, %d shown\n", count, shown)
+		fmt.Fprintf(config.File, "%d tasks, %d shown\n", count, shown)
 	}
 	return nil
 }
@@ -271,7 +271,7 @@ func (taskmap TaskMap) ReplaceKeyInDeps(old_key string, new_key string) (hooks.E
 			}
 		}
 		delete(taskmap, old_key)
-		return hooks.Event{Type: hooks.UpdateKey, Key: old_key },new_key
+		return hooks.Event{Type: hooks.UpdateKey, Key: old_key}, new_key
 	} else {
 		return hooks.Event{}, old_key
 	}

@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -145,21 +147,24 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
 	config.PrintIndent(depth)
 	if task.IsDone(taskmap, config.Now) {
 		config.PrintDonePrefix()
-		printKey(key)
+		printKey(key, config)
 		printDoneTask(task, taskmap, config)
 	} else {
 		config.PrintUndonePrefix()
-		printKey(key)
+		printKey(key, config)
 		printPendingTask(task, taskmap, config)
 	}
-	printTags(task)
-	fmt.Println()
+	printTags(task, config)
+	fmt.Fprintln(config.File)
 	printDescription(depth, task, config)
 	if seen_keys != nil {
 		if _, ok := seen_keys[key]; ok {
 			return 0
 		}
 		seen_keys[key] = true
+		if config.Keys != nil {
+			config.Keys = append(config.Keys, key)
+		}
 	}
 	for _, dep_key := range task.Deps {
 		count += taskmap[dep_key].PrintMarkdown(taskmap, depth+1, seen_keys, dep_key, config, filter)
@@ -170,79 +175,88 @@ func (task *Task) PrintMarkdown(taskmap TaskMap, depth uint, seen_keys map[strin
 func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 	var recur string
 	done_at := task.FindDoneAt(taskmap)
-	if !done_at.IsZero() {
-		overdue := ""
-		if !task.Due.Value().IsZero() && done_at.After(task.Due.Value()) {
-			overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due.Value())) + " overdue"
+	fmt.Fprintf(config.File, "%s", task.Task)
+	if *config.AdditionalInfo {
+		if !done_at.IsZero() {
+			overdue := ""
+			if !task.Due.Value().IsZero() && done_at.After(task.Due.Value()) {
+				overdue += ", " + utils.FormatDuration(done_at.Sub(task.Due.Value())) + " overdue"
+			}
+			if task.Recur != "" {
+				recur = ", each " + task.Recur
+			}
+			fmt.Fprintf(config.File, "(%s ago%s%s)", utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
+		} else {
+			if task.Recur != "" {
+				recur = " (each " + task.Recur + ")"
+			}
+			fmt.Fprintf(config.File, " (each %s)", task.Recur)
 		}
-		if task.Recur != "" {
-			recur = ", each " + task.Recur
-		}
-		fmt.Printf("%s (%s ago%s%s)", task.Task, utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
-	} else {
-		if task.Recur != "" {
-			recur = " (each " + task.Recur + ")"
-		}
-		fmt.Printf("%s%s", task.Task, recur)
 	}
 }
 
 func printPendingTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
-	var recur string
-	if task.Recur != "" {
-		recur = " (each " + task.Recur
-		done_at := task.FindDoneAt(taskmap)
-		if !done_at.IsZero() {
-			if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
-				recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
+	fmt.Fprintf(config.File, "%s", task.Task)
+	if *config.AdditionalInfo {
+		var recur string
+		if task.Recur != "" {
+			recur = " (each " + task.Recur
+			done_at := task.FindDoneAt(taskmap)
+			if !done_at.IsZero() {
+				if date, err := utils.ParseDuration(task.Recur, done_at); err == nil && date.Before(config.Now) {
+					recur += ", " + utils.FormatDuration(config.Now.Sub(date)) + " overdue"
+				}
 			}
+			recur += ")"
 		}
-		recur += ")"
-	}
-	due_print := ""
-	if !task.Due.Value().IsZero() {
-		diff := task.Due.Value().Sub(config.Now)
-		due_print = " ("
-		if task.Due.Value().Add(-diff).Compare(config.Now) != 0 {
-			due_print += strconv.Itoa(task.Due.Value().Year()-config.Now.Year()) + "y"
-		} else {
-			if diff < 0 {
-				due_print = " (-"
-				diff = -diff
+		due_print := ""
+		if !task.Due.Value().IsZero() {
+			diff := task.Due.Value().Sub(config.Now)
+			due_print = " ("
+			if task.Due.Value().Add(-diff).Compare(config.Now) != 0 {
+				due_print += strconv.Itoa(task.Due.Value().Year()-config.Now.Year()) + "y"
+			} else {
+				if diff < 0 {
+					due_print = " (-"
+					diff = -diff
+				}
+				due_print += utils.FormatDuration(diff)
 			}
-			due_print += utils.FormatDuration(diff)
+			due_print += ")"
 		}
-		due_print += ")"
+		fmt.Fprintf(config.File, "%s%s", due_print, recur)
 	}
-	fmt.Printf("%s%s%s", task.Task, due_print, recur)
 }
 
 var bold = color.New(color.Bold)
 
-func printKey(key string) {
+func printKey(key string, config *MarkdownConfig) {
 	if key != "" {
-		fmt.Printf("%s: ", bold.Sprint(key))
+		fmt.Fprintf(config.File, "%s: ", bold.Sprint(key))
 	}
 }
 
 var underline = color.New(color.Underline)
 
-func printTags(task *Task) {
+func printTags(task *Task, config *MarkdownConfig) {
 	for _, tag := range task.Tags {
-		fmt.Print(" ")
-		underline.Printf("#%s", tag)
+		fmt.Fprint(config.File, " ")
+		underline.Fprintf(config.File, "#%s", tag)
 	}
 }
 
 type TaskFilter func(task *Task, taskmap TaskMap, now time.Time) bool
 
 type MarkdownConfig struct {
-	Indent      uint   `yaml:",omitempty"`
-	Mode        string `yaml:",omitempty"`
-	Description bool   `yaml:",omitempty"`
-	Limit       int    `yaml:",omitempty"`
-	Beautify    *bool  `yaml:",omitempty"`
-	Now         time.Time
+	Indent         uint      `yaml:",omitempty"`
+	Mode           string    `yaml:",omitempty"`
+	Description    bool      `yaml:",omitempty"`
+	Limit          int       `yaml:",omitempty"`
+	Beautify       *bool     `yaml:",omitempty"`
+	AdditionalInfo *bool     `yaml:"additional-info,omitempty"`
+	File           io.Writer `yaml:"-"`
+	Keys           []string  `yaml:"-"`
+	Now            time.Time
 }
 
 func (config *MarkdownConfig) Init() {
@@ -250,43 +264,50 @@ func (config *MarkdownConfig) Init() {
 		beautify := !color.NoColor
 		config.Beautify = &beautify
 	}
+	if config.AdditionalInfo == nil {
+		additional_info := true
+		config.AdditionalInfo = &additional_info
+	}
+	if config.File == nil {
+		config.File = os.Stdout
+	}
 	if config.Indent == 0 {
 		config.Indent = 3
 	}
 }
 func (mc *MarkdownConfig) PrintIndent(depth uint) {
 	for range depth * mc.Indent {
-		fmt.Print(" ")
+		fmt.Fprint(mc.File, " ")
 	}
 }
 
 func (mc *MarkdownConfig) PrintDonePrefix() {
 	mc.PrintListPrefix()
 	if *mc.Beautify {
-		fmt.Print("[✓] ")
+		fmt.Fprint(mc.File, "[✓] ")
 	} else {
-		fmt.Print("[x] ")
+		fmt.Fprint(mc.File, "[x] ")
 	}
 }
 
 func (mc *MarkdownConfig) PrintListPrefix() {
 	if !*mc.Beautify {
-		fmt.Print("-")
+		fmt.Fprint(mc.File, "-")
 	}
-	fmt.Print(" ")
+	fmt.Fprint(mc.File, " ")
 }
 
 func (mc *MarkdownConfig) PrintUndonePrefix() {
 	mc.PrintListPrefix()
-	fmt.Print("[ ] ")
+	fmt.Fprint(mc.File, "[ ] ")
 }
 
 func printDescription(depth uint, task *Task, config *MarkdownConfig) {
 	if config.Description && task.Description.Value() != "" {
 		for line := range strings.Lines(task.Description.Value()) {
 			config.PrintIndent(depth + 1)
-			fmt.Print(line)
+			fmt.Fprint(config.File, line)
 		}
-		fmt.Println()
+		fmt.Fprintln(config.File)
 	}
 }

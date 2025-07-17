@@ -18,6 +18,7 @@ require (
 	cloud.google.com/go/auth v0.15.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
+	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
@@ -26,6 +27,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
+	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

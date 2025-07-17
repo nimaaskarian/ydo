@@ -5,8 +5,8 @@ import "fmt"
 type Events []Event
 
 type Event struct {
-	Type             EventType
-	Key          string
+	Type      EventType
+	Key       string
 	Secondary string
 }
 
@@ -32,14 +32,12 @@ func (events Events) String() (output string) {
 			event := &events[i]
 			// squash simple events of same kind together
 			if (events[i].Type == Add) || events[i].Type == Delete || events[i].Type == Do || events[i].Type == Undo {
-				j := i+1
-				for j < len(events) && events[j].Type == events[i].Type {
+				j := i
+				for j+1 < len(events) && events[j+1].Type == events[i].Type {
 					events[i].Key += ", " + events[j].Key
 					j++
 				}
-				if i != j {
-					i = j
-				}
+				i = j
 			}
 			output += event.String() + "\n"
 		}
@@ -55,7 +53,6 @@ func (events Events) Empty() bool {
 	}
 	return true
 }
-
 
 func (event *Event) String() string {
 	switch event.Type {
