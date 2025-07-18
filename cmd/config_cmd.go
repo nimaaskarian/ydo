@@ -35,8 +35,8 @@ markdown:
 	# spaces and uses the execute syscall instead of "system". this is run at the
 	# same directory as your tasks file
 	# hooks:
-	# - git add tasks.yaml
-	# - git commit -m {}
+	# - [git, add, tasks.yaml]
+	# - [git, commit, -m, "{}"]
 tfidf:
   enabled: false
   # minimum tasks needed to turn on tfidf (enabled has to be true for this to work)

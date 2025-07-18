@@ -16,8 +16,8 @@ seriously, y do?
 
 ---
 ydo is a to-do app, with a command line interface heavily inspired by
-[taskwarrior](https://taskwarrior.org/); but uses [yaml](yaml.org) for both
-configurations and task files themselves. This makes ydo easily configured,
+[taskwarrior](https://taskwarrior.org/); but uses [yaml](https://yaml.org) for
+both configurations and task files themselves. This makes ydo easily configured,
 accessible, and fast.
 
 > this app is under heavy development and will change frequently as for now.
@@ -125,5 +125,3 @@ then copy the binary to one of the directories under your `PATH` variable.
 
 # License
 [BSD 2-Caluse](./LICENSE)
-
-also the cmd/webgui/tailwind.css' theme section is the modernized version of [wheatjs' gruvbox tailwind theme](https://github.com/wheatjs/gruvbox-tailwind-theme/) 

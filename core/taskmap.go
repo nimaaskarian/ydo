@@ -66,16 +66,18 @@ func (taskmap TaskMap) WipeDependenciesToKey(key string) error {
 	return nil
 }
 
-type NoSuchTask struct{}
+type NoSuchTask struct{
+	key string
+}
 
 func (e NoSuchTask) Error() string {
-	return "No such task"
+	return fmt.Sprintf("No such task %q", e.key)
 }
 
 func (taskmap TaskMap) GetTask(key string) (*Task, error) {
 	task, ok := taskmap[key]
 	if !ok {
-		return task, NoSuchTask{}
+		return task, NoSuchTask{ key }
 	}
 	return task, nil
 }

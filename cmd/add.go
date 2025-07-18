@@ -136,7 +136,7 @@ func resolveTemplateDate(task *core.Task, item *core.TemplateDate) error {
 }
 
 func TaskTitleFromArgs(args []string) (taskmsg string, err error) {
-	has_non_empty := slices.ContainsFunc(args, func(arg string) bool {
+	has_non_empty := len(args) == 0 || slices.ContainsFunc(args, func(arg string) bool {
 		return arg != ""
 	})
 	if !has_non_empty {

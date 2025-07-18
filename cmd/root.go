@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/nimaaskarian/ydo/core"
@@ -86,7 +85,7 @@ var (
 	}
 )
 
-func SaveChanges(cmd *cobra.Command, args []string) error {
+func SaveChanges(cmd *cobra.Command, _ []string) error {
 	if !events.Empty() {
 		slog.Debug("TaskMap has changed. Writing to file.", "events", events)
 		if dry_run {
@@ -95,13 +94,12 @@ func SaveChanges(cmd *cobra.Command, args []string) error {
 			taskmap.Write(tasks_path)
 		}
 		for _, hook := range config.Hooks {
-			args := strings.Fields(hook)
-			for i, arg := range args {
+			for i, arg := range hook {
 				if arg == "{}" {
-					args[i] = events.String()
+					hook[i] = events.String()
 				}
 			}
-			cmd := exec.Command(args[0], args[1:]...)
+			cmd := exec.Command(hook[0], hook[1:]...)
 			cmd.Dir = filepath.Dir(tasks_path)
 			if err := cmd.Run(); err != nil {
 				return err
