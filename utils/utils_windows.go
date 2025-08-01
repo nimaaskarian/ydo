@@ -1,6 +1,3 @@
-//go:build windows && !darwin && !unix
-// +build windows,!darwin,!unix
-
 package utils
 
 import (

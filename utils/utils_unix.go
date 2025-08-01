@@ -1,5 +1,5 @@
-//go:build !windows && !darwin && unix
-// +build !windows,!darwin,unix
+//go:build !windows
+// +build !windows
 
 package utils
 
