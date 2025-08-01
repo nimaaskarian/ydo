@@ -18,14 +18,12 @@ type Task struct {
 	Task          TemplateBase `yaml:",omitempty"`
 	Description   TemplateBase `yaml:",omitempty"`
 	Deps          []string     `yaml:",omitempty,flow"`
-	Done          bool         `yaml:",omitempty"`
 	AutoComplete  bool         `yaml:"auto-complete,omitempty"`
 	CreatedAt     time.Time    `yaml:"created-at,omitempty"`
 	Due           TemplateDate `yaml:",omitempty"`
 	Until         TemplateDate `yaml:",omitempty"`
 	Schedule      TemplateDate `yaml:",omitempty"`
-	DoneAt        time.Time    `yaml:"done-at,omitempty"`
-	DoneAtArchive []time.Time  `yaml:"done-at-archive,omitempty"`
+	DoneAt []time.Time         `yaml:"done-at,omitempty"`
 	Recur         string       `yaml:",omitempty"`
 	Tags          []string     `yaml:",omitempty"`
 }
@@ -62,10 +60,23 @@ func (task *Task) IsDone(taskmap TaskMap, now time.Time) bool {
 		}
 		return true
 	}
-	if t, err := utils.ParseDuration(task.Recur, task.DoneAt); err == nil && !t.IsZero() && !now.Before(t) {
-		task.Done = false
+	last_done := task.FindDoneAt(taskmap)
+	if t, err := utils.ParseDuration(task.Recur, last_done); err == nil && !t.IsZero() && !now.Before(t) {
+		return false
 	}
-	return task.Done && (task.DoneAt.IsZero() || !task.DoneAt.After(now))
+	// if zero, then its not done
+	if last_done.IsZero() {
+		return false
+	}
+	return !last_done.After(now)
+}
+
+func (task *Task) LastDoneAt() time.Time {
+	length := len(task.DoneAt)
+	if length == 0 {
+		return time.Time{}
+	}
+	return task.DoneAt[length-1]
 }
 
 func (task *Task) Do(taskmap TaskMap, now time.Time, force bool) error {
@@ -75,24 +86,13 @@ func (task *Task) Do(taskmap TaskMap, now time.Time, force bool) error {
 	if !force && task.IsDone(taskmap, now) {
 		return errors.New("Task is already done")
 	}
-	task.Done = true
-	if task.Recur != "" && !task.DoneAt.IsZero() {
-		task.DoneAtArchive = append(task.DoneAtArchive, task.DoneAt)
-	}
-	task.DoneAt = now
+	task.DoneAt = append(task.DoneAt, now)
 	return nil
 }
 
 func (task *Task) Undo(taskmap TaskMap, now time.Time) {
 	if task.IsDone(taskmap, now) && !task.AutoComplete {
-		task.Done = false
-		if task.Recur != "" && len(task.DoneAtArchive) > 0 {
-			length := len(task.DoneAtArchive)
-			task.DoneAt = task.DoneAtArchive[length-1]
-			task.DoneAtArchive = task.DoneAtArchive[:length-1]
-		} else {
-			task.DoneAt = time.Time{}
-		}
+		task.DoneAt = task.DoneAt[:len(task.DoneAt)-1]
 	}
 }
 
@@ -105,10 +105,10 @@ func (task *Task) FindDoneAt(taskmap TaskMap) time.Time {
 			if doneat.After(max_doneat) {
 				max_doneat = doneat
 			}
-			return max_doneat
 		}
+		return max_doneat
 	}
-	return task.DoneAt
+	return task.LastDoneAt()
 }
 
 func (task *Task) IsNotDone(taskmap TaskMap, now time.Time) bool {
@@ -185,7 +185,7 @@ func printDoneTask(task *Task, taskmap TaskMap, config *MarkdownConfig) {
 			if task.Recur != "" {
 				recur = ", each " + task.Recur
 			}
-			fmt.Fprintf(config.File, "(%s ago%s%s)", utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
+			fmt.Fprintf(config.File, " (%s ago%s%s)", utils.FormatDuration(config.Now.Sub(done_at)), overdue, recur)
 		} else {
 			if task.Recur != "" {
 				recur = " (each " + task.Recur + ")"

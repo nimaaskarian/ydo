@@ -183,7 +183,7 @@ func TestCmdUndo(t *testing.T) {
 	assert.ErrorContains(t, rootCmd.Execute(), "No such task")
 	rootCmd.SetArgs(append(base, "undo", "tests"))
 	assert.Nil(t, rootCmd.Execute())
-	assert.False(t, taskmap["tests"].Done)
+	assert.False(t, taskmap["tests"].IsDone(taskmap, time.Now()))
 	rootCmd.SetArgs(append(base, "-Y", "undo"))
 	assert.Nil(t, rootCmd.Execute())
 	for _, task := range taskmap {
@@ -202,7 +202,7 @@ func TestCmdDo(t *testing.T) {
 	assert.ErrorContains(t, rootCmd.Execute(), "No such task")
 	rootCmd.SetArgs(append(base, "do", "tests"))
 	assert.Nil(t, rootCmd.Execute())
-	assert.True(t, taskmap["tests"].Done)
+	assert.True(t, taskmap.IsDone("tests", now))
 	rootCmd.SetArgs(append(base, "-Y", "do"))
 	assert.Nil(t, rootCmd.Execute())
 	for _, task := range taskmap {

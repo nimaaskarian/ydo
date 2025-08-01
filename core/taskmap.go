@@ -28,6 +28,10 @@ func ParseYaml(obj any, input []byte) {
 
 type TaskMap map[string]*Task
 
+func (taskmap TaskMap) IsDone(key string, now time.Time) bool {
+	return taskmap[key].IsDone(taskmap, now)
+}
+
 func (taskmap TaskMap) RegexpMatchingKeys(query string, use_regexp bool) []string {
 	if use_regexp {
 		keys := make([]string, 0, 1)
@@ -288,24 +292,6 @@ func (taskmap TaskMap) HasKeyInDeps(key string) bool {
 	return false
 }
 
-func as_days(d time.Duration) int {
-	return int(d.Hours()) / 24
-}
-
-func addToIndexIfKeyOk(m map[time.Time][2]int, start, end time.Time, index int, key time.Time) bool {
-	if key.After(end) {
-		return true
-	}
-	if key.Before(start) {
-		return false
-	}
-	slog.Debug("Add to index", "start", start, "end", end, "index", index, "key", key)
-	arr := m[key]
-	arr[index] += 1
-	m[key] = arr
-	return false
-}
-
 type Disicipline struct {
 	Count uint
 	Done  uint
@@ -345,122 +331,27 @@ func (taskmap TaskMap) TrackDiscipline(start, end time.Time, step time.Duration)
 			discipline_map[t] = time_map
 		}
 		for key, task := range taskmap {
-			if task.IsDeleted(t) {
+			second_next_t := t.Add(step*2)
+			next_t := t.Add(step)
+			// if its done next interval, doesn't need to be done now.
+			if task.IsDeleted(t) || task.IsDone(taskmap, second_next_t) {
 				continue
 			}
-			was_done := task.IsDone(taskmap, t.Add(-step))
 			discipline, ok := time_map[key]
 			if !ok {
 				discipline = &Disicipline{}
 				time_map[key] = discipline
 			}
-			is_done := task.IsDone(taskmap, t)
-			if is_done && was_done {
-				continue
-			}
 			discipline.Count += 1
-			if is_done {
+			if slices.ContainsFunc(task.DoneAt, func(doneat time.Time) bool {
+				return doneat.After(t) && doneat.Before(next_t)
+			}){
 				discipline.Done += 1
 			}
-			was_done = is_done
 		}
 		t = t.Add(step)
 	}
 	return discipline_map
-}
-
-// start and end are included
-func (taskmap TaskMap) TrackDisciplineDaily(start, end, now time.Time) []float64 {
-	end = utils.NaiveDate(end)
-	start = utils.NaiveDate(start)
-	days := as_days(end.Sub(start))
-	total_done_map := make(map[time.Time][2]int)
-	for i := range days + 1 {
-		d := utils.NaiveDate(start).AddDate(0, 0, i)
-		total_done_map[d] = [2]int{0, 0}
-	}
-
-	for _, task := range taskmap {
-		// ignore legeacy tasks that have no DoneAt date saved
-		if task.IsDone(taskmap, now) && task.DoneAt.IsZero() {
-			continue
-		}
-		end_date := end
-		created_date := utils.NaiveDate(task.CreatedAt)
-		if !task.Schedule.Value().IsZero() {
-			created_date = utils.NaiveDate(task.Schedule.Value())
-		}
-		if !task.Until.Value().IsZero() {
-			end_date = task.Until.Date
-		}
-		if task.Recur == "" {
-			if !task.DoneAt.IsZero() {
-				for i := range as_days(task.DoneAt.Sub(created_date)) + 1 {
-					exists_date := created_date.AddDate(0, 0, i)
-					if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
-						break
-					}
-				}
-				done_date := utils.NaiveDate(task.DoneAt)
-				arr, ok := total_done_map[done_date]
-				if ok {
-					arr[1] += 1
-					total_done_map[done_date] = arr
-				}
-			} else {
-				for i := range as_days(end_date.Sub(created_date)) + 1 {
-					exists_date := created_date.AddDate(0, 0, i)
-					if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
-						break
-					}
-				}
-			}
-		} else {
-			done_dates := append(task.DoneAtArchive, task.DoneAt)
-			created_dates := make([]time.Time, 1, len(done_dates))
-			created_dates[0] = created_date
-			for _, done_at := range task.DoneAtArchive {
-				t, _ := utils.ParseDuration(task.Recur, utils.NaiveDate(done_at))
-				created_dates = append(created_dates, t)
-			}
-			for i, created := range created_dates {
-				upper_bound := done_dates[i]
-				if done_dates[i].IsZero() {
-					upper_bound = end_date
-				}
-				for j := range as_days(upper_bound.Sub(created)) + 1 {
-					exists_date := created.AddDate(0, 0, j)
-					if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
-						break
-					}
-				}
-			}
-			last_created, _ := utils.ParseDuration(task.Recur, utils.NaiveDate(task.DoneAt))
-			for i := range as_days(end_date.Sub(last_created)) + 1 {
-				exists_date := last_created.AddDate(0, 0, i)
-				if addToIndexIfKeyOk(total_done_map, start, end_date, 0, exists_date) {
-					break
-				}
-			}
-			for _, done_at := range done_dates {
-				if addToIndexIfKeyOk(total_done_map, start, end_date, 1, utils.NaiveDate(done_at)) {
-					break
-				}
-			}
-		}
-	}
-	discipline_arr := make([]float64, 0, len(total_done_map))
-	sorted_keys := utils.Keys(total_done_map)
-	slices.SortFunc(sorted_keys, time.Time.Compare)
-	for _, key := range sorted_keys {
-		item := total_done_map[key]
-		if item[0] == 0 && item[1] != 0 {
-			fmt.Println(key, item[1])
-		}
-		discipline := float64(item[1]) / float64(item[0])
-		discipline_arr = append(discipline_arr, discipline)
-	}
-	return discipline_arr
 }
 
 func (taskmap TaskMap) Write(path string) error {
